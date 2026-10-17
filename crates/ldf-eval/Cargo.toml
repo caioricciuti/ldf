@@ -1,0 +1,19 @@
+[package]
+name = "ldf-eval"
+description = "LLM comprehension evaluation: task generation, ground truth, prompt bundles and scoring"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ldf-eval"
+path = "src/main.rs"
+
+[dependencies]
+ldf-data = { workspace = true }
+ldf-formats = { workspace = true }
+ldf-fixtures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tiktoken-rs = { workspace = true }

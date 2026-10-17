@@ -1,0 +1,20 @@
+{"id":1,"name":"Ana María","tricky":"a,b","tricky2":"+1","emoji":"✓","mixed":"José Ñandú [bracket] context","empty":""}
+{"id":2,"name":"İstanbul","tricky":"x:y","tricky2":"1_000","emoji":"👩‍💻","mixed":"北京市 1_000 extract","empty":""}
+{"id":3,"name":"🙂 smiley","tricky":"with \"quotes\"","tricky2":"1.","emoji":"—","mixed":"חנה null result","empty":""}
+{"id":4,"name":"محمد علي","tricky":"back\\slash","tricky2":"007","emoji":"🚀🚀","mixed":"Dzintars ﻿bom extract","empty":""}
+{"id":5,"name":"Kōji","tricky":"line1\nline2","tricky2":"0x10","emoji":"🇧🇷","mixed":"北京市 +1 answer","empty":""}
+{"id":6,"name":"Ōkami 🐺","tricky":"tab\there","tricky2":"1_000","emoji":"→","mixed":"北京市 1_000 context","empty":""}
+{"id":7,"name":"İstanbul","tricky":" leading","tricky2":"","emoji":"✓","mixed":"Ana María  leading false","empty":""}
+{"id":8,"name":"Ævar","tricky":"trailing ","tricky2":"1e5","emoji":"🚀🚀","mixed":"Ελένη back\\slash report","empty":""}
+{"id":9,"name":"Åsa","tricky":"pipe|char","tricky2":"line1\nline2","emoji":"👩‍💻","mixed":"Ana María {brace} stream","empty":""}
+{"id":10,"name":"חנה","tricky":"[bracket]","tricky2":"1.","emoji":"🚀🚀","mixed":"José Ñandú trailing  format","empty":""}
+{"id":11,"name":"李雷","tricky":"{brace}","tricky2":"Infinity","emoji":"👩‍💻","mixed":"Ngọc Ánh 1. latency","empty":""}
+{"id":12,"name":"José Ñandú","tricky":"-dash","tricky2":"[bracket]","emoji":"→","mixed":"Иван Петров .5 field","empty":""}
+{"id":13,"name":"İstanbul","tricky":"#hash","tricky2":"0x10","emoji":"🇧🇷","mixed":"محمد علي tab\there comma","empty":""}
+{"id":14,"name":"Ōkami 🐺","tricky":"007","tricky2":"a,b","emoji":"🚀🚀","mixed":"Zoë Müller zero\u0000byte window","empty":""}
+{"id":15,"name":"Kōji","tricky":"1e5","tricky2":"1.","emoji":"→","mixed":"北京市 line1\nline2 the","empty":""}
+{"id":16,"name":"Sørën","tricky":"+1","tricky2":"﻿bom","emoji":"→","mixed":"İstanbul {brace} byte","empty":""}
+{"id":17,"name":"Åsa","tricky":"true","tricky2":"007","emoji":"🙂","mixed":"Ngọc Ánh 1. noise","empty":""}
+{"id":18,"name":"Ærø","tricky":"null","tricky2":"﻿bom","emoji":"✓","mixed":"José Ñandú - item table","empty":""}
+{"id":19,"name":"Ævar","tricky":"false","tricky2":"","emoji":"🇧🇷","mixed":"Dzintars 1_000 lookup","empty":""}
+{"id":20,"name":"Ana María","tricky":"","tricky2":"tab\there","emoji":"🙂","mixed":"Zoë Müller 1e5 field","empty":""}

@@ -1,0 +1,6285 @@
+{
+  "tool": "ldf-bench",
+  "started_utc": "20261017-203954",
+  "command": [
+    "./target/release/ldf-bench",
+    "perf",
+    "--scale",
+    "medium",
+    "--iters",
+    "7",
+    "--out",
+    "results/medium"
+  ],
+  "iters": 7,
+  "sysinfo": {
+    "os": "Darwin 27.0.0",
+    "arch": "aarch64",
+    "cpu": "Apple M2 Pro",
+    "logical_cpus": 10,
+    "memory_bytes": 17179869184,
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo_profile": "release",
+    "git_commit": "unknown",
+    "crate_versions": [
+      [
+        "arrow",
+        "60.0.0"
+      ],
+      [
+        "criterion",
+        "0.8.2"
+      ],
+      [
+        "csv",
+        "1.4.0"
+      ],
+      [
+        "parquet",
+        "60.0.0"
+      ],
+      [
+        "serde_json",
+        "1.0.151"
+      ],
+      [
+        "simd-json",
+        "0.18.1"
+      ],
+      [
+        "tiktoken-rs",
+        "0.12.1"
+      ]
+    ]
+  },
+  "datasets": [
+    {
+      "name": "flat_users",
+      "path": "fixtures/medium/flat_users.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 1417382,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1417382,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1957383,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1417381,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "semantic",
+          "output_bytes": 647242,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "semantic",
+          "output_bytes": 647242,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "semantic",
+          "output_bytes": 827310,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 667251,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 667252,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 1417382,
+          "secs": [
+            0.000424375,
+            0.000533625,
+            0.000269417,
+            0.000382375,
+            0.000539292,
+            0.000414916,
+            0.000206875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.004346,
+            "system_cpu_secs": 0.002979
+          },
+          "usage_after": {
+            "max_rss_bytes": 7503872,
+            "user_cpu_secs": 0.004372,
+            "system_cpu_secs": 0.005736
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 1417382,
+          "secs": [
+            0.007419208,
+            0.003979833,
+            0.003732084,
+            0.003663583,
+            0.003662708,
+            0.004390333,
+            0.007121208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7487488,
+            "user_cpu_secs": 0.0042369999999999994,
+            "system_cpu_secs": 0.003548
+          },
+          "usage_after": {
+            "max_rss_bytes": 18038784,
+            "user_cpu_secs": 0.046886,
+            "system_cpu_secs": 0.004497999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 1417382,
+          "secs": [
+            0.00523325,
+            0.003132,
+            0.002724625,
+            0.002712542,
+            0.002777291,
+            0.002725125,
+            0.002721334
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7487488,
+            "user_cpu_secs": 0.004359,
+            "system_cpu_secs": 0.003208
+          },
+          "usage_after": {
+            "max_rss_bytes": 28934144,
+            "user_cpu_secs": 0.032799,
+            "system_cpu_secs": 0.004657
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1417382,
+          "secs": [
+            0.001622292,
+            0.001503667,
+            0.001518583,
+            0.001515375,
+            0.001515041,
+            0.00151975,
+            0.00151625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15204352,
+            "user_cpu_secs": 0.010641999999999999,
+            "system_cpu_secs": 0.0037129999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 16859136,
+            "user_cpu_secs": 0.021254,
+            "system_cpu_secs": 0.0038179999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1417382,
+          "secs": [
+            0.003969584,
+            0.003668083,
+            0.003872291,
+            0.003662583,
+            0.003659208,
+            0.003715,
+            0.00368975
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16859136,
+            "user_cpu_secs": 0.012426,
+            "system_cpu_secs": 0.003994
+          },
+          "usage_after": {
+            "max_rss_bytes": 18497536,
+            "user_cpu_secs": 0.046264,
+            "system_cpu_secs": 0.004202
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1957383,
+          "secs": [
+            0.002148583,
+            0.002077333,
+            0.00199625,
+            0.0019915,
+            0.001993459,
+            0.001989833,
+            0.0019865
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15220736,
+            "user_cpu_secs": 0.00974,
+            "system_cpu_secs": 0.0038959999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 17416192,
+            "user_cpu_secs": 0.023739999999999997,
+            "system_cpu_secs": 0.004064
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1957383,
+          "secs": [
+            0.005829958,
+            0.006844916,
+            0.007456541,
+            0.003980208,
+            0.003963542,
+            0.003975,
+            0.004007334
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17416192,
+            "user_cpu_secs": 0.012823,
+            "system_cpu_secs": 0.004131
+          },
+          "usage_after": {
+            "max_rss_bytes": 22364160,
+            "user_cpu_secs": 0.057597999999999996,
+            "system_cpu_secs": 0.00458
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1417381,
+          "secs": [
+            0.003059083,
+            0.002233791,
+            0.001627166,
+            0.001503625,
+            0.001507125,
+            0.001506417,
+            0.00150775
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14876672,
+            "user_cpu_secs": 0.011753,
+            "system_cpu_secs": 0.0038919999999999996
+          },
+          "usage_after": {
+            "max_rss_bytes": 16760832,
+            "user_cpu_secs": 0.024533,
+            "system_cpu_secs": 0.0040609999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1417381,
+          "secs": [
+            0.006022625,
+            0.007328709,
+            0.004280917,
+            0.004534875,
+            0.008932417,
+            0.004030583,
+            0.0040465
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16859136,
+            "user_cpu_secs": 0.012489,
+            "system_cpu_secs": 0.003958
+          },
+          "usage_after": {
+            "max_rss_bytes": 23478272,
+            "user_cpu_secs": 0.05896,
+            "system_cpu_secs": 0.0046489999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 647242,
+          "secs": [
+            0.0044565,
+            0.004329584,
+            0.004307417,
+            0.00430075,
+            0.004337333,
+            0.005468833,
+            0.005712333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15204352,
+            "user_cpu_secs": 0.009889,
+            "system_cpu_secs": 0.003748
+          },
+          "usage_after": {
+            "max_rss_bytes": 16121856,
+            "user_cpu_secs": 0.042408,
+            "system_cpu_secs": 0.004047
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 647242,
+          "secs": [
+            0.003929041,
+            0.003414542,
+            0.006386375,
+            0.007463583,
+            0.003218167,
+            0.003215958,
+            0.003201667
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16236544,
+            "user_cpu_secs": 0.015243,
+            "system_cpu_secs": 0.0040539999999999994
+          },
+          "usage_after": {
+            "max_rss_bytes": 20955136,
+            "user_cpu_secs": 0.053831,
+            "system_cpu_secs": 0.004606
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 647242,
+          "secs": [
+            0.004380291,
+            0.007675375,
+            0.010748167,
+            0.008295625,
+            0.004305834,
+            0.00429325,
+            0.0042935
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15204352,
+            "user_cpu_secs": 0.009771,
+            "system_cpu_secs": 0.003849
+          },
+          "usage_after": {
+            "max_rss_bytes": 16121856,
+            "user_cpu_secs": 0.051205,
+            "system_cpu_secs": 0.003977
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 647242,
+          "secs": [
+            0.004661834,
+            0.007098667,
+            0.003231042,
+            0.003204667,
+            0.003237875,
+            0.003195,
+            0.004772125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16367616,
+            "user_cpu_secs": 0.015092,
+            "system_cpu_secs": 0.003874
+          },
+          "usage_after": {
+            "max_rss_bytes": 21135360,
+            "user_cpu_secs": 0.053044,
+            "system_cpu_secs": 0.004417
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 827310,
+          "secs": [
+            0.004667375,
+            0.004503916,
+            0.004497375,
+            0.004497625,
+            0.00449275,
+            0.005418667,
+            0.02343
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15220736,
+            "user_cpu_secs": 0.009889,
+            "system_cpu_secs": 0.003692
+          },
+          "usage_after": {
+            "max_rss_bytes": 18006016,
+            "user_cpu_secs": 0.047075,
+            "system_cpu_secs": 0.003938
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 827310,
+          "secs": [
+            0.008856291,
+            0.0087865,
+            0.030253375,
+            0.008846084,
+            0.013324416,
+            0.014233041,
+            0.014838041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17137664,
+            "user_cpu_secs": 0.015443,
+            "system_cpu_secs": 0.0041199999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 24313856,
+            "user_cpu_secs": 0.09837399999999999,
+            "system_cpu_secs": 0.005358
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 667251,
+          "secs": [
+            0.004989334,
+            0.004518417,
+            0.004340458,
+            0.004130417,
+            0.004009209,
+            0.009257292,
+            0.007909916
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15220736,
+            "user_cpu_secs": 0.00984,
+            "system_cpu_secs": 0.003649
+          },
+          "usage_after": {
+            "max_rss_bytes": 16891904,
+            "user_cpu_secs": 0.046142999999999997,
+            "system_cpu_secs": 0.0037879999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 667251,
+          "secs": [
+            0.005725875,
+            0.005359291,
+            0.005044083,
+            0.004995209,
+            0.004910042,
+            0.004901833,
+            0.004833125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15548416,
+            "user_cpu_secs": 0.014379,
+            "system_cpu_secs": 0.003277
+          },
+          "usage_after": {
+            "max_rss_bytes": 18726912,
+            "user_cpu_secs": 0.058157999999999994,
+            "system_cpu_secs": 0.0036149999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 667252,
+          "secs": [
+            0.004945291,
+            0.00449775,
+            0.004238458,
+            0.004193417,
+            0.004091625,
+            0.003996584,
+            0.004021666
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14860288,
+            "user_cpu_secs": 0.0063,
+            "system_cpu_secs": 0.001908
+          },
+          "usage_after": {
+            "max_rss_bytes": 15679488,
+            "user_cpu_secs": 0.036150999999999996,
+            "system_cpu_secs": 0.00199
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 667252,
+          "secs": [
+            0.006038167,
+            0.005283041,
+            0.004955791,
+            0.00501675,
+            0.004841916,
+            0.004841958,
+            0.004851041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15548416,
+            "user_cpu_secs": 0.013736,
+            "system_cpu_secs": 0.003005
+          },
+          "usage_after": {
+            "max_rss_bytes": 23298048,
+            "user_cpu_secs": 0.056892,
+            "system_cpu_secs": 0.003557
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "nested_orders",
+      "path": "fixtures/medium/nested_orders.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 2961510,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 2961510,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 5241567,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 2961509,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 3070755,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 3080756,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 2961510,
+          "secs": [
+            0.000722459,
+            0.000969459,
+            0.000925,
+            0.000495541,
+            0.000300291,
+            0.000176667,
+            0.000167375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.004354,
+            "system_cpu_secs": 0.0028239999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 9043968,
+            "user_cpu_secs": 0.004382,
+            "system_cpu_secs": 0.006555
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 2961510,
+          "secs": [
+            0.013240875,
+            0.016794166,
+            0.01654325,
+            0.010765625,
+            0.015968417,
+            0.013331583,
+            0.00943925
+          ],
+          "usage_before": {
+            "max_rss_bytes": 9027584,
+            "user_cpu_secs": 0.0042309999999999995,
+            "system_cpu_secs": 0.003472
+          },
+          "usage_after": {
+            "max_rss_bytes": 34111488,
+            "user_cpu_secs": 0.119754,
+            "system_cpu_secs": 0.007208999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 2961510,
+          "secs": [
+            0.015354375,
+            0.012758791,
+            0.008112041,
+            0.007859375,
+            0.010909333,
+            0.007899583,
+            0.010223
+          ],
+          "usage_before": {
+            "max_rss_bytes": 9027584,
+            "user_cpu_secs": 0.0042829999999999995,
+            "system_cpu_secs": 0.003512
+          },
+          "usage_after": {
+            "max_rss_bytes": 73039872,
+            "user_cpu_secs": 0.09908299999999999,
+            "system_cpu_secs": 0.010263999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2961510,
+          "secs": [
+            0.007916458,
+            0.004193292,
+            0.004116209,
+            0.004085292,
+            0.004110917,
+            0.004092458,
+            0.00408175
+          ],
+          "usage_before": {
+            "max_rss_bytes": 30801920,
+            "user_cpu_secs": 0.022187,
+            "system_cpu_secs": 0.005529
+          },
+          "usage_after": {
+            "max_rss_bytes": 38404096,
+            "user_cpu_secs": 0.051899,
+            "system_cpu_secs": 0.006085999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2961510,
+          "secs": [
+            0.013368958,
+            0.009558666,
+            0.009564542,
+            0.009510833,
+            0.010165167,
+            0.009965292,
+            0.015464209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 36110336,
+            "user_cpu_secs": 0.023420999999999997,
+            "system_cpu_secs": 0.0061389999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 36585472,
+            "user_cpu_secs": 0.129844,
+            "system_cpu_secs": 0.007357
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5241567,
+          "secs": [
+            0.006569667,
+            0.00708925,
+            0.009778334,
+            0.006461792,
+            0.006437333,
+            0.006714292,
+            0.006670666
+          ],
+          "usage_before": {
+            "max_rss_bytes": 30834688,
+            "user_cpu_secs": 0.015397999999999998,
+            "system_cpu_secs": 0.004965
+          },
+          "usage_after": {
+            "max_rss_bytes": 72286208,
+            "user_cpu_secs": 0.061554,
+            "system_cpu_secs": 0.007776
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5241567,
+          "secs": [
+            0.018715875,
+            0.018090083,
+            0.010596042,
+            0.010555791,
+            0.016513708,
+            0.011078459,
+            0.010620792
+          ],
+          "usage_before": {
+            "max_rss_bytes": 38600704,
+            "user_cpu_secs": 0.029904,
+            "system_cpu_secs": 0.006188
+          },
+          "usage_after": {
+            "max_rss_bytes": 41320448,
+            "user_cpu_secs": 0.144201,
+            "system_cpu_secs": 0.008029
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2961509,
+          "secs": [
+            0.004407542,
+            0.004091417,
+            0.0040715,
+            0.004512791,
+            0.008074292,
+            0.005510166,
+            0.004263333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 30818304,
+            "user_cpu_secs": 0.019018,
+            "system_cpu_secs": 0.005201
+          },
+          "usage_after": {
+            "max_rss_bytes": 40058880,
+            "user_cpu_secs": 0.052933,
+            "system_cpu_secs": 0.005932
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2961509,
+          "secs": [
+            0.010929292,
+            0.011891584,
+            0.009973209,
+            0.018334458,
+            0.009869708,
+            0.010578083,
+            0.009890292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 36110336,
+            "user_cpu_secs": 0.024777,
+            "system_cpu_secs": 0.006055
+          },
+          "usage_after": {
+            "max_rss_bytes": 37830656,
+            "user_cpu_secs": 0.126821,
+            "system_cpu_secs": 0.007377
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3070755,
+          "secs": [
+            0.019717083,
+            0.032287375,
+            0.019401291,
+            0.018318375,
+            0.037669375,
+            0.020710625,
+            0.018618792
+          ],
+          "usage_before": {
+            "max_rss_bytes": 30834688,
+            "user_cpu_secs": 0.015482999999999998,
+            "system_cpu_secs": 0.004761
+          },
+          "usage_after": {
+            "max_rss_bytes": 53526528,
+            "user_cpu_secs": 0.1747,
+            "system_cpu_secs": 0.0071849999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3070755,
+          "secs": [
+            0.02797175,
+            0.026848459,
+            0.034201,
+            0.026778583,
+            0.027282709,
+            0.028270875,
+            0.026241208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 35700736,
+            "user_cpu_secs": 0.047633999999999996,
+            "system_cpu_secs": 0.006372
+          },
+          "usage_after": {
+            "max_rss_bytes": 96141312,
+            "user_cpu_secs": 0.26215299999999997,
+            "system_cpu_secs": 0.013083
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3080756,
+          "secs": [
+            0.019490583,
+            0.028209958,
+            0.024502417,
+            0.030718542,
+            0.030181458,
+            0.018528833,
+            0.018458542
+          ],
+          "usage_before": {
+            "max_rss_bytes": 30818304,
+            "user_cpu_secs": 0.013545,
+            "system_cpu_secs": 0.003094
+          },
+          "usage_after": {
+            "max_rss_bytes": 53854208,
+            "user_cpu_secs": 0.172705,
+            "system_cpu_secs": 0.005555
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3080756,
+          "secs": [
+            0.031348709,
+            0.038083542,
+            0.027880708,
+            0.039557083,
+            0.035448792,
+            0.031793708,
+            0.037972834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 35667968,
+            "user_cpu_secs": 0.038048,
+            "system_cpu_secs": 0.007052
+          },
+          "usage_after": {
+            "max_rss_bytes": 96026624,
+            "user_cpu_secs": 0.292342,
+            "system_cpu_secs": 0.015179
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "sparse_events",
+      "path": "fixtures/medium/sparse_events.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 1528799,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1528799,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 2076210,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1528798,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 701949,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 701949,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 1022073,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 1697405,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 1697406,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 1528799,
+          "secs": [
+            0.000433375,
+            0.000452625,
+            0.000330542,
+            0.000583459,
+            0.000327125,
+            0.000441542,
+            0.000359417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.004319,
+            "system_cpu_secs": 0.002949
+          },
+          "usage_after": {
+            "max_rss_bytes": 7618560,
+            "user_cpu_secs": 0.004347,
+            "system_cpu_secs": 0.005848
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 1528799,
+          "secs": [
+            0.005743833,
+            0.00719675,
+            0.009992125,
+            0.005881417,
+            0.007128541,
+            0.0087415,
+            0.004874375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7602176,
+            "user_cpu_secs": 0.0021969999999999997,
+            "system_cpu_secs": 0.001815
+          },
+          "usage_after": {
+            "max_rss_bytes": 22183936,
+            "user_cpu_secs": 0.063551,
+            "system_cpu_secs": 0.003459
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 1528799,
+          "secs": [
+            0.006399166,
+            0.0039285,
+            0.003496209,
+            0.003493459,
+            0.003486875,
+            0.0034955,
+            0.003488333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7602176,
+            "user_cpu_secs": 0.0021869999999999997,
+            "system_cpu_secs": 0.001992
+          },
+          "usage_after": {
+            "max_rss_bytes": 30294016,
+            "user_cpu_secs": 0.037905,
+            "system_cpu_secs": 0.003614
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1528799,
+          "secs": [
+            0.001925833,
+            0.00176425,
+            0.002079667,
+            0.001988625,
+            0.001788417,
+            0.00178625,
+            0.001762042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.010857,
+            "system_cpu_secs": 0.003946
+          },
+          "usage_after": {
+            "max_rss_bytes": 20594688,
+            "user_cpu_secs": 0.023347999999999997,
+            "system_cpu_secs": 0.004236
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1528799,
+          "secs": [
+            0.004820541,
+            0.004634625,
+            0.008633625,
+            0.004667916,
+            0.00662675,
+            0.007043625,
+            0.009130292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 18972672,
+            "user_cpu_secs": 0.013857,
+            "system_cpu_secs": 0.004019
+          },
+          "usage_after": {
+            "max_rss_bytes": 22511616,
+            "user_cpu_secs": 0.07001399999999999,
+            "system_cpu_secs": 0.004563
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2076210,
+          "secs": [
+            0.004386292,
+            0.002389208,
+            0.00223875,
+            0.00224125,
+            0.00222975,
+            0.002235875,
+            0.002221542
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16891904,
+            "user_cpu_secs": 0.011986,
+            "system_cpu_secs": 0.0041129999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 19988480,
+            "user_cpu_secs": 0.02958,
+            "system_cpu_secs": 0.004395
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2076210,
+          "secs": [
+            0.005390208,
+            0.004997125,
+            0.00502125,
+            0.006931584,
+            0.005137166,
+            0.005004083,
+            0.004954666
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19562496,
+            "user_cpu_secs": 0.014348,
+            "system_cpu_secs": 0.0040089999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 24182784,
+            "user_cpu_secs": 0.060339,
+            "system_cpu_secs": 0.004438
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1528798,
+          "secs": [
+            0.001900833,
+            0.001770041,
+            0.0017785,
+            0.001766,
+            0.001763541,
+            0.001760333,
+            0.001750958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.010732,
+            "system_cpu_secs": 0.003948
+          },
+          "usage_after": {
+            "max_rss_bytes": 18989056,
+            "user_cpu_secs": 0.023122,
+            "system_cpu_secs": 0.0040539999999999994
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1528798,
+          "secs": [
+            0.005365125,
+            0.005006875,
+            0.009283791,
+            0.005003708,
+            0.010708959,
+            0.005274,
+            0.005064458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19021824,
+            "user_cpu_secs": 0.013731,
+            "system_cpu_secs": 0.004344
+          },
+          "usage_after": {
+            "max_rss_bytes": 25755648,
+            "user_cpu_secs": 0.069158,
+            "system_cpu_secs": 0.005169
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 701949,
+          "secs": [
+            0.006084541,
+            0.005368416,
+            0.005284833,
+            0.005286833,
+            0.005323625,
+            0.005287458,
+            0.005294791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.01074,
+            "system_cpu_secs": 0.003884
+          },
+          "usage_after": {
+            "max_rss_bytes": 18219008,
+            "user_cpu_secs": 0.048444,
+            "system_cpu_secs": 0.004019
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 701949,
+          "secs": [
+            0.005820917,
+            0.0054315,
+            0.011261,
+            0.009395959,
+            0.0048305,
+            0.004761292,
+            0.004734167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17219584,
+            "user_cpu_secs": 0.014225,
+            "system_cpu_secs": 0.002371
+          },
+          "usage_after": {
+            "max_rss_bytes": 29818880,
+            "user_cpu_secs": 0.07405199999999999,
+            "system_cpu_secs": 0.005018
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 701949,
+          "secs": [
+            0.0053655,
+            0.011302291,
+            0.005292333,
+            0.007271458,
+            0.009406125,
+            0.005365709,
+            0.008456417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.010754999999999999,
+            "system_cpu_secs": 0.0038169999999999996
+          },
+          "usage_after": {
+            "max_rss_bytes": 18972672,
+            "user_cpu_secs": 0.061443,
+            "system_cpu_secs": 0.004111
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 701949,
+          "secs": [
+            0.010667708,
+            0.005429583,
+            0.004916,
+            0.004833958,
+            0.004772584,
+            0.008237916,
+            0.004992917
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17973248,
+            "user_cpu_secs": 0.021981,
+            "system_cpu_secs": 0.004449
+          },
+          "usage_after": {
+            "max_rss_bytes": 29163520,
+            "user_cpu_secs": 0.079565,
+            "system_cpu_secs": 0.0073019999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1022073,
+          "secs": [
+            0.005494875,
+            0.00528075,
+            0.008745833,
+            0.026399667,
+            0.005463875,
+            0.0073495,
+            0.008836125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.010719,
+            "system_cpu_secs": 0.003838
+          },
+          "usage_after": {
+            "max_rss_bytes": 20643840,
+            "user_cpu_secs": 0.058322,
+            "system_cpu_secs": 0.00438
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1022073,
+          "secs": [
+            0.012808833,
+            0.017558708,
+            0.011410875,
+            0.0113515,
+            0.017862291,
+            0.01142075,
+            0.016934625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19218432,
+            "user_cpu_secs": 0.02213,
+            "system_cpu_secs": 0.004992
+          },
+          "usage_after": {
+            "max_rss_bytes": 31342592,
+            "user_cpu_secs": 0.131493,
+            "system_cpu_secs": 0.006979
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1697405,
+          "secs": [
+            0.010925333,
+            0.011630292,
+            0.010454375,
+            0.007829417,
+            0.011913667,
+            0.007662417,
+            0.007498375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16924672,
+            "user_cpu_secs": 0.010832,
+            "system_cpu_secs": 0.00409
+          },
+          "usage_after": {
+            "max_rss_bytes": 24510464,
+            "user_cpu_secs": 0.076449,
+            "system_cpu_secs": 0.004787
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1697405,
+          "secs": [
+            0.015345625,
+            0.023941083,
+            0.014052542,
+            0.019652916,
+            0.015353292,
+            0.029116959,
+            0.013952459
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19185664,
+            "user_cpu_secs": 0.024385999999999998,
+            "system_cpu_secs": 0.0041719999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 51036160,
+            "user_cpu_secs": 0.16186499999999998,
+            "system_cpu_secs": 0.006911
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1697406,
+          "secs": [
+            0.014082792,
+            0.007650792,
+            0.013205958,
+            0.008239666,
+            0.0116015,
+            0.007541958,
+            0.007382375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17219584,
+            "user_cpu_secs": 0.012681999999999999,
+            "system_cpu_secs": 0.004187
+          },
+          "usage_after": {
+            "max_rss_bytes": 22757376,
+            "user_cpu_secs": 0.080311,
+            "system_cpu_secs": 0.00486
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1697406,
+          "secs": [
+            0.014312916,
+            0.013793667,
+            0.013674458,
+            0.013750375,
+            0.014051417,
+            0.013959917,
+            0.01402525
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19431424,
+            "user_cpu_secs": 0.016253,
+            "system_cpu_secs": 0.002041
+          },
+          "usage_after": {
+            "max_rss_bytes": 52494336,
+            "user_cpu_secs": 0.121324,
+            "system_cpu_secs": 0.003974
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "high_card_strings",
+      "path": "fixtures/medium/high_card_strings.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 2372842,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 2372842,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 2792843,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 2372841,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 1842870,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 1842870,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 1982922,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 1882879,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 1882880,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 2372842,
+          "secs": [
+            0.000317667,
+            0.000135333,
+            0.000114625,
+            0.000108666,
+            0.000100875,
+            0.000097958,
+            0.00009625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.00211,
+            "system_cpu_secs": 0.001253
+          },
+          "usage_after": {
+            "max_rss_bytes": 8454144,
+            "user_cpu_secs": 0.00212,
+            "system_cpu_secs": 0.0022199999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 2372842,
+          "secs": [
+            0.004546125,
+            0.003666167,
+            0.003413375,
+            0.003466125,
+            0.003505791,
+            0.00337975,
+            0.003407542
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8437760,
+            "user_cpu_secs": 0.001867,
+            "system_cpu_secs": 0.001297
+          },
+          "usage_after": {
+            "max_rss_bytes": 19546112,
+            "user_cpu_secs": 0.034087,
+            "system_cpu_secs": 0.001931
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 2372842,
+          "secs": [
+            0.003713917,
+            0.003015916,
+            0.002571417,
+            0.002481708,
+            0.002621542,
+            0.002631,
+            0.002540125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8437760,
+            "user_cpu_secs": 0.002064,
+            "system_cpu_secs": 0.001514
+          },
+          "usage_after": {
+            "max_rss_bytes": 28835840,
+            "user_cpu_secs": 0.028061,
+            "system_cpu_secs": 0.002595
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2372842,
+          "secs": [
+            0.00206975,
+            0.001675292,
+            0.001879833,
+            0.00168525,
+            0.001683083,
+            0.001672583,
+            0.001757292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17203200,
+            "user_cpu_secs": 0.007372,
+            "system_cpu_secs": 0.002702
+          },
+          "usage_after": {
+            "max_rss_bytes": 24248320,
+            "user_cpu_secs": 0.019219999999999998,
+            "system_cpu_secs": 0.003257
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2372842,
+          "secs": [
+            0.003822375,
+            0.003477542,
+            0.003620709,
+            0.003440666,
+            0.003529084,
+            0.003402959,
+            0.003467417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 21823488,
+            "user_cpu_secs": 0.008907,
+            "system_cpu_secs": 0.002665
+          },
+          "usage_after": {
+            "max_rss_bytes": 21938176,
+            "user_cpu_secs": 0.041007999999999996,
+            "system_cpu_secs": 0.003003
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2792843,
+          "secs": [
+            0.002150333,
+            0.002210208,
+            0.002195333,
+            0.002164625,
+            0.002076542,
+            0.002159667,
+            0.0021465
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.006123,
+            "system_cpu_secs": 0.002316
+          },
+          "usage_after": {
+            "max_rss_bytes": 37011456,
+            "user_cpu_secs": 0.020184,
+            "system_cpu_secs": 0.003349
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2792843,
+          "secs": [
+            0.0039465,
+            0.003548,
+            0.003617625,
+            0.003671334,
+            0.003817917,
+            0.00360875,
+            0.003666708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 18890752,
+            "user_cpu_secs": 0.009063,
+            "system_cpu_secs": 0.002036
+          },
+          "usage_after": {
+            "max_rss_bytes": 21774336,
+            "user_cpu_secs": 0.042117999999999996,
+            "system_cpu_secs": 0.0021999999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2372841,
+          "secs": [
+            0.001909625,
+            0.001598709,
+            0.001589542,
+            0.001583833,
+            0.001670041,
+            0.001786,
+            0.001589791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.006075,
+            "system_cpu_secs": 0.002168
+          },
+          "usage_after": {
+            "max_rss_bytes": 23330816,
+            "user_cpu_secs": 0.017426999999999998,
+            "system_cpu_secs": 0.002536
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2372841,
+          "secs": [
+            0.003966459,
+            0.003735542,
+            0.00364525,
+            0.00367375,
+            0.003763875,
+            0.003808125,
+            0.004004917
+          ],
+          "usage_before": {
+            "max_rss_bytes": 21544960,
+            "user_cpu_secs": 0.008657,
+            "system_cpu_secs": 0.002175
+          },
+          "usage_after": {
+            "max_rss_bytes": 23379968,
+            "user_cpu_secs": 0.042259,
+            "system_cpu_secs": 0.002398
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1842870,
+          "secs": [
+            0.003330291,
+            0.003187667,
+            0.00320075,
+            0.003205458,
+            0.003188583,
+            0.003110917,
+            0.003205667
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.005952,
+            "system_cpu_secs": 0.001854
+          },
+          "usage_after": {
+            "max_rss_bytes": 21430272,
+            "user_cpu_secs": 0.027864,
+            "system_cpu_secs": 0.0023279999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1842870,
+          "secs": [
+            0.004401541,
+            0.003839125,
+            0.003683375,
+            0.003439292,
+            0.003673416,
+            0.003635292,
+            0.003610042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19464192,
+            "user_cpu_secs": 0.010303999999999999,
+            "system_cpu_secs": 0.002087
+          },
+          "usage_after": {
+            "max_rss_bytes": 26083328,
+            "user_cpu_secs": 0.043574999999999996,
+            "system_cpu_secs": 0.00245
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1842870,
+          "secs": [
+            0.003186333,
+            0.002988542,
+            0.0030015,
+            0.003124833,
+            0.003248292,
+            0.003034708,
+            0.00310975
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.006057,
+            "system_cpu_secs": 0.00201
+          },
+          "usage_after": {
+            "max_rss_bytes": 21446656,
+            "user_cpu_secs": 0.027472,
+            "system_cpu_secs": 0.002277
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1842870,
+          "secs": [
+            0.00485125,
+            0.003866125,
+            0.003653125,
+            0.003580667,
+            0.003505041,
+            0.003581667,
+            0.003545
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19464192,
+            "user_cpu_secs": 0.009989,
+            "system_cpu_secs": 0.002202
+          },
+          "usage_after": {
+            "max_rss_bytes": 27131904,
+            "user_cpu_secs": 0.043569,
+            "system_cpu_secs": 0.00276
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1982922,
+          "secs": [
+            0.008108792,
+            0.007912584,
+            0.007518667,
+            0.007523375,
+            0.007692834,
+            0.007527166,
+            0.007717417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.006051,
+            "system_cpu_secs": 0.001959
+          },
+          "usage_after": {
+            "max_rss_bytes": 25706496,
+            "user_cpu_secs": 0.059264,
+            "system_cpu_secs": 0.002672
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1982922,
+          "secs": [
+            0.013996833,
+            0.012656542,
+            0.01256325,
+            0.012553542,
+            0.012220958,
+            0.012437584,
+            0.012574583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 21610496,
+            "user_cpu_secs": 0.014823,
+            "system_cpu_secs": 0.002204
+          },
+          "usage_after": {
+            "max_rss_bytes": 26869760,
+            "user_cpu_secs": 0.110479,
+            "system_cpu_secs": 0.002868
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1882879,
+          "secs": [
+            0.00726925,
+            0.006834334,
+            0.006369125,
+            0.006275416,
+            0.005849208,
+            0.005997541,
+            0.006302
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17170432,
+            "user_cpu_secs": 0.006003,
+            "system_cpu_secs": 0.002101
+          },
+          "usage_after": {
+            "max_rss_bytes": 23527424,
+            "user_cpu_secs": 0.049671,
+            "system_cpu_secs": 0.003104
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1882879,
+          "secs": [
+            0.009241666,
+            0.008046791,
+            0.009071417,
+            0.008385625,
+            0.0077985,
+            0.007688167,
+            0.007620167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23232512,
+            "user_cpu_secs": 0.013864999999999999,
+            "system_cpu_secs": 0.002372
+          },
+          "usage_after": {
+            "max_rss_bytes": 34242560,
+            "user_cpu_secs": 0.076481,
+            "system_cpu_secs": 0.003901
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1882880,
+          "secs": [
+            0.006700333,
+            0.006840916,
+            0.006666583,
+            0.006080166,
+            0.006256958,
+            0.006095958,
+            0.006089916
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.0065899999999999995,
+            "system_cpu_secs": 0.0027649999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 25280512,
+            "user_cpu_secs": 0.050304999999999996,
+            "system_cpu_secs": 0.003441
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1882880,
+          "secs": [
+            0.008909041,
+            0.008064417,
+            0.007719125,
+            0.007683791,
+            0.0075355,
+            0.007631292,
+            0.00742225
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23248896,
+            "user_cpu_secs": 0.014124999999999999,
+            "system_cpu_secs": 0.002582
+          },
+          "usage_after": {
+            "max_rss_bytes": 33226752,
+            "user_cpu_secs": 0.07583999999999999,
+            "system_cpu_secs": 0.0032979999999999997
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "repetitive_logs",
+      "path": "fixtures/medium/repetitive_logs.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 1452940,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1452940,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1932941,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1452939,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 692989,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 692989,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 853049,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 732998,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 732999,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 1452940,
+          "secs": [
+            0.000190209,
+            0.000064375,
+            0.000056709,
+            0.000052459,
+            0.000050458,
+            0.000052208,
+            0.000049416
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002018,
+            "system_cpu_secs": 0.00142
+          },
+          "usage_after": {
+            "max_rss_bytes": 7536640,
+            "user_cpu_secs": 0.002029,
+            "system_cpu_secs": 0.001932
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 1452940,
+          "secs": [
+            0.004612875,
+            0.003784042,
+            0.003813166,
+            0.00362725,
+            0.003743,
+            0.003814625,
+            0.003768792
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7520256,
+            "user_cpu_secs": 0.00166,
+            "system_cpu_secs": 0.0010019999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 18251776,
+            "user_cpu_secs": 0.036319,
+            "system_cpu_secs": 0.0015509999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 1452940,
+          "secs": [
+            0.005986875,
+            0.003220917,
+            0.00682775,
+            0.002976542,
+            0.002649084,
+            0.002653333,
+            0.002640334
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7520256,
+            "user_cpu_secs": 0.00227,
+            "system_cpu_secs": 0.001987
+          },
+          "usage_after": {
+            "max_rss_bytes": 33685504,
+            "user_cpu_secs": 0.036254,
+            "system_cpu_secs": 0.00401
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1452940,
+          "secs": [
+            0.001587375,
+            0.001511708,
+            0.001515166,
+            0.001512417,
+            0.003058875,
+            0.003209375,
+            0.002756416
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15417344,
+            "user_cpu_secs": 0.009807999999999999,
+            "system_cpu_secs": 0.00403
+          },
+          "usage_after": {
+            "max_rss_bytes": 17072128,
+            "user_cpu_secs": 0.024005,
+            "system_cpu_secs": 0.004141
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1452940,
+          "secs": [
+            0.003905458,
+            0.003720917,
+            0.003735292,
+            0.003720583,
+            0.004173167,
+            0.007720292,
+            0.003733833
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15384576,
+            "user_cpu_secs": 0.009212999999999999,
+            "system_cpu_secs": 0.002349
+          },
+          "usage_after": {
+            "max_rss_bytes": 19005440,
+            "user_cpu_secs": 0.049529,
+            "system_cpu_secs": 0.002717
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1932941,
+          "secs": [
+            0.002017083,
+            0.001946583,
+            0.001934542,
+            0.001943125,
+            0.001939291,
+            0.001966875,
+            0.001938959
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15040512,
+            "user_cpu_secs": 0.010423,
+            "system_cpu_secs": 0.003671
+          },
+          "usage_after": {
+            "max_rss_bytes": 16203776,
+            "user_cpu_secs": 0.024036,
+            "system_cpu_secs": 0.003737
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1932941,
+          "secs": [
+            0.004276209,
+            0.00399075,
+            0.003982,
+            0.004029417,
+            0.003997458,
+            0.004191584,
+            0.003988333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17514496,
+            "user_cpu_secs": 0.012891999999999999,
+            "system_cpu_secs": 0.003286
+          },
+          "usage_after": {
+            "max_rss_bytes": 19562496,
+            "user_cpu_secs": 0.049005,
+            "system_cpu_secs": 0.0035369999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1452939,
+          "secs": [
+            0.00153075,
+            0.001512625,
+            0.001512833,
+            0.00150675,
+            0.001510167,
+            0.001509625,
+            0.001507625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15024128,
+            "user_cpu_secs": 0.0064659999999999995,
+            "system_cpu_secs": 0.002
+          },
+          "usage_after": {
+            "max_rss_bytes": 15433728,
+            "user_cpu_secs": 0.017029,
+            "system_cpu_secs": 0.002031
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1452939,
+          "secs": [
+            0.004348333,
+            0.004042917,
+            0.004066542,
+            0.004037041,
+            0.004037583,
+            0.00410675,
+            0.004213125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15400960,
+            "user_cpu_secs": 0.008964,
+            "system_cpu_secs": 0.0017929999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 21184512,
+            "user_cpu_secs": 0.045503999999999996,
+            "system_cpu_secs": 0.002108
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 692989,
+          "secs": [
+            0.003917084,
+            0.004393584,
+            0.003793583,
+            0.003787125,
+            0.003775792,
+            0.003792958,
+            0.003655417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15024128,
+            "user_cpu_secs": 0.0075509999999999996,
+            "system_cpu_secs": 0.001958
+          },
+          "usage_after": {
+            "max_rss_bytes": 15974400,
+            "user_cpu_secs": 0.034335,
+            "system_cpu_secs": 0.002105
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 692989,
+          "secs": [
+            0.003705791,
+            0.003452083,
+            0.003216125,
+            0.003177708,
+            0.00316925,
+            0.003166042,
+            0.0031675
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16400384,
+            "user_cpu_secs": 0.011066,
+            "system_cpu_secs": 0.001745
+          },
+          "usage_after": {
+            "max_rss_bytes": 21151744,
+            "user_cpu_secs": 0.041548999999999996,
+            "system_cpu_secs": 0.002219
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 692989,
+          "secs": [
+            0.003828375,
+            0.003644542,
+            0.003621,
+            0.003876833,
+            0.00374675,
+            0.003798084,
+            0.003746833
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15056896,
+            "user_cpu_secs": 0.006461,
+            "system_cpu_secs": 0.001937
+          },
+          "usage_after": {
+            "max_rss_bytes": 16007168,
+            "user_cpu_secs": 0.032305,
+            "system_cpu_secs": 0.002274
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 692989,
+          "secs": [
+            0.0042,
+            0.003485167,
+            0.003309375,
+            0.003230625,
+            0.003278208,
+            0.003191291,
+            0.003128875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15335424,
+            "user_cpu_secs": 0.010978,
+            "system_cpu_secs": 0.0019169999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 22724608,
+            "user_cpu_secs": 0.042075999999999995,
+            "system_cpu_secs": 0.002653
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 853049,
+          "secs": [
+            0.004098834,
+            0.004016125,
+            0.003834083,
+            0.003942792,
+            0.004036541,
+            0.004046917,
+            0.003781958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15024128,
+            "user_cpu_secs": 0.0063739999999999995,
+            "system_cpu_secs": 0.0019119999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 17694720,
+            "user_cpu_secs": 0.033735,
+            "system_cpu_secs": 0.0022719999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 853049,
+          "secs": [
+            0.008831083,
+            0.008236667,
+            0.00798775,
+            0.008120542,
+            0.008068666,
+            0.00795825,
+            0.007890583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15876096,
+            "user_cpu_secs": 0.011182,
+            "system_cpu_secs": 0.002062
+          },
+          "usage_after": {
+            "max_rss_bytes": 21741568,
+            "user_cpu_secs": 0.075931,
+            "system_cpu_secs": 0.0023699999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 732998,
+          "secs": [
+            0.004863,
+            0.004543584,
+            0.004213958,
+            0.004405291,
+            0.004240125,
+            0.004186833,
+            0.004118583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15040512,
+            "user_cpu_secs": 0.006246,
+            "system_cpu_secs": 0.0019549999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 17285120,
+            "user_cpu_secs": 0.036383,
+            "system_cpu_secs": 0.002346
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 732998,
+          "secs": [
+            0.006154583,
+            0.005881375,
+            0.005488459,
+            0.005428417,
+            0.005527333,
+            0.005382,
+            0.005366042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15745024,
+            "user_cpu_secs": 0.011866,
+            "system_cpu_secs": 0.001772
+          },
+          "usage_after": {
+            "max_rss_bytes": 19464192,
+            "user_cpu_secs": 0.058778,
+            "system_cpu_secs": 0.002287
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 732999,
+          "secs": [
+            0.004937209,
+            0.004705125,
+            0.004340417,
+            0.004123667,
+            0.004134791,
+            0.004173458,
+            0.003949584
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15400960,
+            "user_cpu_secs": 0.006209,
+            "system_cpu_secs": 0.0016929999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 16498688,
+            "user_cpu_secs": 0.036448,
+            "system_cpu_secs": 0.0018059999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 732999,
+          "secs": [
+            0.006202208,
+            0.005768791,
+            0.005485458,
+            0.005305041,
+            0.005510458,
+            0.005620208,
+            0.005263167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16056320,
+            "user_cpu_secs": 0.012031,
+            "system_cpu_secs": 0.0020599999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 19759104,
+            "user_cpu_secs": 0.058629999999999995,
+            "system_cpu_secs": 0.002446
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "unicode_strings",
+      "path": "fixtures/medium/unicode_strings.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 1302064,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1302064,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1782065,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1302063,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 610425,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 610415,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 765580,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 688035,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 686018,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 1302064,
+          "secs": [
+            0.000181584,
+            0.000077125,
+            0.000065875,
+            0.000062417,
+            0.000059916,
+            0.000058667,
+            0.000056834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002094,
+            "system_cpu_secs": 0.001362
+          },
+          "usage_after": {
+            "max_rss_bytes": 7389184,
+            "user_cpu_secs": 0.002103,
+            "system_cpu_secs": 0.0019199999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 1302064,
+          "secs": [
+            0.005084042,
+            0.00470175,
+            0.004338333,
+            0.004446917,
+            0.004492083,
+            0.004315875,
+            0.004214375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7372800,
+            "user_cpu_secs": 0.0019019999999999998,
+            "system_cpu_secs": 0.001371
+          },
+          "usage_after": {
+            "max_rss_bytes": 17743872,
+            "user_cpu_secs": 0.041104999999999996,
+            "system_cpu_secs": 0.001994
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 1302064,
+          "secs": [
+            0.0039165,
+            0.00314575,
+            0.003068875,
+            0.003039167,
+            0.003263042,
+            0.003134,
+            0.003079208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 7372800,
+            "user_cpu_secs": 0.002167,
+            "system_cpu_secs": 0.0015999999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 26427392,
+            "user_cpu_secs": 0.032286999999999996,
+            "system_cpu_secs": 0.0026379999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1302064,
+          "secs": [
+            0.001591625,
+            0.001537334,
+            0.001541375,
+            0.001628667,
+            0.0015015,
+            0.001469459,
+            0.001455625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14827520,
+            "user_cpu_secs": 0.00699,
+            "system_cpu_secs": 0.0018479999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 16531456,
+            "user_cpu_secs": 0.017543,
+            "system_cpu_secs": 0.002012
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1302064,
+          "secs": [
+            0.004359542,
+            0.004281875,
+            0.004246208,
+            0.004425792,
+            0.004336833,
+            0.004425667,
+            0.004249083
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16613376,
+            "user_cpu_secs": 0.009792,
+            "system_cpu_secs": 0.002323
+          },
+          "usage_after": {
+            "max_rss_bytes": 18268160,
+            "user_cpu_secs": 0.048133999999999996,
+            "system_cpu_secs": 0.002473
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1782065,
+          "secs": [
+            0.002010375,
+            0.001899,
+            0.001907916,
+            0.001896541,
+            0.001902833,
+            0.001895667,
+            0.001974333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14811136,
+            "user_cpu_secs": 0.0068189999999999995,
+            "system_cpu_secs": 0.0017469999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 15630336,
+            "user_cpu_secs": 0.020225999999999997,
+            "system_cpu_secs": 0.0018219999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1782065,
+          "secs": [
+            0.004902958,
+            0.004598959,
+            0.004739166,
+            0.004528,
+            0.004639584,
+            0.004417417,
+            0.004506209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15597568,
+            "user_cpu_secs": 0.009918,
+            "system_cpu_secs": 0.001918
+          },
+          "usage_after": {
+            "max_rss_bytes": 19644416,
+            "user_cpu_secs": 0.050209,
+            "system_cpu_secs": 0.002198
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1302063,
+          "secs": [
+            0.001572916,
+            0.001595125,
+            0.001491208,
+            0.001487209,
+            0.001476833,
+            0.001479916,
+            0.001476958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14811136,
+            "user_cpu_secs": 0.0069039999999999995,
+            "system_cpu_secs": 0.001941
+          },
+          "usage_after": {
+            "max_rss_bytes": 16547840,
+            "user_cpu_secs": 0.017365,
+            "system_cpu_secs": 0.002055
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1302063,
+          "secs": [
+            0.005208375,
+            0.005052417,
+            0.004849917,
+            0.00490525,
+            0.004924459,
+            0.005125334,
+            0.004828041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16678912,
+            "user_cpu_secs": 0.009736,
+            "system_cpu_secs": 0.001979
+          },
+          "usage_after": {
+            "max_rss_bytes": 20611072,
+            "user_cpu_secs": 0.052489,
+            "system_cpu_secs": 0.002258
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 610425,
+          "secs": [
+            0.003874875,
+            0.0037315,
+            0.003691833,
+            0.003697125,
+            0.00362725,
+            0.003565,
+            0.003650458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14860288,
+            "user_cpu_secs": 0.007133,
+            "system_cpu_secs": 0.001931
+          },
+          "usage_after": {
+            "max_rss_bytes": 15712256,
+            "user_cpu_secs": 0.032838,
+            "system_cpu_secs": 0.002026
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 610425,
+          "secs": [
+            0.005176292,
+            0.0045625,
+            0.004284875,
+            0.004316125,
+            0.004302583,
+            0.004132959,
+            0.0044675
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15040512,
+            "user_cpu_secs": 0.012027,
+            "system_cpu_secs": 0.001913
+          },
+          "usage_after": {
+            "max_rss_bytes": 22347776,
+            "user_cpu_secs": 0.051150999999999995,
+            "system_cpu_secs": 0.002287
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 610415,
+          "secs": [
+            0.0038805,
+            0.003681792,
+            0.003645917,
+            0.003762667,
+            0.003596625,
+            0.003693708,
+            0.003630333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14811136,
+            "user_cpu_secs": 0.0071449999999999994,
+            "system_cpu_secs": 0.002273
+          },
+          "usage_after": {
+            "max_rss_bytes": 15761408,
+            "user_cpu_secs": 0.032889999999999996,
+            "system_cpu_secs": 0.002388
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 610415,
+          "secs": [
+            0.005174583,
+            0.004426667,
+            0.004247708,
+            0.004397209,
+            0.004292,
+            0.004469625,
+            0.004127834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15728640,
+            "user_cpu_secs": 0.011987999999999999,
+            "system_cpu_secs": 0.002212
+          },
+          "usage_after": {
+            "max_rss_bytes": 20889600,
+            "user_cpu_secs": 0.050831999999999995,
+            "system_cpu_secs": 0.002836
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 765580,
+          "secs": [
+            0.004243917,
+            0.00411125,
+            0.003948083,
+            0.004051166,
+            0.004145167,
+            0.004194625,
+            0.004027125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14811136,
+            "user_cpu_secs": 0.006767,
+            "system_cpu_secs": 0.001807
+          },
+          "usage_after": {
+            "max_rss_bytes": 17317888,
+            "user_cpu_secs": 0.035182,
+            "system_cpu_secs": 0.002093
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 765580,
+          "secs": [
+            0.009901084,
+            0.009292875,
+            0.009043084,
+            0.008774917,
+            0.008803542,
+            0.008670167,
+            0.008981375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15712256,
+            "user_cpu_secs": 0.012216,
+            "system_cpu_secs": 0.002362
+          },
+          "usage_after": {
+            "max_rss_bytes": 22052864,
+            "user_cpu_secs": 0.083146,
+            "system_cpu_secs": 0.0031309999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 688035,
+          "secs": [
+            0.004818833,
+            0.004735708,
+            0.00422425,
+            0.00447975,
+            0.004407292,
+            0.004110667,
+            0.00414575
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14827520,
+            "user_cpu_secs": 0.006959,
+            "system_cpu_secs": 0.001895
+          },
+          "usage_after": {
+            "max_rss_bytes": 17088512,
+            "user_cpu_secs": 0.037498,
+            "system_cpu_secs": 0.0022619999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 688035,
+          "secs": [
+            0.007845791,
+            0.007563375,
+            0.007214542,
+            0.007175917,
+            0.006953792,
+            0.006990167,
+            0.007067875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15597568,
+            "user_cpu_secs": 0.012678,
+            "system_cpu_secs": 0.00201
+          },
+          "usage_after": {
+            "max_rss_bytes": 19529728,
+            "user_cpu_secs": 0.071342,
+            "system_cpu_secs": 0.002581
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 686018,
+          "secs": [
+            0.005159334,
+            0.00466975,
+            0.004250583,
+            0.004106959,
+            0.004083542,
+            0.004665416,
+            0.004212083
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14811136,
+            "user_cpu_secs": 0.006925,
+            "system_cpu_secs": 0.001767
+          },
+          "usage_after": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.037819,
+            "system_cpu_secs": 0.001979
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 686018,
+          "secs": [
+            0.00774025,
+            0.007243458,
+            0.007140291,
+            0.00708725,
+            0.007287584,
+            0.006878208,
+            0.006886625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15843328,
+            "user_cpu_secs": 0.012921,
+            "system_cpu_secs": 0.001805
+          },
+          "usage_after": {
+            "max_rss_bytes": 19349504,
+            "user_cpu_secs": 0.07096999999999999,
+            "system_cpu_secs": 0.0022329999999999997
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "numeric_mix",
+      "path": "fixtures/medium/numeric_mix.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 2395221,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 2395221,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 3235222,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 2395220,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 1364354,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 1364354,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 1644462,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "toon",
+          "level": "lossy",
+          "output_bytes": 1384363,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "toon-tab",
+          "level": "lossy",
+          "output_bytes": 1384364,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 2395221,
+          "secs": [
+            0.000319875,
+            0.000175667,
+            0.000135208,
+            0.000112209,
+            0.000107166,
+            0.000100208,
+            0.000101375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.0020369999999999997,
+            "system_cpu_secs": 0.001346
+          },
+          "usage_after": {
+            "max_rss_bytes": 8486912,
+            "user_cpu_secs": 0.002048,
+            "system_cpu_secs": 0.002369
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 2395221,
+          "secs": [
+            0.00745575,
+            0.006532583,
+            0.006799459,
+            0.006644542,
+            0.006522416,
+            0.006552208,
+            0.006578417
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8470528,
+            "user_cpu_secs": 0.001872,
+            "system_cpu_secs": 0.001428
+          },
+          "usage_after": {
+            "max_rss_bytes": 23248896,
+            "user_cpu_secs": 0.056997,
+            "system_cpu_secs": 0.0022789999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 2395221,
+          "secs": [
+            0.006345917,
+            0.004920708,
+            0.004620834,
+            0.00465775,
+            0.00453825,
+            0.004649375,
+            0.004809209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8470528,
+            "user_cpu_secs": 0.002245,
+            "system_cpu_secs": 0.0018789999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 37945344,
+            "user_cpu_secs": 0.043814,
+            "system_cpu_secs": 0.0035169999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2395221,
+          "secs": [
+            0.003549125,
+            0.003324917,
+            0.003341917,
+            0.003240542,
+            0.003316917,
+            0.003246042,
+            0.003227375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20840448,
+            "user_cpu_secs": 0.008761999999999999,
+            "system_cpu_secs": 0.002149
+          },
+          "usage_after": {
+            "max_rss_bytes": 25722880,
+            "user_cpu_secs": 0.031734,
+            "system_cpu_secs": 0.002415
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2395221,
+          "secs": [
+            0.006766667,
+            0.006562667,
+            0.006748,
+            0.006864917,
+            0.006519292,
+            0.006555958,
+            0.0066275
+          ],
+          "usage_before": {
+            "max_rss_bytes": 25559040,
+            "user_cpu_secs": 0.01338,
+            "system_cpu_secs": 0.002565
+          },
+          "usage_after": {
+            "max_rss_bytes": 25640960,
+            "user_cpu_secs": 0.068621,
+            "system_cpu_secs": 0.002698
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3235222,
+          "secs": [
+            0.004207875,
+            0.003901917,
+            0.004010875,
+            0.004098209,
+            0.0039575,
+            0.004035541,
+            0.003857917
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20873216,
+            "user_cpu_secs": 0.00886,
+            "system_cpu_secs": 0.00244
+          },
+          "usage_after": {
+            "max_rss_bytes": 28213248,
+            "user_cpu_secs": 0.036444,
+            "system_cpu_secs": 0.002913
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3235222,
+          "secs": [
+            0.007282708,
+            0.007050166,
+            0.006978,
+            0.007092417,
+            0.007164666,
+            0.006983625,
+            0.006923208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 26411008,
+            "user_cpu_secs": 0.014239,
+            "system_cpu_secs": 0.002608
+          },
+          "usage_after": {
+            "max_rss_bytes": 29736960,
+            "user_cpu_secs": 0.07224,
+            "system_cpu_secs": 0.0029519999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2395220,
+          "secs": [
+            0.0039185,
+            0.003412792,
+            0.003638375,
+            0.003238916,
+            0.003262625,
+            0.003357625,
+            0.003212292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20873216,
+            "user_cpu_secs": 0.008768999999999999,
+            "system_cpu_secs": 0.002133
+          },
+          "usage_after": {
+            "max_rss_bytes": 27394048,
+            "user_cpu_secs": 0.032244999999999996,
+            "system_cpu_secs": 0.002689
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2395220,
+          "secs": [
+            0.0073705,
+            0.006915458,
+            0.007089166,
+            0.006899292,
+            0.006846333,
+            0.006815542,
+            0.006940583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 25772032,
+            "user_cpu_secs": 0.013982999999999999,
+            "system_cpu_secs": 0.0026999999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 27459584,
+            "user_cpu_secs": 0.071201,
+            "system_cpu_secs": 0.002986
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1364354,
+          "secs": [
+            0.0126315,
+            0.012003875,
+            0.012165084,
+            0.012322667,
+            0.012109375,
+            0.011899625,
+            0.011899458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20889600,
+            "user_cpu_secs": 0.008638,
+            "system_cpu_secs": 0.00231
+          },
+          "usage_after": {
+            "max_rss_bytes": 23789568,
+            "user_cpu_secs": 0.09296499999999999,
+            "system_cpu_secs": 0.002941
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1364354,
+          "secs": [
+            0.006598541,
+            0.005938458,
+            0.005662125,
+            0.00543,
+            0.005453125,
+            0.005436333,
+            0.0054405
+          ],
+          "usage_before": {
+            "max_rss_bytes": 22822912,
+            "user_cpu_secs": 0.022708,
+            "system_cpu_secs": 0.0022199999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 31064064,
+            "user_cpu_secs": 0.070265,
+            "system_cpu_secs": 0.003858
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1364354,
+          "secs": [
+            0.0132545,
+            0.01221725,
+            0.011964833,
+            0.012029667,
+            0.011781458,
+            0.011675625,
+            0.011655584
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20807680,
+            "user_cpu_secs": 0.00899,
+            "system_cpu_secs": 0.002427
+          },
+          "usage_after": {
+            "max_rss_bytes": 24199168,
+            "user_cpu_secs": 0.09265699999999999,
+            "system_cpu_secs": 0.0032719999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1364354,
+          "secs": [
+            0.006313,
+            0.006975792,
+            0.005507458,
+            0.005780291,
+            0.005582792,
+            0.005495417,
+            0.005349667
+          ],
+          "usage_before": {
+            "max_rss_bytes": 22806528,
+            "user_cpu_secs": 0.022508999999999998,
+            "system_cpu_secs": 0.0027429999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 31113216,
+            "user_cpu_secs": 0.070819,
+            "system_cpu_secs": 0.004955
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1644462,
+          "secs": [
+            0.013223,
+            0.012522041,
+            0.01284375,
+            0.012307,
+            0.012314916,
+            0.012591667,
+            0.01251825
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20824064,
+            "user_cpu_secs": 0.008797,
+            "system_cpu_secs": 0.0020989999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 28131328,
+            "user_cpu_secs": 0.09602,
+            "system_cpu_secs": 0.0031149999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1644462,
+          "secs": [
+            0.016169792,
+            0.0152865,
+            0.014971459,
+            0.015279334,
+            0.01468325,
+            0.014878,
+            0.0150405
+          ],
+          "usage_before": {
+            "max_rss_bytes": 24281088,
+            "user_cpu_secs": 0.023271999999999998,
+            "system_cpu_secs": 0.002548
+          },
+          "usage_after": {
+            "max_rss_bytes": 34668544,
+            "user_cpu_secs": 0.136826,
+            "system_cpu_secs": 0.004743
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1384363,
+          "secs": [
+            0.011998708,
+            0.01105325,
+            0.010600708,
+            0.010511666,
+            0.010096791,
+            0.010333292,
+            0.010256166
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20840448,
+            "user_cpu_secs": 0.008897,
+            "system_cpu_secs": 0.0032879999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 25346048,
+            "user_cpu_secs": 0.08286,
+            "system_cpu_secs": 0.004096
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1384363,
+          "secs": [
+            0.0099635,
+            0.0093405,
+            0.008689458,
+            0.008750292,
+            0.008624167,
+            0.008566041,
+            0.00862625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 25165824,
+            "user_cpu_secs": 0.021432,
+            "system_cpu_secs": 0.002779
+          },
+          "usage_after": {
+            "max_rss_bytes": 37634048,
+            "user_cpu_secs": 0.091166,
+            "system_cpu_secs": 0.004837999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1384364,
+          "secs": [
+            0.01272675,
+            0.01135075,
+            0.010502959,
+            0.010747375,
+            0.01057775,
+            0.010851292,
+            0.009904458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20824064,
+            "user_cpu_secs": 0.008735999999999999,
+            "system_cpu_secs": 0.002182
+          },
+          "usage_after": {
+            "max_rss_bytes": 25804800,
+            "user_cpu_secs": 0.08466699999999999,
+            "system_cpu_secs": 0.0028469999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1384364,
+          "secs": [
+            0.010038042,
+            0.009353417,
+            0.008635375,
+            0.008800167,
+            0.008709291,
+            0.008651042,
+            0.008850042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 24100864,
+            "user_cpu_secs": 0.021974999999999998,
+            "system_cpu_secs": 0.002287
+          },
+          "usage_after": {
+            "max_rss_bytes": 36438016,
+            "user_cpu_secs": 0.092127,
+            "system_cpu_secs": 0.004429
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "mixed_types",
+      "path": "fixtures/medium/mixed_types.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 753789,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 753789,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1394040,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 753788,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 911309,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 914750,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 753789,
+          "secs": [
+            0.000135292,
+            0.000041916,
+            0.000038042,
+            0.000038417,
+            0.000032709,
+            0.000032125,
+            0.000031708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002134,
+            "system_cpu_secs": 0.001638
+          },
+          "usage_after": {
+            "max_rss_bytes": 6848512,
+            "user_cpu_secs": 0.002147,
+            "system_cpu_secs": 0.001983
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 753789,
+          "secs": [
+            0.003529916,
+            0.002815125,
+            0.002736666,
+            0.002760875,
+            0.002885958,
+            0.002790583,
+            0.002651834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6832128,
+            "user_cpu_secs": 0.001869,
+            "system_cpu_secs": 0.001322
+          },
+          "usage_after": {
+            "max_rss_bytes": 16793600,
+            "user_cpu_secs": 0.028835999999999997,
+            "system_cpu_secs": 0.0021119999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 753789,
+          "secs": [
+            0.003489791,
+            0.00274275,
+            0.002731375,
+            0.00267175,
+            0.002649375,
+            0.002594416,
+            0.002598917
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6832128,
+            "user_cpu_secs": 0.001971,
+            "system_cpu_secs": 0.00124
+          },
+          "usage_after": {
+            "max_rss_bytes": 19185664,
+            "user_cpu_secs": 0.028709,
+            "system_cpu_secs": 0.001772
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 753789,
+          "secs": [
+            0.00129125,
+            0.001283291,
+            0.001280667,
+            0.001296625,
+            0.001292708,
+            0.001290667,
+            0.001350416
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14958592,
+            "user_cpu_secs": 0.0051459999999999995,
+            "system_cpu_secs": 0.001622
+          },
+          "usage_after": {
+            "max_rss_bytes": 15351808,
+            "user_cpu_secs": 0.014189,
+            "system_cpu_secs": 0.001664
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 753789,
+          "secs": [
+            0.0028225,
+            0.002786959,
+            0.002756375,
+            0.002763333,
+            0.002703333,
+            0.002688458,
+            0.002761959
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16531456,
+            "user_cpu_secs": 0.007541999999999999,
+            "system_cpu_secs": 0.001857
+          },
+          "usage_after": {
+            "max_rss_bytes": 17121280,
+            "user_cpu_secs": 0.034302,
+            "system_cpu_secs": 0.00197
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1394040,
+          "secs": [
+            0.001961334,
+            0.001901208,
+            0.00187675,
+            0.001874958,
+            0.001896542,
+            0.00195025,
+            0.001960042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14942208,
+            "user_cpu_secs": 0.005157999999999999,
+            "system_cpu_secs": 0.001761
+          },
+          "usage_after": {
+            "max_rss_bytes": 17465344,
+            "user_cpu_secs": 0.018425999999999998,
+            "system_cpu_secs": 0.0019069999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1394040,
+          "secs": [
+            0.003474542,
+            0.003208167,
+            0.003190584,
+            0.00299825,
+            0.003023834,
+            0.003002375,
+            0.002998333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16007168,
+            "user_cpu_secs": 0.008047,
+            "system_cpu_secs": 0.001883
+          },
+          "usage_after": {
+            "max_rss_bytes": 19415040,
+            "user_cpu_secs": 0.037251,
+            "system_cpu_secs": 0.002154
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 753788,
+          "secs": [
+            0.001319541,
+            0.0012775,
+            0.001324958,
+            0.001359458,
+            0.0013005,
+            0.001287916,
+            0.001288209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14942208,
+            "user_cpu_secs": 0.005274,
+            "system_cpu_secs": 0.001829
+          },
+          "usage_after": {
+            "max_rss_bytes": 16220160,
+            "user_cpu_secs": 0.014289,
+            "system_cpu_secs": 0.001969
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 753788,
+          "secs": [
+            0.003206125,
+            0.003172792,
+            0.003016334,
+            0.003010417,
+            0.003029375,
+            0.003173833,
+            0.003004083
+          ],
+          "usage_before": {
+            "max_rss_bytes": 15384576,
+            "user_cpu_secs": 0.007417999999999999,
+            "system_cpu_secs": 0.001717
+          },
+          "usage_after": {
+            "max_rss_bytes": 18939904,
+            "user_cpu_secs": 0.036329,
+            "system_cpu_secs": 0.002002
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 911309,
+          "secs": [
+            0.004089708,
+            0.003910917,
+            0.003888542,
+            0.003871625,
+            0.003875667,
+            0.003874333,
+            0.004048958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14974976,
+            "user_cpu_secs": 0.0051459999999999995,
+            "system_cpu_secs": 0.0017679999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 18382848,
+            "user_cpu_secs": 0.032324,
+            "system_cpu_secs": 0.0021089999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 911309,
+          "secs": [
+            0.008232625,
+            0.00781025,
+            0.007939917,
+            0.008156041,
+            0.007933958,
+            0.007720666,
+            0.007785042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16515072,
+            "user_cpu_secs": 0.010248,
+            "system_cpu_secs": 0.001666
+          },
+          "usage_after": {
+            "max_rss_bytes": 23658496,
+            "user_cpu_secs": 0.07271999999999999,
+            "system_cpu_secs": 0.0023829999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 914750,
+          "secs": [
+            0.004189292,
+            0.003981625,
+            0.004026583,
+            0.003757125,
+            0.003933792,
+            0.003961208,
+            0.003851959
+          ],
+          "usage_before": {
+            "max_rss_bytes": 14942208,
+            "user_cpu_secs": 0.0052699999999999995,
+            "system_cpu_secs": 0.001663
+          },
+          "usage_after": {
+            "max_rss_bytes": 18432000,
+            "user_cpu_secs": 0.032709,
+            "system_cpu_secs": 0.001916
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 914750,
+          "secs": [
+            0.008514291,
+            0.007819125,
+            0.007754958,
+            0.007750917,
+            0.007737541,
+            0.007781166,
+            0.007688708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16564224,
+            "user_cpu_secs": 0.010239999999999999,
+            "system_cpu_secs": 0.001748
+          },
+          "usage_after": {
+            "max_rss_bytes": 22724608,
+            "user_cpu_secs": 0.072363,
+            "system_cpu_secs": 0.002185
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "wide_table",
+      "path": "fixtures/medium/wide_table.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 5410061,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 5410061,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 7930062,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 5410060,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 2739993,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 2739993,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 3580325,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 2772828,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 2772829,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 5410061,
+          "secs": [
+            0.000635917,
+            0.000313917,
+            0.000280958,
+            0.0002405,
+            0.000229541,
+            0.000221083,
+            0.000225375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6012928,
+            "user_cpu_secs": 0.002062,
+            "system_cpu_secs": 0.001383
+          },
+          "usage_after": {
+            "max_rss_bytes": 11485184,
+            "user_cpu_secs": 0.002072,
+            "system_cpu_secs": 0.003524
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.021273417,
+            0.019048083,
+            0.019704667,
+            0.01744825,
+            0.017624083,
+            0.01871375,
+            0.017429834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 11485184,
+            "user_cpu_secs": 0.001764,
+            "system_cpu_secs": 0.00148
+          },
+          "usage_after": {
+            "max_rss_bytes": 67420160,
+            "user_cpu_secs": 0.15803699999999998,
+            "system_cpu_secs": 0.010121
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.016149042,
+            0.015298459,
+            0.016754833,
+            0.01321625,
+            0.01316425,
+            0.012966625,
+            0.012732833
+          ],
+          "usage_before": {
+            "max_rss_bytes": 11485184,
+            "user_cpu_secs": 0.002051,
+            "system_cpu_secs": 0.001859
+          },
+          "usage_after": {
+            "max_rss_bytes": 117669888,
+            "user_cpu_secs": 0.122373,
+            "system_cpu_secs": 0.016446
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.007957959,
+            0.008275041,
+            0.008616167,
+            0.008993834,
+            0.008658791,
+            0.008461,
+            0.008136958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61915136,
+            "user_cpu_secs": 0.019771999999999998,
+            "system_cpu_secs": 0.004593
+          },
+          "usage_after": {
+            "max_rss_bytes": 98631680,
+            "user_cpu_secs": 0.07625699999999999,
+            "system_cpu_secs": 0.007169999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.0190805,
+            0.020704,
+            0.017515625,
+            0.017454584,
+            0.017589833,
+            0.017529792,
+            0.017772708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64421888,
+            "user_cpu_secs": 0.032739,
+            "system_cpu_secs": 0.00533
+          },
+          "usage_after": {
+            "max_rss_bytes": 70336512,
+            "user_cpu_secs": 0.188168,
+            "system_cpu_secs": 0.011788
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 7930062,
+          "secs": [
+            0.010531417,
+            0.010265292,
+            0.010205791,
+            0.010783625,
+            0.011008541,
+            0.010546125,
+            0.010721791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61915136,
+            "user_cpu_secs": 0.019887,
+            "system_cpu_secs": 0.004854
+          },
+          "usage_after": {
+            "max_rss_bytes": 116342784,
+            "user_cpu_secs": 0.09014499999999999,
+            "system_cpu_secs": 0.008629999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 7930062,
+          "secs": [
+            0.021372583,
+            0.021045209,
+            0.018819083,
+            0.019897917,
+            0.01936075,
+            0.019480208,
+            0.019566583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66945024,
+            "user_cpu_secs": 0.03394,
+            "system_cpu_secs": 0.005386
+          },
+          "usage_after": {
+            "max_rss_bytes": 75415552,
+            "user_cpu_secs": 0.201563,
+            "system_cpu_secs": 0.011432
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410060,
+          "secs": [
+            0.008149084,
+            0.008266541,
+            0.008453791,
+            0.008385459,
+            0.008463667,
+            0.008395958,
+            0.008395958
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61898752,
+            "user_cpu_secs": 0.020125999999999998,
+            "system_cpu_secs": 0.0041459999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 98631680,
+            "user_cpu_secs": 0.076111,
+            "system_cpu_secs": 0.006618
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410060,
+          "secs": [
+            0.019595084,
+            0.020271208,
+            0.018266,
+            0.020055209,
+            0.019317666,
+            0.018553,
+            0.018598042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64274432,
+            "user_cpu_secs": 0.032538,
+            "system_cpu_secs": 0.004978
+          },
+          "usage_after": {
+            "max_rss_bytes": 71106560,
+            "user_cpu_secs": 0.19613899999999998,
+            "system_cpu_secs": 0.010626
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.02681675,
+            0.027934333,
+            0.025751167,
+            0.026793542,
+            0.025684167,
+            0.025627875,
+            0.026141125
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61898752,
+            "user_cpu_secs": 0.019867,
+            "system_cpu_secs": 0.0045639999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 66699264,
+            "user_cpu_secs": 0.202921,
+            "system_cpu_secs": 0.006128
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.01524,
+            0.014398458,
+            0.013444916,
+            0.013575083,
+            0.013668834,
+            0.013209417,
+            0.01331675
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64520192,
+            "user_cpu_secs": 0.050865,
+            "system_cpu_secs": 0.005357
+          },
+          "usage_after": {
+            "max_rss_bytes": 92585984,
+            "user_cpu_secs": 0.175554,
+            "system_cpu_secs": 0.009465
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.0263875,
+            0.025608875,
+            0.027303292,
+            0.026627417,
+            0.027005958,
+            0.026256208,
+            0.026394625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61865984,
+            "user_cpu_secs": 0.019818,
+            "system_cpu_secs": 0.004288999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 66682880,
+            "user_cpu_secs": 0.203655,
+            "system_cpu_secs": 0.005867
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.015564792,
+            0.013551458,
+            0.013228875,
+            0.013709166,
+            0.013297333,
+            0.013426042,
+            0.013282875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64536576,
+            "user_cpu_secs": 0.051244,
+            "system_cpu_secs": 0.0054139999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 99172352,
+            "user_cpu_secs": 0.17529699999999998,
+            "system_cpu_secs": 0.009378
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3580325,
+          "secs": [
+            0.026511917,
+            0.025783166,
+            0.025855667,
+            0.026881667,
+            0.025673334,
+            0.026958917,
+            0.026415167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61865984,
+            "user_cpu_secs": 0.01965,
+            "system_cpu_secs": 0.004235
+          },
+          "usage_after": {
+            "max_rss_bytes": 70287360,
+            "user_cpu_secs": 0.202198,
+            "system_cpu_secs": 0.005654
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3580325,
+          "secs": [
+            0.036876958,
+            0.033875625,
+            0.034237,
+            0.034429,
+            0.034327542,
+            0.0341065,
+            0.034294
+          ],
+          "usage_before": {
+            "max_rss_bytes": 67862528,
+            "user_cpu_secs": 0.050768,
+            "system_cpu_secs": 0.006032999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 98271232,
+            "user_cpu_secs": 0.321374,
+            "system_cpu_secs": 0.011068999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772828,
+          "secs": [
+            0.025512333,
+            0.025972834,
+            0.026029292,
+            0.023243958,
+            0.024597042,
+            0.024145625,
+            0.022948917
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61882368,
+            "user_cpu_secs": 0.020329999999999997,
+            "system_cpu_secs": 0.004463
+          },
+          "usage_after": {
+            "max_rss_bytes": 68026368,
+            "user_cpu_secs": 0.191263,
+            "system_cpu_secs": 0.005855
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772828,
+          "secs": [
+            0.054105041,
+            0.05005475,
+            0.049488125,
+            0.049678666,
+            0.049813,
+            0.050053792,
+            0.049734166
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66568192,
+            "user_cpu_secs": 0.051045,
+            "system_cpu_secs": 0.005973
+          },
+          "usage_after": {
+            "max_rss_bytes": 99237888,
+            "user_cpu_secs": 0.428455,
+            "system_cpu_secs": 0.012665
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772829,
+          "secs": [
+            0.02442675,
+            0.024831875,
+            0.023926125,
+            0.023976083,
+            0.025110458,
+            0.023688833,
+            0.024507875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61898752,
+            "user_cpu_secs": 0.020149,
+            "system_cpu_secs": 0.00456
+          },
+          "usage_after": {
+            "max_rss_bytes": 67665920,
+            "user_cpu_secs": 0.18914299999999998,
+            "system_cpu_secs": 0.0058969999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772829,
+          "secs": [
+            0.053941292,
+            0.0496405,
+            0.049432208,
+            0.04932475,
+            0.049282709,
+            0.049842917,
+            0.049866834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66437120,
+            "user_cpu_secs": 0.048944999999999995,
+            "system_cpu_secs": 0.005621
+          },
+          "usage_after": {
+            "max_rss_bytes": 100974592,
+            "user_cpu_secs": 0.425817,
+            "system_cpu_secs": 0.011668
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "deep_nesting",
+      "path": "fixtures/medium/deep_nesting.json",
+      "input_kind": "json",
+      "records": 2000,
+      "input_bytes": 640241,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 640241,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 2673562,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 640240,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 1602993,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 1628994,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 640241,
+          "secs": [
+            0.000112916,
+            0.000040125,
+            0.000035166,
+            0.000030291,
+            0.000028792,
+            0.000028292,
+            0.000027875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002071,
+            "system_cpu_secs": 0.001581
+          },
+          "usage_after": {
+            "max_rss_bytes": 6733824,
+            "user_cpu_secs": 0.00208,
+            "system_cpu_secs": 0.0018839999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 2000,
+          "bytes": 640241,
+          "secs": [
+            0.003479542,
+            0.002577584,
+            0.002567125,
+            0.002620583,
+            0.002592,
+            0.002524,
+            0.002593209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6717440,
+            "user_cpu_secs": 0.001709,
+            "system_cpu_secs": 0.001124
+          },
+          "usage_after": {
+            "max_rss_bytes": 17973248,
+            "user_cpu_secs": 0.027510999999999997,
+            "system_cpu_secs": 0.0017909999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 2000,
+          "bytes": 640241,
+          "secs": [
+            0.003461375,
+            0.002411417,
+            0.002389083,
+            0.002464708,
+            0.002419042,
+            0.002385917,
+            0.002390209
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6717440,
+            "user_cpu_secs": 0.0019019999999999998,
+            "system_cpu_secs": 0.001139
+          },
+          "usage_after": {
+            "max_rss_bytes": 20643840,
+            "user_cpu_secs": 0.026473,
+            "system_cpu_secs": 0.001961
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 2000,
+          "bytes": 640241,
+          "secs": [
+            0.001112584,
+            0.001091416,
+            0.001050709,
+            0.001062875,
+            0.001049708,
+            0.001056333,
+            0.001053375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16646144,
+            "user_cpu_secs": 0.004777,
+            "system_cpu_secs": 0.001632
+          },
+          "usage_after": {
+            "max_rss_bytes": 16793600,
+            "user_cpu_secs": 0.012150999999999999,
+            "system_cpu_secs": 0.001738
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 2000,
+          "bytes": 640241,
+          "secs": [
+            0.002654333,
+            0.002632708,
+            0.002569541,
+            0.002572,
+            0.002599458,
+            0.002549417,
+            0.002564292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16760832,
+            "user_cpu_secs": 0.006809,
+            "system_cpu_secs": 0.0016229999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 17481728,
+            "user_cpu_secs": 0.032151,
+            "system_cpu_secs": 0.001952
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2673562,
+          "secs": [
+            0.003370292,
+            0.003544583,
+            0.0035505,
+            0.003308,
+            0.003187959,
+            0.003194334,
+            0.003133042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16728064,
+            "user_cpu_secs": 0.004888,
+            "system_cpu_secs": 0.001751
+          },
+          "usage_after": {
+            "max_rss_bytes": 23085056,
+            "user_cpu_secs": 0.027805,
+            "system_cpu_secs": 0.002116
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2673562,
+          "secs": [
+            0.00398725,
+            0.00378125,
+            0.003767583,
+            0.003749583,
+            0.003721541,
+            0.003714042,
+            0.00369725
+          ],
+          "usage_before": {
+            "max_rss_bytes": 20938752,
+            "user_cpu_secs": 0.009222,
+            "system_cpu_secs": 0.002062
+          },
+          "usage_after": {
+            "max_rss_bytes": 23789568,
+            "user_cpu_secs": 0.043085,
+            "system_cpu_secs": 0.002325
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 2000,
+          "bytes": 640240,
+          "secs": [
+            0.001082,
+            0.001073792,
+            0.001094041,
+            0.001045375,
+            0.001106334,
+            0.001115667,
+            0.001048208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16596992,
+            "user_cpu_secs": 0.0048909999999999995,
+            "system_cpu_secs": 0.00174
+          },
+          "usage_after": {
+            "max_rss_bytes": 16842752,
+            "user_cpu_secs": 0.012268,
+            "system_cpu_secs": 0.0019169999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 2000,
+          "bytes": 640240,
+          "secs": [
+            0.002754708,
+            0.002644625,
+            0.002677834,
+            0.00262075,
+            0.002633167,
+            0.002647833,
+            0.002635916
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16777216,
+            "user_cpu_secs": 0.006940999999999999,
+            "system_cpu_secs": 0.0017749999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 18186240,
+            "user_cpu_secs": 0.032777,
+            "system_cpu_secs": 0.0020369999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 2000,
+          "bytes": 1602993,
+          "secs": [
+            0.0054935,
+            0.004915042,
+            0.004887584,
+            0.005406042,
+            0.005025708,
+            0.004927833,
+            0.00483925
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16646144,
+            "user_cpu_secs": 0.004843999999999999,
+            "system_cpu_secs": 0.00164
+          },
+          "usage_after": {
+            "max_rss_bytes": 22953984,
+            "user_cpu_secs": 0.039694,
+            "system_cpu_secs": 0.002234
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 2000,
+          "bytes": 1602993,
+          "secs": [
+            0.010386,
+            0.009825334,
+            0.009737792,
+            0.009766208,
+            0.009718459,
+            0.009901834,
+            0.009770541
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19611648,
+            "user_cpu_secs": 0.011356999999999999,
+            "system_cpu_secs": 0.002474
+          },
+          "usage_after": {
+            "max_rss_bytes": 50397184,
+            "user_cpu_secs": 0.085547,
+            "system_cpu_secs": 0.00477
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 2000,
+          "bytes": 1628994,
+          "secs": [
+            0.005541875,
+            0.005313333,
+            0.004930791,
+            0.005323125,
+            0.005122833,
+            0.005620875,
+            0.005171041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16629760,
+            "user_cpu_secs": 0.004935,
+            "system_cpu_secs": 0.001896
+          },
+          "usage_after": {
+            "max_rss_bytes": 23035904,
+            "user_cpu_secs": 0.041437999999999996,
+            "system_cpu_secs": 0.002373
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 2000,
+          "bytes": 1628994,
+          "secs": [
+            0.010891292,
+            0.010427584,
+            0.009739792,
+            0.010134166,
+            0.009803958,
+            0.00993825,
+            0.009600792
+          ],
+          "usage_before": {
+            "max_rss_bytes": 19677184,
+            "user_cpu_secs": 0.011271999999999999,
+            "system_cpu_secs": 0.001985
+          },
+          "usage_after": {
+            "max_rss_bytes": 49676288,
+            "user_cpu_secs": 0.08684399999999999,
+            "system_cpu_secs": 0.004358
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "empty_values",
+      "path": "fixtures/medium/empty_values.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 1965797,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1965797,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 2895798,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1965796,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 2325788,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 2325789,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 1965797,
+          "secs": [
+            0.000255708,
+            0.000097708,
+            0.000085875,
+            0.0000755,
+            0.000077875,
+            0.000073917,
+            0.000067042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002015,
+            "system_cpu_secs": 0.001284
+          },
+          "usage_after": {
+            "max_rss_bytes": 8044544,
+            "user_cpu_secs": 0.002023,
+            "system_cpu_secs": 0.002016
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 1965797,
+          "secs": [
+            0.007186458,
+            0.006076584,
+            0.005947917,
+            0.005903917,
+            0.005947041,
+            0.0059525,
+            0.006101042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8028160,
+            "user_cpu_secs": 0.001646,
+            "system_cpu_secs": 0.001091
+          },
+          "usage_after": {
+            "max_rss_bytes": 25264128,
+            "user_cpu_secs": 0.055348999999999995,
+            "system_cpu_secs": 0.002267
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 1965797,
+          "secs": [
+            0.0062455,
+            0.004363708,
+            0.004154125,
+            0.004068375,
+            0.004078584,
+            0.004757417,
+            0.004127834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8028160,
+            "user_cpu_secs": 0.002036,
+            "system_cpu_secs": 0.0018059999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 44548096,
+            "user_cpu_secs": 0.043226999999999995,
+            "system_cpu_secs": 0.004344
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1965797,
+          "secs": [
+            0.002274167,
+            0.001925083,
+            0.001914834,
+            0.001916166,
+            0.001907791,
+            0.002002375,
+            0.002100583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23101440,
+            "user_cpu_secs": 0.008385,
+            "system_cpu_secs": 0.002238
+          },
+          "usage_after": {
+            "max_rss_bytes": 26296320,
+            "user_cpu_secs": 0.022147999999999998,
+            "system_cpu_secs": 0.0025009999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1965797,
+          "secs": [
+            0.006368291,
+            0.006234833,
+            0.006410834,
+            0.006129958,
+            0.006114708,
+            0.0061845,
+            0.006112875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 24281088,
+            "user_cpu_secs": 0.012029999999999999,
+            "system_cpu_secs": 0.0021449999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 27525120,
+            "user_cpu_secs": 0.06715499999999999,
+            "system_cpu_secs": 0.002627
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2895798,
+          "secs": [
+            0.0033635,
+            0.003015125,
+            0.002964542,
+            0.003032333,
+            0.003021208,
+            0.0030055,
+            0.002995834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23085056,
+            "user_cpu_secs": 0.008634,
+            "system_cpu_secs": 0.003044
+          },
+          "usage_after": {
+            "max_rss_bytes": 27213824,
+            "user_cpu_secs": 0.02964,
+            "system_cpu_secs": 0.0034159999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2895798,
+          "secs": [
+            0.006733041,
+            0.006446875,
+            0.006396042,
+            0.006879458,
+            0.006517333,
+            0.006303834,
+            0.006380333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 28311552,
+            "user_cpu_secs": 0.013498,
+            "system_cpu_secs": 0.0026219999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 31277056,
+            "user_cpu_secs": 0.070461,
+            "system_cpu_secs": 0.0030989999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1965796,
+          "secs": [
+            0.002304375,
+            0.00192375,
+            0.0019095,
+            0.00190825,
+            0.001955,
+            0.002177375,
+            0.001989042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23101440,
+            "user_cpu_secs": 0.008447,
+            "system_cpu_secs": 0.002293
+          },
+          "usage_after": {
+            "max_rss_bytes": 26329088,
+            "user_cpu_secs": 0.022184,
+            "system_cpu_secs": 0.002719
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 1965796,
+          "secs": [
+            0.006301291,
+            0.006197167,
+            0.006162917,
+            0.006172333,
+            0.006268709,
+            0.006597583,
+            0.006243583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 24297472,
+            "user_cpu_secs": 0.012078,
+            "system_cpu_secs": 0.002165
+          },
+          "usage_after": {
+            "max_rss_bytes": 29671424,
+            "user_cpu_secs": 0.067145,
+            "system_cpu_secs": 0.002732
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2325788,
+          "secs": [
+            0.010399417,
+            0.009990708,
+            0.009908917,
+            0.009547916,
+            0.009620541,
+            0.0096135,
+            0.009905375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23101440,
+            "user_cpu_secs": 0.008417,
+            "system_cpu_secs": 0.002176
+          },
+          "usage_after": {
+            "max_rss_bytes": 31195136,
+            "user_cpu_secs": 0.076581,
+            "system_cpu_secs": 0.002933
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2325788,
+          "secs": [
+            0.020428625,
+            0.021361791,
+            0.020450292,
+            0.020503167,
+            0.022071875,
+            0.020686834,
+            0.020409041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 29032448,
+            "user_cpu_secs": 0.020176,
+            "system_cpu_secs": 0.002652
+          },
+          "usage_after": {
+            "max_rss_bytes": 56770560,
+            "user_cpu_secs": 0.173367,
+            "system_cpu_secs": 0.008532999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2325789,
+          "secs": [
+            0.010334625,
+            0.009387042,
+            0.0094855,
+            0.009387625,
+            0.009354208,
+            0.009527083,
+            0.01022275
+          ],
+          "usage_before": {
+            "max_rss_bytes": 23085056,
+            "user_cpu_secs": 0.008508,
+            "system_cpu_secs": 0.0022789999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 30474240,
+            "user_cpu_secs": 0.075531,
+            "system_cpu_secs": 0.002914
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2325789,
+          "secs": [
+            0.020753209,
+            0.0207955,
+            0.021320375,
+            0.020842625,
+            0.020548458,
+            0.020715541,
+            0.020496792
+          ],
+          "usage_before": {
+            "max_rss_bytes": 29212672,
+            "user_cpu_secs": 0.020187,
+            "system_cpu_secs": 0.00263
+          },
+          "usage_after": {
+            "max_rss_bytes": 63422464,
+            "user_cpu_secs": 0.172648,
+            "system_cpu_secs": 0.008421
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    },
+    {
+      "name": "long_text",
+      "path": "fixtures/medium/long_text.json",
+      "input_kind": "json",
+      "records": 2000,
+      "input_bytes": 2438014,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 2438014,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 2498015,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 2438013,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 2360150,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 2359826,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 2378364,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 2372038,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 2371715,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 2438014,
+          "secs": [
+            0.00032125,
+            0.000117292,
+            0.000104292,
+            0.000093583,
+            0.00009025,
+            0.000088791,
+            0.000090791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6029312,
+            "user_cpu_secs": 0.002036,
+            "system_cpu_secs": 0.001362
+          },
+          "usage_after": {
+            "max_rss_bytes": 8519680,
+            "user_cpu_secs": 0.002048,
+            "system_cpu_secs": 0.002263
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 2000,
+          "bytes": 2438014,
+          "secs": [
+            0.001538208,
+            0.001211208,
+            0.001095833,
+            0.001065041,
+            0.001076875,
+            0.0011975,
+            0.001204375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8503296,
+            "user_cpu_secs": 0.0017059999999999998,
+            "system_cpu_secs": 0.001132
+          },
+          "usage_after": {
+            "max_rss_bytes": 14958592,
+            "user_cpu_secs": 0.010928,
+            "system_cpu_secs": 0.001555
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 2000,
+          "bytes": 2438014,
+          "secs": [
+            0.001851292,
+            0.001468584,
+            0.001313041,
+            0.001277042,
+            0.001243041,
+            0.0012145,
+            0.001199708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 8503296,
+            "user_cpu_secs": 0.0017699999999999999,
+            "system_cpu_secs": 0.001227
+          },
+          "usage_after": {
+            "max_rss_bytes": 20348928,
+            "user_cpu_secs": 0.011888,
+            "system_cpu_secs": 0.001789
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2438014,
+          "secs": [
+            0.001497667,
+            0.001245708,
+            0.001200292,
+            0.001206584,
+            0.0011985,
+            0.001197084,
+            0.001195084
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12419072,
+            "user_cpu_secs": 0.0030239999999999998,
+            "system_cpu_secs": 0.001455
+          },
+          "usage_after": {
+            "max_rss_bytes": 17154048,
+            "user_cpu_secs": 0.011509,
+            "system_cpu_secs": 0.001713
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2438014,
+          "secs": [
+            0.00116475,
+            0.00107125,
+            0.001089667,
+            0.001232125,
+            0.001173541,
+            0.001094833,
+            0.001095167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17170432,
+            "user_cpu_secs": 0.004443,
+            "system_cpu_secs": 0.0016799999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 17416192,
+            "user_cpu_secs": 0.013476,
+            "system_cpu_secs": 0.00171
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2498015,
+          "secs": [
+            0.001328,
+            0.001220291,
+            0.001209416,
+            0.001208291,
+            0.00132225,
+            0.001444584,
+            0.001281083
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12468224,
+            "user_cpu_secs": 0.0030429999999999997,
+            "system_cpu_secs": 0.0015739999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 14827520,
+            "user_cpu_secs": 0.011923999999999999,
+            "system_cpu_secs": 0.001705
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2498015,
+          "secs": [
+            0.00129925,
+            0.0011235,
+            0.001121208,
+            0.00111575,
+            0.001116125,
+            0.001170583,
+            0.001340375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 13746176,
+            "user_cpu_secs": 0.004539,
+            "system_cpu_secs": 0.001749
+          },
+          "usage_after": {
+            "max_rss_bytes": 16531456,
+            "user_cpu_secs": 0.013864,
+            "system_cpu_secs": 0.0019099999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2438013,
+          "secs": [
+            0.001539959,
+            0.00125075,
+            0.001241459,
+            0.001247625,
+            0.001246042,
+            0.001240208,
+            0.001255458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12386304,
+            "user_cpu_secs": 0.002986,
+            "system_cpu_secs": 0.001576
+          },
+          "usage_after": {
+            "max_rss_bytes": 17186816,
+            "user_cpu_secs": 0.011739999999999999,
+            "system_cpu_secs": 0.001841
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2438013,
+          "secs": [
+            0.00190825,
+            0.001819916,
+            0.001885541,
+            0.001809666,
+            0.001794625,
+            0.001775208,
+            0.001799791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17121280,
+            "user_cpu_secs": 0.004482,
+            "system_cpu_secs": 0.001954
+          },
+          "usage_after": {
+            "max_rss_bytes": 18333696,
+            "user_cpu_secs": 0.018375,
+            "system_cpu_secs": 0.002025
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2360150,
+          "secs": [
+            0.0011005,
+            0.000831459,
+            0.000805083,
+            0.000783667,
+            0.000802708,
+            0.000778166,
+            0.000882791
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12369920,
+            "user_cpu_secs": 0.003078,
+            "system_cpu_secs": 0.0016359999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 17121280,
+            "user_cpu_secs": 0.008742,
+            "system_cpu_secs": 0.001954
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2360150,
+          "secs": [
+            0.002725,
+            0.002650167,
+            0.002525542,
+            0.00230075,
+            0.00230725,
+            0.002372416,
+            0.00229625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17137664,
+            "user_cpu_secs": 0.0043749999999999995,
+            "system_cpu_secs": 0.001893
+          },
+          "usage_after": {
+            "max_rss_bytes": 20414464,
+            "user_cpu_secs": 0.022513,
+            "system_cpu_secs": 0.002152
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2359826,
+          "secs": [
+            0.001284584,
+            0.000938333,
+            0.000873292,
+            0.000859917,
+            0.000851,
+            0.000878875,
+            0.000857834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12402688,
+            "user_cpu_secs": 0.0031609999999999997,
+            "system_cpu_secs": 0.0015869999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.009427,
+            "system_cpu_secs": 0.0018319999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2359826,
+          "secs": [
+            0.002285916,
+            0.002049042,
+            0.0021,
+            0.002065,
+            0.002054792,
+            0.002038917,
+            0.002014708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17203200,
+            "user_cpu_secs": 0.0041389999999999995,
+            "system_cpu_secs": 0.001717
+          },
+          "usage_after": {
+            "max_rss_bytes": 20348928,
+            "user_cpu_secs": 0.019702,
+            "system_cpu_secs": 0.0019779999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2378364,
+          "secs": [
+            0.0049165,
+            0.004957875,
+            0.005034875,
+            0.004986416,
+            0.005026125,
+            0.005180292,
+            0.004953041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12402688,
+            "user_cpu_secs": 0.0031219999999999998,
+            "system_cpu_secs": 0.0017599999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 29425664,
+            "user_cpu_secs": 0.037042,
+            "system_cpu_secs": 0.002871
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2378364,
+          "secs": [
+            0.007521125,
+            0.007156791,
+            0.007018083,
+            0.0078075,
+            0.007053417,
+            0.00686575,
+            0.007017583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 16121856,
+            "user_cpu_secs": 0.008393,
+            "system_cpu_secs": 0.0019909999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 19578880,
+            "user_cpu_secs": 0.059503,
+            "system_cpu_secs": 0.002542
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2372038,
+          "secs": [
+            0.006210458,
+            0.005949541,
+            0.005798458,
+            0.005891917,
+            0.00610475,
+            0.005712208,
+            0.005857833
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12419072,
+            "user_cpu_secs": 0.0031569999999999997,
+            "system_cpu_secs": 0.001687
+          },
+          "usage_after": {
+            "max_rss_bytes": 19415040,
+            "user_cpu_secs": 0.043916,
+            "system_cpu_secs": 0.002404
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2372038,
+          "secs": [
+            0.011353833,
+            0.011506375,
+            0.011191834,
+            0.011134208,
+            0.011106416,
+            0.011583959,
+            0.0109105
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17203200,
+            "user_cpu_secs": 0.009149,
+            "system_cpu_secs": 0.0017369999999999998
+          },
+          "usage_after": {
+            "max_rss_bytes": 21413888,
+            "user_cpu_secs": 0.088332,
+            "system_cpu_secs": 0.0025859999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2371715,
+          "secs": [
+            0.006590125,
+            0.006114042,
+            0.006230584,
+            0.006558083,
+            0.00634525,
+            0.00625625,
+            0.00635475
+          ],
+          "usage_before": {
+            "max_rss_bytes": 12369920,
+            "user_cpu_secs": 0.0032229999999999997,
+            "system_cpu_secs": 0.0016719999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 19529728,
+            "user_cpu_secs": 0.046872,
+            "system_cpu_secs": 0.002447
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 2000,
+          "bytes": 2371715,
+          "secs": [
+            0.011259917,
+            0.010835916,
+            0.010764042,
+            0.011032,
+            0.010828917,
+            0.010721125,
+            0.0106365
+          ],
+          "usage_before": {
+            "max_rss_bytes": 17235968,
+            "user_cpu_secs": 0.009816,
+            "system_cpu_secs": 0.0021349999999999997
+          },
+          "usage_after": {
+            "max_rss_bytes": 21430272,
+            "user_cpu_secs": 0.08674799999999999,
+            "system_cpu_secs": 0.002577
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[package]
+name = "ldf"
+description = "Language Data Format. Reserved: the format is designed after the Phase 1 baseline measurements."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+ldf-data = { workspace = true }

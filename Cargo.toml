@@ -1,0 +1,42 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/ldf-data",
+    "crates/ldf-fixtures",
+    "crates/ldf-formats",
+    "crates/ldf-bench",
+    "crates/ldf-eval",
+    "crates/ldf",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/caioricciuti/ldf"
+
+# Every external dependency is pinned to an exact version. Transitive versions
+# are pinned by Cargo.lock, which is committed. See AGENTS.md for the policy.
+[workspace.dependencies]
+ldf-data = { path = "crates/ldf-data" }
+ldf-fixtures = { path = "crates/ldf-fixtures" }
+ldf-formats = { path = "crates/ldf-formats" }
+ldf-eval = { path = "crates/ldf-eval" }
+
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }
+simd-json = { version = "=0.18.1", default-features = false, features = ["serde_impl", "runtime-detection"] }
+csv = { version = "=1.4.0" }
+arrow = { version = "=60.0.0", default-features = false, features = ["json"] }
+parquet = { version = "=60.0.0", default-features = false, features = ["arrow", "snap", "zstd"] }
+tiktoken-rs = { version = "=0.12.1" }
+criterion = { version = "=0.8.2", default-features = false }
+
+[profile.release]
+debug = 1
+lto = "thin"
+codegen-units = 4
+
+[profile.bench]
+inherits = "release"

@@ -1,0 +1,22 @@
+[package]
+name = "ldf-data"
+description = "Value model, numeric semantics and input readers (JSON, JSONL, CSV, Parquet) for the LDF research workspace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = ["parquet", "simd"]
+# Parquet input via apache/arrow-rs. Heavy dependency tree; off when not needed.
+parquet = ["dep:parquet", "dep:arrow"]
+# SIMD JSON parsing path (simd-json). The serde_json path is always available.
+simd = ["dep:simd-json"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+simd-json = { workspace = true, optional = true }
+csv = { workspace = true }
+arrow = { workspace = true, optional = true }
+parquet = { workspace = true, optional = true }

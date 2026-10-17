@@ -1,0 +1,30 @@
+[package]
+name = "ldf-bench"
+description = "Performance and token benchmark CLI for the LDF research workspace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ldf-bench"
+path = "src/main.rs"
+
+[features]
+default = ["simd"]
+simd = ["ldf-data/simd"]
+
+[dependencies]
+ldf-data = { workspace = true }
+ldf-formats = { workspace = true }
+ldf-fixtures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tiktoken-rs = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "formats"
+harness = false

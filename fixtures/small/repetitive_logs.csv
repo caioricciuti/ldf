@@ -1,0 +1,21 @@
+ts,level,service,status,region,message,latency_ms
+2023-11-14T22:13:21Z,INFO,billing,200,us-east,retrying upstream call,206
+2023-11-14T22:13:28Z,INFO,ingest,200,eu-west,user session expired,419
+2023-11-14T22:13:36Z,FATAL,search,401,eu-north,request completed,711
+2023-11-14T22:13:46Z,INFO,scheduler,200,eu-north,retrying upstream call,1151
+2023-11-14T22:13:53Z,DEBUG,billing,201,us-east,slow query detected,476
+2023-11-14T22:14:01Z,INFO,gateway,201,ap-south,payment captured,398
+2023-11-14T22:14:04Z,WARN,ingest,200,eu-west,index rebuilt,560
+2023-11-14T22:14:15Z,DEBUG,api,200,us-east,cache miss for key,774
+2023-11-14T22:14:16Z,INFO,billing,400,us-east,cache miss for key,960
+2023-11-14T22:14:28Z,DEBUG,billing,204,eu-west,user session expired,1397
+2023-11-14T22:14:31Z,DEBUG,search,200,us-east,user session expired,1032
+2023-11-14T22:14:43Z,INFO,gateway,201,eu-west,request completed,763
+2023-11-14T22:14:50Z,INFO,auth,201,ap-south,job scheduled,1034
+2023-11-14T22:14:51Z,INFO,ingest,200,us-east,user session expired,1156
+2023-11-14T22:14:59Z,INFO,gateway,500,eu-north,index rebuilt,1157
+2023-11-14T22:15:07Z,INFO,billing,204,us-east,rate limit applied,1354
+2023-11-14T22:15:12Z,DEBUG,api,200,eu-north,cache miss for key,825
+2023-11-14T22:15:23Z,INFO,api,500,us-east,request completed,442
+2023-11-14T22:15:27Z,INFO,search,404,ap-south,index rebuilt,1841
+2023-11-14T22:15:35Z,INFO,auth,200,eu-west,job scheduled,1909

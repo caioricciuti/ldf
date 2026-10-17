@@ -1,0 +1,15 @@
+[package]
+name = "ldf-formats"
+description = "Baseline serialization formats (JSON, JSONL, CSV, TSV, TOON, Markdown) for the LDF research workspace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+ldf-data = { workspace = true }
+serde_json = { workspace = true }
+csv = { workspace = true }
+
+[dev-dependencies]
+serde = { workspace = true }

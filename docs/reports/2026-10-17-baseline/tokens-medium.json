@@ -1,0 +1,2373 @@
+{
+  "tool": "ldf-bench",
+  "started_utc": "20261017-202336",
+  "command": [
+    "./target/release/ldf-bench",
+    "tokens",
+    "--scale",
+    "medium",
+    "--sample",
+    "1000",
+    "--out",
+    "results/medium"
+  ],
+  "iters": 7,
+  "sysinfo": {
+    "os": "Darwin 27.0.0",
+    "arch": "aarch64",
+    "cpu": "Apple M2 Pro",
+    "logical_cpus": 10,
+    "memory_bytes": 17179869184,
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo_profile": "release",
+    "git_commit": "unknown",
+    "crate_versions": [
+      [
+        "arrow",
+        "60.0.0"
+      ],
+      [
+        "criterion",
+        "0.8.2"
+      ],
+      [
+        "csv",
+        "1.4.0"
+      ],
+      [
+        "parquet",
+        "60.0.0"
+      ],
+      [
+        "serde_json",
+        "1.0.151"
+      ],
+      [
+        "simd-json",
+        "0.18.1"
+      ],
+      [
+        "tiktoken-rs",
+        "0.12.1"
+      ]
+    ]
+  },
+  "datasets": [
+    {
+      "name": "flat_users",
+      "path": "fixtures/medium/flat_users.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 1417382,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 139777,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 193778,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 139776,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "semantic",
+          "output_bytes": 62811,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "semantic",
+          "output_bytes": 62811,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "semantic",
+          "output_bytes": 80879,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 64819,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 64820,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 139777,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 46854
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 47109
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 193778,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 73853
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 74108
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 139776,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 47851
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 48106
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 62811,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 28345
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 28321
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 62811,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 28254
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 28227
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 80879,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 34473
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 34859
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 64819,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 30349
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 30325
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 64820,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 30259
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 30232
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "nested_orders",
+      "path": "fixtures/medium/nested_orders.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 2961510,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 296165,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 524286,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 296164,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 307039,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 308040,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 296165,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 99948
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 99403
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 524286,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 176889
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 177344
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 296164,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 100946
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 100401
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"customer\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "bytes": 307039,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 108056
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 108171
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 308040,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 108057
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 108172
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "sparse_events",
+      "path": "fixtures/medium/sparse_events.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 1528799,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 152262,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 207205,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 152261,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 69206,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 69206,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 101330,
+          "detail": "0: object size 15 vs 9"
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 169175,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 169176,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 152262,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 54975
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 54783
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 207205,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 81971
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 81779
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 152261,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 55973
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 55781
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 69206,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 33321
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 33410
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 69206,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 33046
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 33162
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 101330,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 53313
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 53460
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 169175,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 67287
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 67434
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 169176,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 67288
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 67435
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "high_card_strings",
+      "path": "fixtures/medium/high_card_strings.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 2372842,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 236416,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 278417,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 236415,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 183444,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 183444,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 197496,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 187452,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 187453,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 236416,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 114671
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 115761
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 278417,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 136670
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 137760
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 236415,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 115668
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 116758
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 183444,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 101408
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 102391
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 183444,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 101001
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 101995
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 197496,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 106130
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 107219
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 187452,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 103656
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 104703
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 187453,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 104006
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 105000
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "repetitive_logs",
+      "path": "fixtures/medium/repetitive_logs.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 1452940,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 145256,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 193257,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 145255,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 69305,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 69305,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 85365,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 73313,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 73314,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 145256,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 46047
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 46047
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 193257,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 71047
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 71047
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 145255,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 47045
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 47045
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 69305,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 29720
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 29609
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 69305,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 28145
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 28114
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 85365,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 34055
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 34055
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 73313,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 31735
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 31624
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 73314,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 31150
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 31119
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "unicode_strings",
+      "path": "fixtures/medium/unicode_strings.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 1302064,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 129365,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 177366,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 129364,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 60168,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 60186,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 75747,
+          "detail": "0.empty: null vs \"\""
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 67977,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 67812,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 129365,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 42188
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 44398
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 177366,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 64668
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 67816
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 129364,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 43186
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 45396
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 60168,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 21820
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 24948
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 60186,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 23037
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 25954
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 75747,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 27577
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 30479
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 67977,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 25884
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 29024
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 67812,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 29776
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 31734
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "numeric_mix",
+      "path": "fixtures/medium/numeric_mix.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 2395221,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 238512,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 322513,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 238511,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 135560,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 135560,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 163668,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "toon",
+          "level": "lossy",
+          "output_bytes": 137568,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "toon-tab",
+          "level": "lossy",
+          "output_bytes": 137569,
+          "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 238512,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 99863
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 97390
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 322513,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 139390
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 138390
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 238511,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 100861
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 98388
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 135560,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 64895
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 64894
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 135560,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 66366
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 66365
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 163668,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 78923
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 78923
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 137568,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 66899
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 66898
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 137569,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 68371
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 68370
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "mixed_types",
+      "path": "fixtures/medium/mixed_types.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 753789,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 75074,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 139970,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 75073,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 91131,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 91470,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 75074,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 24896
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 24184
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 139970,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 49747
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 49747
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 75073,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 25228
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 24667
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"value\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "bytes": 91131,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 33045
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 33033
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 91470,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 33338
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 33333
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "wide_table",
+      "path": "fixtures/medium/wide_table.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 5410061,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 539993,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 791994,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 539992,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 273137,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 273137,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 357469,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 276453,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 276454,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 539993,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 234201
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 234201
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 791994,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 351201
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 351201
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 539992,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 235199
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 235199
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 273137,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 99704
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 99099
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 273137,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 96524
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 96319
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 357469,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 134177
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 134177
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 276453,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 102546
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 101983
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 276454,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 100491
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 100286
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "deep_nesting",
+      "path": "fixtures/medium/deep_nesting.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 640241,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 320064,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1337814,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 320063,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 802028,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 815029,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 320064,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 123455
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 126454
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 1337814,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 302155
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 302155
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 320063,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 124452
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 126452
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "tsv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "markdown",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"tree\" is a object (nested)"
+        },
+        {
+          "format": "toon",
+          "bytes": 802028,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 224576
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 224576
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 815029,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 237577
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 237577
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "empty_values",
+      "path": "fixtures/medium/empty_values.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 1965797,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 195771,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 288772,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 195770,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "markdown",
+          "level": "unsupported",
+          "output_bytes": 0,
+          "detail": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 231727,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 231728,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 195771,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 59714
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 60812
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 288772,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 96714
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 97812
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 195770,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 60712
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 61810
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "tsv",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "markdown",
+          "bytes": 0,
+          "records": 1000,
+          "counts": [],
+          "unsupported": "record 0 field \"empty_a\" is a array (nested)"
+        },
+        {
+          "format": "toon",
+          "bytes": 231727,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 75907
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 77049
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 231728,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 75908
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 77050
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    },
+    {
+      "name": "long_text",
+      "path": "fixtures/medium/long_text.json",
+      "input_kind": "json",
+      "records": 1000,
+      "input_bytes": 2438014,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 1243549,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 1273550,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 1243548,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "output_bytes": 1204465,
+          "detail": null
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "output_bytes": 1204323,
+          "detail": null
+        },
+        {
+          "format": "markdown",
+          "level": "byte",
+          "output_bytes": 1213683,
+          "detail": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "output_bytes": 1210577,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "output_bytes": 1210436,
+          "detail": null
+        }
+      ],
+      "measurements": [],
+      "tokens": [
+        {
+          "format": "json",
+          "bytes": 1243549,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 224271
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 224521
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "json-pretty",
+          "bytes": 1273550,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 239169
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 239419
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "jsonl",
+          "bytes": 1243548,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 225269
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 225519
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "csv",
+          "bytes": 1204465,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 210605
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 209865
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "tsv",
+          "bytes": 1204323,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 211016
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 210393
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "markdown",
+          "bytes": 1213683,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 216628
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 217070
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon",
+          "bytes": 1210577,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 216648
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 216679
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "toon-tab",
+          "bytes": 1210436,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 217162
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 217310
+            }
+          ],
+          "unsupported": null
+        }
+      ]
+    }
+  ]
+}

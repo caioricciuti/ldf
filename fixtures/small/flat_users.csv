@@ -1,0 +1,21 @@
+id,name,email,age,active,score,country,signup_date
+1,Fay Goodall,fay.0@corp.example,67,false,19.27,NO,2016-06-03
+2,Cleo Jackson,cleo.1@mail.test,39,false,0.1,IT,2023-08-24
+3,Jun Vaughan,jun.2@uni.edu,75,true,80.33,US,2023-08-11
+4,Cy McCarthy,cy.3@uni.edu,37,true,35.02,CN,2016-07-22
+5,Xia Goodall,xia.4@mail.test,62,false,13.33,DK,2020-09-08
+6,Fay Ritchie,fay.5@mail.test,50,true,8.88,MX,2025-07-07
+7,Dee Gosling,dee.6@example.com,87,true,7.25,CA,2017-03-22
+8,Ned McCarthy,ned.7@example.com,64,true,70.89,NZ,2016-02-04
+9,Mia Lamport,mia.8@corp.example,36,false,92.69,CA,2020-09-27
+10,Xia Backus,xia.9@mail.test,28,true,86.6,NZ,2015-10-12
+11,Pia Wirth,pia.10@example.com,58,false,37.62,UK,2021-07-18
+12,Eve Wirth,eve.11@example.com,59,true,3.87,NZ,2017-05-26
+13,Rui Perlman,rui.12@uni.edu,76,true,62.6,CA,2023-08-26
+14,Pia Torvalds,pia.13@mail.test,78,false,76.79,NZ,2021-11-20
+15,Uma Ride,uma.14@example.org,79,false,46.32,IT,2018-03-11
+16,Cleo Holberton,cleo.15@example.com,24,false,51.74,AR,2015-09-09
+17,Iris Gosling,iris.16@corp.example,29,true,93.11,CA,2021-12-18
+18,Bob Goodall,bob.17@example.org,47,false,4.31,AR,2021-07-09
+19,Iris Franklin,iris.18@mail.test,76,true,22.24,JP,2018-11-17
+20,Sol Clarke,sol.19@corp.example,65,false,51.56,PT,2023-09-09

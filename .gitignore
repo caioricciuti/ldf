@@ -1,0 +1,12 @@
+/target
+# Generated performance datasets (regenerate with ldf-gen). Small correctness
+# fixtures under fixtures/small are committed.
+/fixtures/medium
+/fixtures/large
+/fixtures/custom
+# Benchmark outputs and encoded samples. Curated reports live in docs/reports.
+/results
+# Evaluation bundles, API responses and scores.
+/eval/out
+.env
+.DS_Store
