@@ -160,7 +160,9 @@ impl Answer {
 fn trailing_value(text: &str) -> Option<Answer> {
     // Trailing punctuation and decorative brackets (ASCII or not) are not
     // part of the answer.
-    const CLOSERS: [char; 12] = ['.', '!', '*', '`', ')', '〕', '】', '」', '》', '〉', '⟩', '］'];
+    const CLOSERS: [char; 12] = [
+        '.', '!', '*', '`', ')', '〕', '】', '」', '》', '〉', '⟩', '］',
+    ];
     const OPENERS: [char; 11] = ['(', '〔', '【', '「', '《', '〈', '⟨', '［', '*', '`', ','];
     let t = text.trim_end().trim_end_matches(CLOSERS).trim_end();
     if let Some(close) = t.rfind(']')
@@ -179,7 +181,11 @@ fn trailing_value(text: &str) -> Option<Answer> {
     {
         return Some(Answer::Text(s));
     }
-    let last = t.rsplit([' ', '\n', ':', '=']).next()?.trim_start_matches(OPENERS).trim_end_matches(',');
+    let last = t
+        .rsplit([' ', '\n', ':', '='])
+        .next()?
+        .trim_start_matches(OPENERS)
+        .trim_end_matches(',');
     if let Ok(f) = last.parse::<f64>()
         && last.chars().any(|c| c.is_ascii_digit())
     {
@@ -292,16 +298,47 @@ mod tests {
     #[test]
     fn prose_then_answer() {
         let t = Tolerance::default();
-        assert!(Answer::Number(50.0).accepts(&parse_response("All 50 records have an age value.  50").unwrap(), &t));
-        assert!(Answer::Number(13.0).accepts(&parse_response("id 48 has 48.16, so id 13 is larger.  13").unwrap(), &t));
-        assert!(Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("Highest ages: id 7 (87), id 34 (85).  [7,34]").unwrap(), &t));
-        assert!(Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("Ages: 87 (id 7).  ```json [7,34] ```").unwrap(), &t));
-        assert!(!Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("the two highest are  [\"7\", \"34\"]  The ids are numbers").unwrap(), &t));
-        assert!(Answer::Text("dan.34@example.com".into()).accepts(&parse_response("The email is \"dan.34@example.com\"").unwrap(), &t));
+        assert!(Answer::Number(50.0).accepts(
+            &parse_response("All 50 records have an age value.  50").unwrap(),
+            &t
+        ));
+        assert!(Answer::Number(13.0).accepts(
+            &parse_response("id 48 has 48.16, so id 13 is larger.  13").unwrap(),
+            &t
+        ));
+        assert!(
+            Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(
+                &parse_response("Highest ages: id 7 (87), id 34 (85).  [7,34]").unwrap(),
+                &t
+            )
+        );
+        assert!(
+            Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(
+                &parse_response("Ages: 87 (id 7).  ```json [7,34] ```").unwrap(),
+                &t
+            )
+        );
+        assert!(
+            !Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(
+                &parse_response("the two highest are  [\"7\", \"34\"]  The ids are numbers")
+                    .unwrap(),
+                &t
+            )
+        );
+        assert!(Answer::Text("dan.34@example.com".into()).accepts(
+            &parse_response("The email is \"dan.34@example.com\"").unwrap(),
+            &t
+        ));
         // Prose with no extractable trailing value stays unparsed-as-text and is scored wrong, not correct.
-        assert!(Answer::Number(29258.0).accepts(&parse_response("7760 + 7506 = 29258  〔29258〕").unwrap(), &t));
-        assert!(Answer::Number(49.0).accepts(&parse_response("so the answer is (49)").unwrap(), &t));
-        let got = parse_response("Records with score above 86.42: - id 9: 92.69 - id 10: 86.6").unwrap();
+        assert!(Answer::Number(29258.0).accepts(
+            &parse_response("7760 + 7506 = 29258  〔29258〕").unwrap(),
+            &t
+        ));
+        assert!(
+            Answer::Number(49.0).accepts(&parse_response("so the answer is (49)").unwrap(), &t)
+        );
+        let got =
+            parse_response("Records with score above 86.42: - id 9: 92.69 - id 10: 86.6").unwrap();
         assert!(!Answer::Set(vec![Scalar::Number(9.0), Scalar::Number(10.0)]).accepts(&got, &t));
     }
 }

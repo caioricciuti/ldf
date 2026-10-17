@@ -95,7 +95,18 @@ All numbers below are from `docs/reports/2026-10-17-baseline/` (Apple M2 Pro,
     are therefore paid for in tokens. **[V]** `tokens-medium.md`,
     `perf-medium.md`.
 
-11. **Arrow JSON schema inference cannot type heterogeneous or empty
+11. **A typed table with child tables closes the irregular-data gap.** LDF
+    v0 (`docs/ldf-spec-v0.md`), built from items 3 to 7, measures 0.61 /
+    0.64 / 0.63 / 0.68 / 0.80 / 0.36 of compact JSON's o200k tokens on
+    flat_users / nested_orders / sparse_events / mixed_types / deep_nesting
+    / empty_values, against TOON's 0.65 / 1.08 / 1.22 / 1.33 / 1.82 / 1.27,
+    and round-trips byte-exact on 11 of 12 datasets. The design choices that
+    matter, each measured separately in `docs/design-candidates.md`: a typed
+    header costs nothing and removes quoting; relational child tables save
+    37 percent on arrays of objects; comma tokenizes 5 to 7 percent better
+    than pipe. **[V]** `tokens-medium.md`, `perf-medium.md`.
+
+12. **Arrow JSON schema inference cannot type heterogeneous or empty
     columns.** mixed_types (a field that is sometimes a scalar, sometimes an
     object) and empty_values (empty arrays with no element type) have no
     Parquet fixture. Any Parquet to text pipeline needs a schema source

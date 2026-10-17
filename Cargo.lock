@@ -767,6 +767,8 @@ name = "ldf"
 version = "0.1.0"
 dependencies = [
  "ldf-data",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -820,6 +822,7 @@ name = "ldf-formats"
 version = "0.1.0"
 dependencies = [
  "csv",
+ "ldf",
  "ldf-data",
  "serde",
  "serde_json",

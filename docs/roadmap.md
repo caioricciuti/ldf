@@ -67,8 +67,12 @@ where not" with a cheap switch.
 
 ## Phase 4: implementation and GB-scale paths
 
-- `ldf` crate: streaming encoder and decoder over `RecordStream`, Arrow
-  RecordBatch fast path for Parquet input without materialising `Value`.
+- Done 2026-10-18: `ldf` crate with batch encoder (flattening, child tables),
+  streaming encoder (flat rows, JSON cells), decoder, conformance fixtures;
+  wired into every benchmark table as format `ldf`.
+- Next: block-interleaved child tables so the streaming encoder reaches the
+  batch encoder's size; Arrow RecordBatch fast path for Parquet input without
+  materialising `Value`.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
 - Round-trip and conformance fixtures for LDF itself, in the same style as

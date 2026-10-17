@@ -36,7 +36,20 @@ fn looks_like_special(s: &str) -> bool {
     let lower = s.to_ascii_lowercase();
     if matches!(
         lower.as_str(),
-        "" | "~" | "null" | "true" | "false" | "yes" | "no" | "on" | "off" | "y" | "n" | ".inf" | "-.inf" | "+.inf" | ".nan"
+        "" | "~"
+            | "null"
+            | "true"
+            | "false"
+            | "yes"
+            | "no"
+            | "on"
+            | "off"
+            | "y"
+            | "n"
+            | ".inf"
+            | "-.inf"
+            | "+.inf"
+            | ".nan"
     ) {
         return true;
     }
@@ -46,10 +59,14 @@ fn looks_like_special(s: &str) -> bool {
         i += 1;
     }
     let rest = &lower[i..];
-    if rest.starts_with("0x") && rest.len() > 2 && rest[2..].bytes().all(|c| c.is_ascii_hexdigit()) {
+    if rest.starts_with("0x") && rest.len() > 2 && rest[2..].bytes().all(|c| c.is_ascii_hexdigit())
+    {
         return true;
     }
-    if rest.starts_with("0o") && rest.len() > 2 && rest[2..].bytes().all(|c| (b'0'..=b'7').contains(&c)) {
+    if rest.starts_with("0o")
+        && rest.len() > 2
+        && rest[2..].bytes().all(|c| (b'0'..=b'7').contains(&c))
+    {
         return true;
     }
     // [0-9]+ | (\.[0-9]+ | [0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?
@@ -95,13 +112,34 @@ fn needs_quotes(s: &str) -> bool {
     if first.is_whitespace() || last.is_whitespace() || last == ':' {
         return true;
     }
-    if matches!(first, '-' | '?' | ':' | ',' | '[' | ']' | '{' | '}' | '#' | '&' | '*' | '!' | '|' | '>' | '\'' | '"' | '%' | '@' | '`') {
+    if matches!(
+        first,
+        '-' | '?'
+            | ':'
+            | ','
+            | '['
+            | ']'
+            | '{'
+            | '}'
+            | '#'
+            | '&'
+            | '*'
+            | '!'
+            | '|'
+            | '>'
+            | '\''
+            | '"'
+            | '%'
+            | '@'
+            | '`'
+    ) {
         return true;
     }
     if s.contains(": ") || s.contains(" #") || s.contains('\t') {
         return true;
     }
-    s.chars().any(|c| c < ' ' || c == '\u{7f}' || c == '\u{feff}' || c == '\u{2028}' || c == '\u{2029}')
+    s.chars()
+        .any(|c| c < ' ' || c == '\u{7f}' || c == '\u{feff}' || c == '\u{2028}' || c == '\u{2029}')
 }
 
 fn push_quoted(s: &str, out: &mut String) {
@@ -113,7 +151,12 @@ fn push_quoted(s: &str, out: &mut String) {
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
-            c if c < ' ' || c == '\u{7f}' || c == '\u{feff}' || c == '\u{2028}' || c == '\u{2029}' => {
+            c if c < ' '
+                || c == '\u{7f}'
+                || c == '\u{feff}'
+                || c == '\u{2028}'
+                || c == '\u{2029}' =>
+            {
                 let _ = write!(out, "\\u{:04x}", c as u32);
             }
             c => out.push(c),
@@ -247,7 +290,9 @@ fn from_yaml(y: &Yaml) -> Result<Value, String> {
                 ".inf" | ".Inf" | ".INF" => f64::INFINITY,
                 "-.inf" | "-.Inf" | "-.INF" => f64::NEG_INFINITY,
                 ".nan" | ".NaN" | ".NAN" => f64::NAN,
-                _ => t.parse::<f64>().map_err(|e| format!("bad float {s:?}: {e}"))?,
+                _ => t
+                    .parse::<f64>()
+                    .map_err(|e| format!("bad float {s:?}: {e}"))?,
             };
             Value::from(f)
         }
@@ -307,7 +352,10 @@ impl Format for YamlFormat {
         };
         match from_yaml(root).map_err(err)? {
             Value::Array(items) => Ok(items),
-            other => Err(err(format!("expected a root sequence, found {}", other.type_name()))),
+            other => Err(err(format!(
+                "expected a root sequence, found {}",
+                other.type_name()
+            ))),
         }
     }
     fn stream_encoder(&self) -> Option<Box<dyn StreamEncoder>> {
@@ -358,11 +406,54 @@ mod tests {
     #[test]
     fn tricky_strings_survive() {
         let tricky = [
-            "", " lead", "trail ", "true", "No", "null", "~", "007", "1e5", "0x10", "0o17", ".5", "1.", "+1", "-", "- item", "key: value",
-            "a #b", "#x", "[x]", "{x}", "x:", "a\nb", "tab\there", "quote\"s", "back\\slash", "\u{feff}bom", "zero\u{0}byte", "é🙂",
-            "1_000", "0b1", ".inf", "-.inf", ".nan", "12:30", "2026-10-17", "@at", "`tick", "!tag", "&anchor", "*alias", "|lit", ">fold",
+            "",
+            " lead",
+            "trail ",
+            "true",
+            "No",
+            "null",
+            "~",
+            "007",
+            "1e5",
+            "0x10",
+            "0o17",
+            ".5",
+            "1.",
+            "+1",
+            "-",
+            "- item",
+            "key: value",
+            "a #b",
+            "#x",
+            "[x]",
+            "{x}",
+            "x:",
+            "a\nb",
+            "tab\there",
+            "quote\"s",
+            "back\\slash",
+            "\u{feff}bom",
+            "zero\u{0}byte",
+            "é🙂",
+            "1_000",
+            "0b1",
+            ".inf",
+            "-.inf",
+            ".nan",
+            "12:30",
+            "2026-10-17",
+            "@at",
+            "`tick",
+            "!tag",
+            "&anchor",
+            "*alias",
+            "|lit",
+            ">fold",
         ];
-        let recs: Vec<Value> = tricky.iter().map(|t| obj! {"s" => *t, "k" => obj! {*t => 1}}).collect();
+        let recs: Vec<Value> = tricky
+            .iter()
+            .map(|t| obj! {"s" => *t, "k" => obj! {*t => 1}})
+            .collect();
         let s = YamlFormat.encode_to_string(&recs).unwrap();
         let back = YamlFormat.decode(s.as_bytes()).unwrap();
         for (i, (a, b)) in recs.iter().zip(&back).enumerate() {
@@ -376,13 +467,22 @@ mod tests {
         let s = YamlFormat.encode_to_string(&recs).unwrap();
         let back = YamlFormat.decode(s.as_bytes()).unwrap();
         assert!(back[0].semantic_eq(&recs[0]), "{s}");
-        assert!(matches!(back[0].get("f"), Some(Value::Number(Number::F64(_)))));
-        assert!(matches!(back[0].get("i"), Some(Value::Number(Number::I64(1)))));
+        assert!(matches!(
+            back[0].get("f"),
+            Some(Value::Number(Number::F64(_)))
+        ));
+        assert!(matches!(
+            back[0].get("i"),
+            Some(Value::Number(Number::I64(1)))
+        ));
         // yaml-rust2 has no u64: integers above i64::MAX come back as f64
         // (documented loss, reported as lossy by the round-trip check).
         let big = vec![obj! {"u" => u64::MAX}];
         let s = YamlFormat.encode_to_string(&big).unwrap();
         let back = YamlFormat.decode(s.as_bytes()).unwrap();
-        assert!(matches!(back[0].get("u"), Some(Value::Number(Number::F64(_)))));
+        assert!(matches!(
+            back[0].get("u"),
+            Some(Value::Number(Number::F64(_)))
+        ));
     }
 }

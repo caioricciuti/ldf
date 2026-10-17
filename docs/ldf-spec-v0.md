@@ -1,0 +1,138 @@
+# LDF v0 (draft, 2026-10-18)
+
+Language Data Format: a lossless, line-oriented, token-efficient text
+encoding of JSON records for language-model consumption. Version 0 is the
+prototype that `crates/ldf` implements; every rule here is checked by that
+implementation's tests. Rationale and measurements: `docs/design-candidates.md`.
+
+## 1. Data model
+
+Same as JSON: null, boolean, number, string, array, object; object key order
+is significant; `1` and `1.0` are different values. Numeric domain of the
+reference implementation: i64, u64, f64.
+
+A document encodes a **dataset**: an ordered sequence of records. Records are
+usually objects; any JSON value is allowed.
+
+## 2. Lines
+
+UTF-8, LF line ends, no BOM. A document is a sequence of **tables**. Each
+table is one header line followed by zero or more row lines. Blank lines are
+ignored outside tables and forbidden inside a table. There are no comments.
+
+## 3. Header
+
+```
+@name col,col,col
+```
+
+`name` is the table path: `records` for the root table, `records.items` for
+the child table of field `items`, recursively. Each `col` is
+`key:type` or `key:type?`:
+
+| type | cell content |
+|---|---|
+| `i` | integer in decimal, optional leading `-` |
+| `f` | float: shortest round-trip decimal, `.0` kept on integral values, exponent allowed (`1e21`, `1e-7`) |
+| `s` | string, bare or JSON-quoted (section 5) |
+| `b` | `true` or `false` |
+| `j` | any JSON value as a compact JSON literal |
+| `t` | child table reference: the number of child rows for this record |
+
+`?` marks a column that may hold `null` or be absent in some rows. It is
+informative; decoders accept `null` and empty cells in any column.
+
+Column keys are **paths**: segments joined by `.`. A segment is bare when it
+matches `[A-Za-z_][A-Za-z0-9_]*`; otherwise it is a JSON string literal
+(`"dotted.key"`, `"with space"`, `""`). Decoders split paths on dots outside
+quotes.
+
+A header for a table name that already appeared replaces the previous
+header for that name (schema change mid-stream). Rows always belong to the
+most recent header.
+
+## 4. Rows
+
+A row has exactly as many cells as its header has columns, separated by
+commas. Cell meaning:
+
+* empty cell: the key is **absent** from the record;
+* `null`: the key is present with value null;
+* otherwise the value according to the column type.
+
+Cells of type `j` are parsed as one JSON value starting at the cell's first
+character; the comma that follows the value ends the cell. Cells of other
+types end at the first comma outside a JSON-quoted string.
+
+A row whose table is a child table is attached to a parent row (section 7).
+
+## 5. Strings
+
+A string cell is bare unless it
+
+* is empty, or equals `null`, `true` or `false`;
+* starts or ends with a space or tab;
+* contains `,`, `"`, `\`, CR, LF or a control character below U+0020.
+
+A non-bare string is a JSON string literal (`"..."` with JSON escapes).
+Because the column type is `s`, a bare `42`, `1e5`, `-` or `007` is a string.
+
+## 6. Numbers
+
+`i`: the integer's decimal text. `f`: shortest digits that round-trip, as
+Rust's `{:?}` and JavaScript's `Number#toString` produce, except that
+integral values keep `.0` (`1.0`, `100.0`) so float kind survives. NaN and
+infinities are not representable and encode as `null`.
+
+## 7. Nesting
+
+Flattening is decided per field over the whole dataset (batch encoder):
+
+1. **Objects.** A field whose present values are all objects with the same
+   key set at every record flattens into dotted columns, recursively. If the
+   key sets differ across records, or some values are non-objects, the field
+   is a `j` column. An empty object `{}` is a `j` cell.
+2. **Arrays of objects.** A field whose present values are all arrays whose
+   elements are all objects becomes a **child table** `parent.field`. The
+   parent gets a `t` column holding the element count. Child rows are the
+   elements, flattened by the same rules, prefixed with one join column:
+   * the parent table's first column (same key and type) when its values
+     are unique across the parent table, or
+   * `_:i`, the 1-based ordinal of the parent row within its table, when
+     they are not.
+   Child rows appear in parent order, then element order. A parent whose
+   `t` cell is `0` has an empty array; empty cell means absent; `null`
+   means null.
+3. **Everything else** (arrays of scalars, mixed arrays, scalars that vary
+   in type across records) is a `j` column.
+
+A record that is not an object is a row of the single column `_:j`.
+
+Decoders rebuild objects from dotted paths in header order and attach child
+rows by the join column, inserting the array at the position of the `t`
+column within the parent's key order.
+
+## 8. Streaming encoder
+
+Emits a header when the next record's key set differs from the current
+header, then one row per record. It never creates child tables (arrays of
+objects are `j` cells) and never flattens objects (nested objects are `j`
+cells), because both decisions need the whole dataset. Its output is valid
+LDF and decodes with the same decoder.
+
+## 9. Example
+
+```
+@records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,items:t,total:f,status:s,note:s?
+ORD-000001,4654,Val Thompson,São Paulo,2,715.94,shipped,context compare
+ORD-000002,50,Sol Ritchie,Buenos Aires,1,2757.03,cancelled,null
+@records.items order_id:s,sku:s,qty:i,price:f
+ORD-000001,E5,3,28.78
+ORD-000001,C3,4,157.4
+ORD-000002,A1,1,2757.03
+```
+
+## 10. Open for v1
+
+Block-interleaved child tables for streaming; a tab delimiter variant;
+column statistics in headers; a decoder option to type `j` cells lazily.

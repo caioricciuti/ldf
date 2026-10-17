@@ -1,0 +1,109 @@
+{
+  "version": "0.1",
+  "category": "encode",
+  "description": "LDF v0 encoder fixtures: input is a JSON array of records, expected is the exact document text.",
+  "tests": [
+    {
+      "name": "flat records with every scalar type",
+      "input": [{"id": 1, "name": "Ada", "active": true, "score": 19.5}, {"id": 2, "name": "Bob", "active": false, "score": 7.0}],
+      "expected": "@records id:i,name:s,active:b,score:f\n1,Ada,true,19.5\n2,Bob,false,7.0\n",
+      "spec": "3, 4, 6"
+    },
+    {
+      "name": "strings that look like other types stay bare because the column is typed",
+      "input": [{"s": "42"}, {"s": "1e5"}, {"s": "-"}, {"s": "007"}, {"s": "NaN"}],
+      "expected": "@records s:s\n42\n1e5\n-\n007\nNaN\n",
+      "spec": "5"
+    },
+    {
+      "name": "strings that need quotes",
+      "input": [{"s": ""}, {"s": "null"}, {"s": "true"}, {"s": " lead"}, {"s": "trail "}, {"s": "a,b"}, {"s": "q\"q"}, {"s": "back\\slash"}, {"s": "line\nbreak"}, {"s": "tab\there"}],
+      "expected": "@records s:s\n\"\"\n\"null\"\n\"true\"\n\" lead\"\n\"trail \"\n\"a,b\"\n\"q\\\"q\"\n\"back\\\\slash\"\n\"line\\nbreak\"\n\"tab\\there\"\n",
+      "spec": "5"
+    },
+    {
+      "name": "missing versus null and the nullable marker",
+      "input": [{"id": 1, "a": null, "b": "x"}, {"id": 2, "b": null}, {"id": 3}],
+      "expected": "@records id:i,a:j?,b:s?\n1,null,x\n2,,null\n3,,\n",
+      "spec": "4"
+    },
+    {
+      "name": "float kind survives and integers stay integers",
+      "input": [{"f": 1.0, "i": 1, "g": 0.30000000000000004, "big": 1e21, "tiny": 1e-7, "neg0": -0.0, "u": 18446744073709551615}],
+      "expected": "@records f:f,i:i,g:f,big:f,tiny:f,neg0:f,u:i\n1.0,1,0.30000000000000004,1e21,1e-7,-0.0,18446744073709551615\n",
+      "spec": "6"
+    },
+    {
+      "name": "mixed int and float column is json",
+      "input": [{"v": 1}, {"v": 1.5}],
+      "expected": "@records v:j\n1\n1.5\n",
+      "spec": "7.3"
+    },
+    {
+      "name": "uniform nested objects flatten to dotted paths",
+      "input": [{"id": 1, "c": {"x": 1, "d": {"y": "a"}}}, {"id": 2, "c": {"x": 2, "d": {"y": "b"}}}],
+      "expected": "@records id:i,c.x:i,c.d.y:s\n1,1,a\n2,2,b\n",
+      "spec": "7.1"
+    },
+    {
+      "name": "objects with differing key sets stay json",
+      "input": [{"id": 1, "c": {"x": 1}}, {"id": 2, "c": {"y": 2}}],
+      "expected": "@records id:i,c:j\n1,{\"x\":1}\n2,{\"y\":2}\n",
+      "spec": "7.1"
+    },
+    {
+      "name": "empty object is a json cell",
+      "input": [{"id": 1, "c": {}}, {"id": 2, "c": {}}],
+      "expected": "@records id:i,c:j\n1,{}\n2,{}\n",
+      "spec": "7.1"
+    },
+    {
+      "name": "arrays of objects become a child table joined by the parent key",
+      "input": [{"id": "A", "items": [{"sku": "x", "n": 1}, {"sku": "y", "n": 2}]}, {"id": "B", "items": []}, {"id": "C", "items": [{"sku": "z", "n": 3}]}],
+      "expected": "@records id:s,items:t\nA,2\nB,0\nC,1\n@records.items id:s,sku:s,n:i\nA,x,1\nA,y,2\nC,z,3\n",
+      "spec": "7.2"
+    },
+    {
+      "name": "child table uses an ordinal when the parent key repeats",
+      "input": [{"k": 1, "items": [{"v": 1}]}, {"k": 1, "items": [{"v": 2}]}],
+      "expected": "@records k:i,items:t\n1,1\n1,1\n@records.items _:i,v:i\n1,1\n2,2\n",
+      "spec": "7.2"
+    },
+    {
+      "name": "absent and null arrays of objects",
+      "input": [{"id": 1, "items": [{"v": 1}]}, {"id": 2}, {"id": 3, "items": null}],
+      "expected": "@records id:i,items:t?\n1,1\n2,\n3,null\n@records.items id:i,v:i\n1,1\n",
+      "spec": "7.2"
+    },
+    {
+      "name": "arrays of scalars and mixed arrays are json cells",
+      "input": [{"id": 1, "tags": ["a", "b"], "m": [1, {"x": 1}]}, {"id": 2, "tags": [], "m": []}],
+      "expected": "@records id:i,tags:j,m:j\n1,[\"a\",\"b\"],[1,{\"x\":1}]\n2,[],[]\n",
+      "spec": "7.3"
+    },
+    {
+      "name": "keys needing quotes in the header",
+      "input": [{"with space": 1, "dotted.key": 2, "": 3, "a:b": 4, "x,y": 5, "ключ": 6}],
+      "expected": "@records \"with space\":i,\"dotted.key\":i,\"\":i,\"a:b\":i,\"x,y\":i,\"ключ\":i\n1,2,3,4,5,6\n",
+      "spec": "3"
+    },
+    {
+      "name": "quoted segment inside a nested path",
+      "input": [{"o": {"my key": 1}}, {"o": {"my key": 2}}],
+      "expected": "@records o.\"my key\":i\n1\n2\n",
+      "spec": "3"
+    },
+    {
+      "name": "records that are not objects",
+      "input": [1, "x", null, [1, 2], {"a": 1}],
+      "expected": "@records _:j?\n1\n\"x\"\nnull\n[1,2]\n{\"a\":1}\n",
+      "spec": "7"
+    },
+    {
+      "name": "empty dataset",
+      "input": [],
+      "expected": "@records _:j\n",
+      "spec": "7"
+    }
+  ]
+}

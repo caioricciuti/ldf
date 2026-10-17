@@ -1,8 +1,8 @@
 # ldf-bench results
 
-Started 20261017-211646 UTC. Command: `./target/release/ldf-bench tokens --scale small --out results/small`
+Started 20261017-220957 UTC. Command: `./target/release/ldf-bench tokens --scale small --out results/small`
 
-Machine: Apple M2 Pro (aarch64), 10 logical CPUs, 16.0 GiB RAM, Darwin 27.0.0. release profile, commit 41bf21d.
+Machine: Apple M2 Pro (aarch64), 10 logical CPUs, 16.0 GiB RAM, Darwin 27.0.0. release profile, commit a7bcfcb.
 
 Toolchain: rustc 1.98.0 (88d9e12ae 2026-08-18). Crates: arrow 60.0.0, criterion 0.8.2, csv 1.4.0, parquet 60.0.0, serde_json 1.0.151, simd-json 0.18.1, tiktoken-rs 0.12.1.
 
@@ -23,6 +23,7 @@ Each operation runs in its own child process. Iteration 0 is the cold run; media
 | toon | byte | 1.3 KiB | 0.47 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 1.3 KiB | 0.47 | - | - | - | - | - | - | - | - |
 | yaml | byte | 2.6 KiB | 0.99 | - | - | - | - | - | - | - | - |
+| ldf | byte | 1.3 KiB | 0.47 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -37,6 +38,7 @@ Each operation runs in its own child process. Iteration 0 is the cold run; media
 | toon | 1.3 KiB | 623 | 0.66 | 2.09 | 623 | 0.66 | 2.09 |
 | toon-tab | 1.3 KiB | 620 | 0.65 | 2.10 | 622 | 0.66 | 2.10 |
 | yaml | 2.6 KiB | 1177 | 1.24 | 2.30 | 1172 | 1.24 | 2.31 |
+| ldf | 1.3 KiB | 590 | 0.62 | 2.17 | 590 | 0.62 | 2.17 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -55,6 +57,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | semantic | 6.0 KiB | 1.03 | - | - | - | - | - | - | - | - |
 | toon-tab | semantic | 6.1 KiB | 1.04 | - | - | - | - | - | - | - | - |
 | yaml | byte | 6.6 KiB | 1.13 | - | - | - | - | - | - | - | - |
+| ldf | byte | 2.9 KiB | 0.50 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -69,6 +72,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 6.0 KiB | 2177 | 1.08 | 2.84 | 2171 | 1.07 | 2.85 |
 | toon-tab | 6.1 KiB | 2178 | 1.08 | 2.85 | 2172 | 1.07 | 2.86 |
 | yaml | 6.6 KiB | 2539 | 1.26 | 2.67 | 2533 | 1.25 | 2.68 |
+| ldf | 2.9 KiB | 1362 | 0.67 | 2.18 | 1357 | 0.67 | 2.19 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -87,6 +91,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 3.3 KiB | 1.11 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 3.3 KiB | 1.11 | - | - | - | - | - | - | - | - |
 | yaml | byte | 2.9 KiB | 0.99 | - | - | - | - | - | - | - | - |
+| ldf | semantic-unordered (object key order changed) | 1.6 KiB | 0.55 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -101,6 +106,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 3.3 KiB | 1337 | 1.23 | 2.49 | 1332 | 1.22 | 2.50 |
 | toon-tab | 3.3 KiB | 1338 | 1.23 | 2.49 | 1333 | 1.22 | 2.50 |
 | yaml | 2.9 KiB | 1310 | 1.21 | 2.26 | 1305 | 1.20 | 2.27 |
+| ldf | 1.6 KiB | 755 | 0.69 | 2.18 | 753 | 0.69 | 2.18 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -119,6 +125,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 3.7 KiB | 0.80 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 3.7 KiB | 0.80 | - | - | - | - | - | - | - | - |
 | yaml | byte | 4.5 KiB | 0.97 | - | - | - | - | - | - | - | - |
+| ldf | byte | 3.6 KiB | 0.78 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -133,6 +140,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 3.7 KiB | 2094 | 0.91 | 1.79 | 2076 | 0.91 | 1.81 |
 | toon-tab | 3.7 KiB | 2099 | 0.91 | 1.79 | 2084 | 0.91 | 1.80 |
 | yaml | 4.5 KiB | 2475 | 1.07 | 1.85 | 2455 | 1.07 | 1.87 |
+| ldf | 3.6 KiB | 2050 | 0.89 | 1.80 | 2032 | 0.89 | 1.82 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -151,6 +159,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 1.5 KiB | 0.52 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 1.5 KiB | 0.52 | - | - | - | - | - | - | - | - |
 | yaml | byte | 2.7 KiB | 0.97 | - | - | - | - | - | - | - | - |
+| ldf | byte | 1.4 KiB | 0.50 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -165,6 +174,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 1.5 KiB | 640 | 0.70 | 2.35 | 644 | 0.70 | 2.33 |
 | toon-tab | 1.5 KiB | 630 | 0.69 | 2.39 | 630 | 0.69 | 2.39 |
 | yaml | 2.7 KiB | 1093 | 1.19 | 2.55 | 1093 | 1.19 | 2.55 |
+| ldf | 1.4 KiB | 605 | 0.66 | 2.38 | 609 | 0.66 | 2.36 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -183,6 +193,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 1.3 KiB | 0.54 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 1.3 KiB | 0.53 | - | - | - | - | - | - | - | - |
 | yaml | byte | 2.5 KiB | 0.99 | - | - | - | - | - | - | - | - |
+| ldf | byte | 1.3 KiB | 0.51 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -197,6 +208,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 1.3 KiB | 606 | 0.68 | 2.25 | 538 | 0.64 | 2.54 |
 | toon-tab | 1.3 KiB | 665 | 0.74 | 2.05 | 620 | 0.73 | 2.20 |
 | yaml | 2.5 KiB | 1037 | 1.16 | 2.43 | 965 | 1.14 | 2.61 |
+| ldf | 1.3 KiB | 565 | 0.63 | 2.32 | 497 | 0.59 | 2.64 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -215,6 +227,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | semantic | 2.8 KiB | 0.60 | - | - | - | - | - | - | - | - |
 | toon-tab | semantic | 2.8 KiB | 0.60 | - | - | - | - | - | - | - | - |
 | yaml | byte | 4.9 KiB | 1.04 | - | - | - | - | - | - | - | - |
+| ldf | byte | 2.8 KiB | 0.59 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -229,6 +242,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 2.8 KiB | 1392 | 0.71 | 2.05 | 1393 | 0.69 | 2.05 |
 | toon-tab | 2.8 KiB | 1425 | 0.73 | 2.01 | 1426 | 0.71 | 2.00 |
 | yaml | 4.9 KiB | 2421 | 1.24 | 2.06 | 2421 | 1.20 | 2.06 |
+| ldf | 2.8 KiB | 1364 | 0.70 | 2.08 | 1365 | 0.68 | 2.08 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -247,6 +261,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 1.7 KiB | 1.22 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 1.7 KiB | 1.22 | - | - | - | - | - | - | - | - |
 | yaml | byte | 1.6 KiB | 1.12 | - | - | - | - | - | - | - | - |
+| ldf | byte | 914 B | 0.64 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -261,6 +276,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 1.7 KiB | 653 | 1.36 | 2.65 | 655 | 1.33 | 2.65 |
 | toon-tab | 1.7 KiB | 661 | 1.38 | 2.63 | 661 | 1.34 | 2.63 |
 | yaml | 1.6 KiB | 668 | 1.39 | 2.38 | 668 | 1.36 | 2.38 |
+| ldf | 914 B | 334 | 0.70 | 2.74 | 346 | 0.70 | 2.64 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -279,6 +295,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | semantic | 5.5 KiB | 0.53 | - | - | - | - | - | - | - | - |
 | toon-tab | semantic | 5.5 KiB | 0.53 | - | - | - | - | - | - | - | - |
 | yaml | byte | 10.9 KiB | 1.04 | - | - | - | - | - | - | - | - |
+| ldf | byte | 5.6 KiB | 0.53 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -293,6 +310,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 5.5 KiB | 2130 | 0.45 | 2.66 | 2138 | 0.46 | 2.65 |
 | toon-tab | 5.5 KiB | 2109 | 0.45 | 2.69 | 2113 | 0.45 | 2.68 |
 | yaml | 10.9 KiB | 5937 | 1.27 | 1.88 | 5937 | 1.27 | 1.88 |
+| ldf | 5.6 KiB | 2134 | 0.46 | 2.68 | 2142 | 0.46 | 2.67 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -311,6 +329,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 8.6 KiB | 2.59 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 8.7 KiB | 2.63 | - | - | - | - | - | - | - | - |
 | yaml | byte | 9.0 KiB | 2.70 | - | - | - | - | - | - | - | - |
+| ldf | byte | 2.5 KiB | 0.74 | - | - | - | - | - | - | - | - |
 
 ### Tokens (10 records)
 
@@ -325,6 +344,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 8.6 KiB | 2345 | 1.75 | 3.76 | 2345 | 1.79 | 3.76 |
 | toon-tab | 8.7 KiB | 2476 | 1.85 | 3.61 | 2476 | 1.89 | 3.61 |
 | yaml | 9.0 KiB | 2413 | 1.80 | 3.82 | 2413 | 1.84 | 3.82 |
+| ldf | 2.5 KiB | 1110 | 0.83 | 2.27 | 1100 | 0.84 | 2.30 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -343,6 +363,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 4.5 KiB | 1.19 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 4.5 KiB | 1.19 | - | - | - | - | - | - | - | - |
 | yaml | byte | 3.9 KiB | 1.04 | - | - | - | - | - | - | - | - |
+| ldf | byte | 1.3 KiB | 0.35 | - | - | - | - | - | - | - | - |
 
 ### Tokens (20 records)
 
@@ -357,6 +378,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 4.5 KiB | 1533 | 1.27 | 2.99 | 1515 | 1.27 | 3.03 |
 | toon-tab | 4.5 KiB | 1534 | 1.27 | 2.99 | 1516 | 1.27 | 3.03 |
 | yaml | 3.9 KiB | 1465 | 1.21 | 2.74 | 1447 | 1.21 | 2.77 |
+| ldf | 1.3 KiB | 463 | 0.38 | 2.91 | 483 | 0.41 | 2.79 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 
@@ -375,6 +397,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | byte | 11.6 KiB | 0.98 | - | - | - | - | - | - | - | - |
 | toon-tab | byte | 11.6 KiB | 0.98 | - | - | - | - | - | - | - | - |
 | yaml | byte | 11.9 KiB | 1.00 | - | - | - | - | - | - | - | - |
+| ldf | byte | 11.6 KiB | 0.97 | - | - | - | - | - | - | - | - |
 
 ### Tokens (10 records)
 
@@ -389,6 +412,7 @@ Claude token counts are not in this table: Anthropic does not publish its tokeni
 | toon | 11.6 KiB | 2148 | 0.97 | 5.55 | 2148 | 0.97 | 5.55 |
 | toon-tab | 11.6 KiB | 2157 | 0.97 | 5.53 | 2155 | 0.97 | 5.53 |
 | yaml | 11.9 KiB | 2254 | 1.02 | 5.41 | 2250 | 1.02 | 5.42 |
+| ldf | 11.6 KiB | 2130 | 0.96 | 5.59 | 2130 | 0.96 | 5.59 |
 
 Claude token counts are not in this table: Anthropic does not publish its tokenizer. Run `eval/count_tokens_claude.py` against the encoded files in `encoded/` to add exact counts from the count_tokens API.
 

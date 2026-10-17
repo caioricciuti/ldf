@@ -212,7 +212,21 @@ def main():
     out_path = os.path.join(args.bundle, f"responses.{args.provider}.{args.model}.jsonl")
     done = set()
     if os.path.exists(out_path):
-        done = {r["prompt_id"] for r in read_jsonl(out_path)}
+        # Errored attempts (auth failures, transport errors) are not results:
+        # drop them from the file so the resume re-sends those prompts.
+        kept = []
+        dropped = 0
+        for r in read_jsonl(out_path):
+            if r.get("error") and not str(r["error"]).startswith("refusal"):
+                dropped += 1
+            else:
+                kept.append(r)
+        if dropped:
+            with open(out_path, "w", encoding="utf-8") as f:
+                for r in kept:
+                    f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            print(f"dropped {dropped} errored attempts from a previous run; they will be re-sent")
+        done = {r["prompt_id"] for r in kept}
     todo = [q for q in prompts if q["prompt_id"] not in done]
     if args.max_prompts is not None:
         todo = todo[: args.max_prompts]
@@ -274,6 +288,9 @@ def main():
                 rec.update(text=text, finish_reason=finish, input_tokens=itok, output_tokens=otok, cached_tokens=cached, error=perr)
             out.write(json.dumps(rec, ensure_ascii=False) + "\n")
             out.flush()
+            if rec["error"] and str(rec["error"]).startswith(("http 401", "http 403")):
+                print(f"authentication failed ({rec['error'][:60]}); stopping so the run does not spin on a bad key")
+                break
             status = rec["error"] or (rec["text"] or "")[:60].replace("\n", " ")
             c = cost_of(rec)
             cost_txt = ""

@@ -1,6 +1,6 @@
 {
   "tool": "ldf-bench",
-  "started_utc": "20261017-211646",
+  "started_utc": "20261017-220957",
   "command": [
     "./target/release/ldf-bench",
     "tokens",
@@ -18,7 +18,7 @@
     "memory_bytes": 17179869184,
     "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
     "cargo_profile": "release",
-    "git_commit": "41bf21d",
+    "git_commit": "a7bcfcb",
     "crate_versions": [
       [
         "arrow",
@@ -110,6 +110,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 2708,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 1282,
           "detail": null
         }
       ],
@@ -276,6 +282,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 1282,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 590
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 590
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -338,6 +362,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 6788,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 2975,
           "detail": null
         }
       ],
@@ -471,6 +501,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 2975,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 1357
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 1362
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -534,6 +582,12 @@
           "level": "byte",
           "output_bytes": 2960,
           "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "semantic-unordered",
+          "output_bytes": 1645,
+          "detail": "object key order changed"
         }
       ],
       "measurements": [],
@@ -699,6 +753,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 1645,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 753
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 755
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -761,6 +833,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 4580,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 3690,
           "detail": null
         }
       ],
@@ -927,6 +1005,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 3690,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 2032
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 2050
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -989,6 +1085,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 2787,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 1440,
           "detail": null
         }
       ],
@@ -1155,6 +1257,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 1440,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 609
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 605
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1217,6 +1337,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 2521,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 1310,
           "detail": null
         }
       ],
@@ -1383,6 +1509,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 1310,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 497
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 565
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1445,6 +1589,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 4990,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 2839,
           "detail": null
         }
       ],
@@ -1611,6 +1761,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 2839,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 1365
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 1364
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1673,6 +1841,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 1592,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 914,
           "detail": null
         }
       ],
@@ -1806,6 +1980,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 914,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 346
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 334
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1868,6 +2060,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 11182,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 5716,
           "detail": null
         }
       ],
@@ -2034,6 +2232,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 5716,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 2142
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 2134
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -2096,6 +2312,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 9207,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 2525,
           "detail": null
         }
       ],
@@ -2229,6 +2451,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 2525,
+          "records": 10,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 1100
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 1110
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -2291,6 +2531,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 4011,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 1348,
           "detail": null
         }
       ],
@@ -2424,6 +2670,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 1348,
+          "records": 20,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 483
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 463
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -2486,6 +2750,12 @@
           "format": "yaml",
           "level": "byte",
           "output_bytes": 12192,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 11912,
           "detail": null
         }
       ],
@@ -2649,6 +2919,24 @@
               "tokenizer": "cl100k_base",
               "exact": true,
               "tokens": 2254
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "ldf",
+          "bytes": 11912,
+          "records": 10,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 2130
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 2130
             }
           ],
           "unsupported": null

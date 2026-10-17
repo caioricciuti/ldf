@@ -1,0 +1,131 @@
+{
+  "version": "0.1",
+  "category": "decode",
+  "description": "LDF v0 decoder fixtures: input is document text, expected is the JSON array of records, or shouldError.",
+  "tests": [
+    {
+      "name": "typed cells",
+      "input": "@records id:i,name:s,active:b,score:f\n1,Ada,true,19.5\n2,Bob,false,7.0\n",
+      "expected": [{"id": 1, "name": "Ada", "active": true, "score": 19.5}, {"id": 2, "name": "Bob", "active": false, "score": 7.0}]
+    },
+    {
+      "name": "bare strings are strings whatever they look like",
+      "input": "@records s:s\n42\n1e5\n-\n007\n",
+      "expected": [{"s": "42"}, {"s": "1e5"}, {"s": "-"}, {"s": "007"}]
+    },
+    {
+      "name": "quoted strings unescape",
+      "input": "@records s:s\n\"\"\n\"null\"\n\"a,b\"\n\"q\\\"q\"\n\"line\\nbreak\"\n\"\\u00e9\"\n",
+      "expected": [{"s": ""}, {"s": "null"}, {"s": "a,b"}, {"s": "q\"q"}, {"s": "line\nbreak"}, {"s": "é"}]
+    },
+    {
+      "name": "empty is absent, null is null, in any column type",
+      "input": "@records id:i,a:s,b:i,c:b,d:f,e:j\n1,,,,,\n2,null,null,null,null,null\n",
+      "expected": [{"id": 1}, {"id": 2, "a": null, "b": null, "c": null, "d": null, "e": null}]
+    },
+    {
+      "name": "json cells may contain commas and quotes",
+      "input": "@records id:i,v:j,s:s\n1,{\"a\":[1,2],\"b\":\"x,y\"},after\n2,[\"q\\\"q\"],x\n",
+      "expected": [{"id": 1, "v": {"a": [1, 2], "b": "x,y"}, "s": "after"}, {"id": 2, "v": ["q\"q"], "s": "x"}]
+    },
+    {
+      "name": "dotted paths rebuild nested objects in header order",
+      "input": "@records id:i,c.x:i,c.d.y:s,c.z:b\n1,1,a,true\n",
+      "expected": [{"id": 1, "c": {"x": 1, "d": {"y": "a"}, "z": true}}]
+    },
+    {
+      "name": "child table joined by parent key, array placed at the t column position",
+      "input": "@records id:s,items:t,total:f\nA,2,1.5\nB,0,2.5\n@records.items id:s,sku:s\nA,x\nA,y\n",
+      "expected": [{"id": "A", "items": [{"sku": "x"}, {"sku": "y"}], "total": 1.5}, {"id": "B", "items": [], "total": 2.5}]
+    },
+    {
+      "name": "child table joined by ordinal",
+      "input": "@records k:i,items:t\n1,1\n1,1\n@records.items _:i,v:i\n2,20\n1,10\n",
+      "expected": [{"k": 1, "items": [{"v": 10}]}, {"k": 1, "items": [{"v": 20}]}]
+    },
+    {
+      "name": "grandchild tables",
+      "input": "@records id:i,items:t\n1,1\n@records.items id:i,v:i,subs:t\n1,7,2\n@records.items.subs v:i,z:s\n7,a\n7,b\n",
+      "expected": [{"id": 1, "items": [{"v": 7, "subs": [{"z": "a"}, {"z": "b"}]}]}]
+    },
+    {
+      "name": "schema change mid stream",
+      "input": "@records a:i,b:s\n1,x\n@records a:i\n2\n@records a:i,c:b\n3,true\n",
+      "expected": [{"a": 1, "b": "x"}, {"a": 2}, {"a": 3, "c": true}]
+    },
+    {
+      "name": "scalar records",
+      "input": "@records _:j?\n1\n\"x\"\nnull\n[1,2]\n",
+      "expected": [1, "x", null, [1, 2]]
+    },
+    {
+      "name": "quoted header keys and paths",
+      "input": "@records \"with space\":i,\"dotted.key\":i,o.\"my key\":i,\"\":s\n1,2,3,e\n",
+      "expected": [{"with space": 1, "dotted.key": 2, "o": {"my key": 3}, "": "e"}]
+    },
+    {
+      "name": "CRLF and BOM are tolerated, blank lines between tables ignored",
+      "input": "\ufeff@records a:i\r\n1\r\n\r\n@records a:i\r\n2\r\n",
+      "expected": [{"a": 1}, {"a": 2}]
+    },
+    {
+      "name": "integers above i64 decode as u64, floats parse exponents",
+      "input": "@records u:i,f:f,g:f\n18446744073709551615,1e21,-0.0\n",
+      "expected": [{"u": 18446744073709551615, "f": 1e21, "g": -0.0}]
+    },
+    {
+      "name": "errors: row before header",
+      "input": "1,2\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: cell count mismatch",
+      "input": "@records a:i,b:s\n1\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: extra cell",
+      "input": "@records a:i\n1,2\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: bad integer",
+      "input": "@records a:i\nx\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: bad boolean",
+      "input": "@records a:b\nyes\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: child count mismatch",
+      "input": "@records a:t\n2\n@records.a a:i,v:i\n2,1\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: unknown type code",
+      "input": "@records a:x\n1\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: unterminated quoted cell",
+      "input": "@records a:s\n\"abc\n",
+      "expected": null,
+      "shouldError": true
+    },
+    {
+      "name": "errors: child table without parent",
+      "input": "@records a:i\n1\n@other.x _:i,v:i\n1,1\n",
+      "expected": null,
+      "shouldError": true
+    }
+  ]
+}

@@ -96,20 +96,27 @@ Separation, if it exists, has to come from larger samples or weaker models;
 
 Ratios to compact JSON. Bytes and o200k_base tokens.
 
-| dataset | csv bytes | csv tok | markdown bytes | markdown tok | toon bytes | toon tok | yaml bytes | yaml tok | json-pretty tok |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| flat_users | 0.45 | 0.60 | 0.58 | 0.74 | 0.46 | 0.65 | 0.99 | 1.25 | 1.58 |
-| repetitive_logs | 0.48 | 0.65 | 0.59 | 0.74 | 0.50 | 0.69 | 0.97 | 1.19 | 1.54 |
-| wide_table | 0.51 | 0.43 | 0.66 | 0.57 | 0.51 | 0.44 | 1.04 | 1.27 | 1.50 |
-| high_card_strings | 0.78 | 0.88 | 0.84 | 0.93 | 0.79 | 0.90 | 0.97 | 1.07 | 1.19 |
-| numeric_mix | 0.57 | 0.65 | 0.69 | 0.79 | 0.58 | 0.67 | 1.04 | 1.21 | 1.40 |
-| unicode_strings | 0.47 | 0.52 | 0.59 | 0.65 | 0.53 | 0.61 | 0.99 | 1.13 | 1.53 |
-| long_text | 0.97 | 0.94 | 0.98 | 0.97 | 0.97 | 0.97 | 1.00 | 1.02 | 1.07 |
-| sparse_events | 0.45 (lossy) | 0.61 | 0.67 (lossy) | 0.97 | 1.11 | 1.22 | 0.99 | 1.20 | 1.49 |
-| nested_orders | unsupported | | unsupported | | 1.04 | 1.08 | 1.13 | 1.26 | 1.77 |
-| mixed_types | unsupported | | unsupported | | 1.21 | 1.33 | 1.10 | 1.34 | 2.00 |
-| empty_values | unsupported | | unsupported | | 1.18 | 1.27 | 1.04 | 1.22 | 1.62 |
-| deep_nesting | unsupported | | unsupported | | 2.50 | 1.82 | 2.64 | 1.88 | 2.45 |
+| dataset | csv bytes | csv tok | markdown bytes | markdown tok | toon bytes | toon tok | yaml bytes | yaml tok | json-pretty tok | **ldf bytes** | **ldf tok** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| flat_users | 0.45 | 0.60 | 0.58 | 0.74 | 0.46 | 0.65 | 0.99 | 1.25 | 1.58 | **0.46** | **0.61** |
+| repetitive_logs | 0.48 | 0.65 | 0.59 | 0.74 | 0.50 | 0.69 | 0.97 | 1.19 | 1.54 | **0.48** | **0.65** |
+| wide_table | 0.51 | 0.43 | 0.66 | 0.57 | 0.51 | 0.44 | 1.04 | 1.27 | 1.50 | **0.51** | **0.43** |
+| high_card_strings | 0.78 | 0.88 | 0.84 | 0.93 | 0.79 | 0.90 | 0.97 | 1.07 | 1.19 | **0.78** | **0.88** |
+| numeric_mix | 0.57 | 0.65 | 0.69 | 0.79 | 0.58 | 0.67 | 1.04 | 1.21 | 1.40 | **0.57** | **0.66** |
+| unicode_strings | 0.47 | 0.52 | 0.59 | 0.65 | 0.53 | 0.61 | 0.99 | 1.13 | 1.53 | **0.50** | **0.55** |
+| long_text | 0.97 | 0.94 | 0.98 | 0.97 | 0.97 | 0.97 | 1.00 | 1.02 | 1.07 | **0.97** | **0.96** |
+| sparse_events | 0.45 (lossy) | 0.61 | 0.67 (lossy) | 0.97 | 1.11 | 1.22 | 0.99 | 1.20 | 1.49 | **0.49** | **0.63** |
+| nested_orders | unsupported | | unsupported | | 1.04 | 1.08 | 1.13 | 1.26 | 1.77 | **0.46** | **0.64** |
+| mixed_types | unsupported | | unsupported | | 1.21 | 1.33 | 1.10 | 1.34 | 2.00 | **0.64** | **0.68** |
+| empty_values | unsupported | | unsupported | | 1.18 | 1.27 | 1.04 | 1.22 | 1.62 | **0.32** | **0.36** |
+| deep_nesting | unsupported | | unsupported | | 2.50 | 1.82 | 2.64 | 1.88 | 2.45 | **0.68** | **0.80** |
+
+LDF v0 (`docs/ldf-spec-v0.md`, added 2026-10-18) is the project's own
+format, designed from the rows above it. It is within 1 to 3 percent of CSV
+in tokens on every dataset CSV can represent, lossless where CSV is not, and
+20 to 64 percent below compact JSON on every dataset where TOON is above
+JSON. Round trip: byte-exact on 11 of 12 datasets; sparse_events decodes
+semantically equal with keys in header order (inherent to a column layout).
 
 Observations:
 
@@ -146,17 +153,23 @@ Observations:
 | csv, tsv | high_card_strings, repetitive_logs, long_text | flat_users | sparse_events (absent and null merge), unicode_strings (`""` becomes null), wide_table (`"null"` becomes null), numeric_mix | nested_orders, mixed_types, deep_nesting, empty_values |
 | markdown | same as csv | | | |
 | yaml | all 12 | | | |
+| ldf | 11 | sparse_events (key order follows the header) | | |
 
 ## Throughput (medium fixtures, warm medians, `perf-medium.md`)
 
 Ranges across datasets. MB = 1e6 bytes of the format's own output (encode)
 or input (decode, parse).
 
-| operation | serde_json / compact json | simd-json | csv (this repo, csv crate) | toon (this repo) | markdown (this repo) | yaml (own emitter, yaml-rust2 decoder) |
-|---|---|---|---|---|---|---|
-| parse JSON input | 200 to 2 100 MB/s | 270 to 1 900 MB/s; 20 to 40 percent faster than serde_json on 9 of 12 datasets, slower on deep_nesting and long_text | | | | |
-| encode | 580 to 2 000 MB/s | | 90 to 2 900 MB/s | 110 to 400 MB/s | 130 to 480 MB/s | 210 to 500 MB/s |
-| decode | 220 to 2 200 MB/s | | 140 to 1 200 MB/s | 56 to 250 MB/s | 60 to 340 MB/s | 30 to 140 MB/s |
+| operation | serde_json / compact json | simd-json | csv (this repo, csv crate) | toon (this repo) | markdown (this repo) | yaml (own emitter, yaml-rust2 decoder) | ldf v0 (this repo) |
+|---|---|---|---|---|---|---|---|
+| parse JSON input | 200 to 2 100 MB/s | 270 to 1 900 MB/s; 20 to 40 percent faster than serde_json on 9 of 12 datasets, slower on deep_nesting and long_text | | | | | |
+| encode | 580 to 2 000 MB/s | | 100 to 2 900 MB/s | 110 to 520 MB/s | 130 to 480 MB/s | 210 to 500 MB/s | 49 to 1 100 MB/s |
+| decode | 220 to 2 200 MB/s | | 140 to 1 000 MB/s | 56 to 250 MB/s | 60 to 340 MB/s | 30 to 140 MB/s | 53 to 760 MB/s |
+
+LDF's slow end is wide_table on both sides (49 and 53 MB/s): schema analysis
+and object rebuilding cost O(columns) per cell in this first implementation.
+On nested_orders LDF decodes at 81 MB/s against TOON's 123 MB/s and encodes
+at 127 MB/s against 186 MB/s.
 
 The YAML and final TOON numbers come from a rerun while an unrelated
 network-bound process was active; compact JSON medians moved by under 7

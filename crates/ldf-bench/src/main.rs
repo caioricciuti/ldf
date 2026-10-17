@@ -126,16 +126,44 @@ fn count(args: &Args) -> Result<(), String> {
     if files.is_empty() {
         return Err("pass one or more files".into());
     }
-    println!("| file | bytes | {} |", names.iter().map(|n| format!("{n} | bytes/token")).collect::<Vec<_>>().join(" | "));
-    println!("|---|---:|{}", names.iter().map(|_| "---:|---:|").collect::<String>());
+    println!(
+        "| file | bytes | {} |",
+        names
+            .iter()
+            .map(|n| format!("{n} | bytes/token"))
+            .collect::<Vec<_>>()
+            .join(" | ")
+    );
+    println!(
+        "|---|---:|{}",
+        names.iter().map(|_| "---:|---:|").collect::<String>()
+    );
     for f in files {
         let text = fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
         let counts = tk.count(&text);
         let cells: Vec<String> = counts
             .iter()
-            .map(|c| format!("{} | {:.2}", c.tokens, if c.tokens > 0 { text.len() as f64 / c.tokens as f64 } else { 0.0 }))
+            .map(|c| {
+                format!(
+                    "{} | {:.2}",
+                    c.tokens,
+                    if c.tokens > 0 {
+                        text.len() as f64 / c.tokens as f64
+                    } else {
+                        0.0
+                    }
+                )
+            })
             .collect();
-        println!("| {} | {} | {} |", Path::new(f).file_name().and_then(|n| n.to_str()).unwrap_or(f), text.len(), cells.join(" | "));
+        println!(
+            "| {} | {} | {} |",
+            Path::new(f)
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or(f),
+            text.len(),
+            cells.join(" | ")
+        );
     }
     Ok(())
 }

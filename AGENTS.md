@@ -2,9 +2,10 @@
 
 Working notes for anyone (human or agent) touching this repository. The
 project is LDF, a research effort towards a lossless, token-efficient data
-format for LLM consumption. Phase 1 (this state) is the measurement
-foundation; the format itself is not designed yet. Read `docs/roadmap.md`
-before proposing syntax.
+format for LLM consumption. Phases 1 and 2 built the measurement foundation;
+Phase 3 produced LDF v0 (`docs/ldf-spec-v0.md`, `crates/ldf`) from those
+measurements. Read `docs/roadmap.md` and `docs/design-candidates.md` before
+proposing syntax changes.
 
 ## Architecture
 
@@ -14,10 +15,10 @@ Cargo workspace, Rust stable, edition 2024.
 |---|---|---|
 | `ldf-data` | `Value` model (ordered keys, int/float kind kept), `Number` canonical text and JSON number grammar, `FlatSchema` inference, input readers for JSON (serde_json or simd-json), JSONL, CSV/TSV, Parquet (arrow-rs, feature `parquet`) | |
 | `ldf-fixtures` | frozen PRNG (xoshiro256** + splitmix64), dataset catalog, streaming writers for JSON/JSONL/CSV/Parquet | `ldf-gen` |
-| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml. TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
+| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter. TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
-| `ldf` | reserved for the format; empty | |
+| `ldf` | LDF v0 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening and child tables, conformance fixtures under `tests/fixtures` | |
 
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
 spend-gated) and `count_tokens_claude.py` (Anthropic count_tokens).
@@ -100,3 +101,8 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
 - yaml-rust2 has no u64: integers above i64::MAX decode as f64.
 - Frontier models explain before answering even when told not to; the
   scorer takes the trailing JSON value (`ldf_eval::answer::parse_response`).
+- LDF v0 ties CSV on flat data and beats compact JSON by 20 to 64 percent on
+  irregular data (tokens). Its codec is young: the decoder attaches child
+  rows through a hash map keyed by the join value's canonical text, and the
+  encoder uses positional key hints; before those two fixes nested decode
+  ran at 1 MB/s. Wide tables still cost O(columns) per cell on insert.

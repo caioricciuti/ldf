@@ -1,6 +1,6 @@
 [package]
 name = "ldf"
-description = "Language Data Format. Reserved: the format is designed after the Phase 1 baseline measurements."
+description = "Language Data Format: lossless, token-efficient text encoding of JSON records for language models (v0 prototype)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,3 +8,7 @@ license.workspace = true
 
 [dependencies]
 ldf-data = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+serde = { workspace = true }

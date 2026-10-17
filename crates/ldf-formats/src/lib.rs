@@ -14,12 +14,14 @@
 //! * `toon`         Token-Oriented Object Notation, spec v4.4, written from
 //!   the spec and checked against its conformance fixtures
 //! * `yaml`         block-style YAML 1.2 (own emitter, yaml-rust2 decoder)
+//! * `ldf`          Language Data Format v0 (the project's own format, `crates/ldf`)
 
 use std::fmt;
 
 use ldf_data::Value;
 
 pub mod json;
+pub mod ldf;
 pub mod tabular;
 pub mod toon;
 pub mod yaml;
@@ -131,6 +133,7 @@ pub fn all_formats() -> Vec<Box<dyn Format>> {
         Box::new(toon::Toon::default()),
         Box::new(toon::Toon::tab()),
         Box::new(yaml::YamlFormat),
+        Box::new(ldf::LdfFormat),
     ]
 }
 

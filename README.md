@@ -5,10 +5,12 @@ language models to read: fewer tokens than JSON, no silent flattening, GB-scale
 streaming, and accuracy that is measured rather than assumed. The competitors
 are JSON, JSONL, CSV/TSV, Markdown tables and TOON.
 
-This repository is in **Phase 1**: there is no LDF syntax yet. What exists is
-the apparatus that will decide the syntax: deterministic datasets, faithful
-baseline implementations, a performance harness, exact token counting and an
-LLM comprehension evaluation. See `docs/roadmap.md` for what comes next and
+The repository holds the measurement apparatus that decided the syntax
+(deterministic datasets, faithful baseline implementations, a performance
+harness, exact token counting, an LLM comprehension evaluation) and the first
+version of the format itself: **LDF v0**, specified in `docs/ldf-spec-v0.md`
+and implemented in `crates/ldf`. See `docs/design-candidates.md` for how the
+measurements led to it, `docs/roadmap.md` for what comes next and
 `docs/research.md` for the state of the art.
 
 ## What is here
@@ -17,10 +19,10 @@ LLM comprehension evaluation. See `docs/roadmap.md` for what comes next and
 |---|---|
 | `crates/ldf-data` | value model, number semantics, readers for JSON, JSONL, CSV, Parquet |
 | `crates/ldf-fixtures` | `ldf-gen`: twelve deterministic datasets at three scales |
-| `crates/ldf-formats` | baselines: json, json-pretty, jsonl, csv, tsv, markdown, toon (spec v4.4, conformance tested), yaml |
+| `crates/ldf-formats` | baselines: json, json-pretty, jsonl, csv, tsv, markdown, toon (spec v4.4, conformance tested), yaml, and the `ldf` adapter |
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, token counts, Criterion benches |
 | `crates/ldf-eval` | `ldf-eval`: tasks with ground truth, prompt bundles, scoring |
-| `crates/ldf` | reserved for the format |
+| `crates/ldf` | LDF v0 encoder, decoder and conformance fixtures |
 | `eval/` | stdlib-only Python: `run_eval.py` (API calls, spend-gated), `count_tokens_claude.py` |
 | `fixtures/small` | committed correctness fixtures (regenerable) |
 | `docs/` | research notes, benchmark methodology, roadmap, measured reports |

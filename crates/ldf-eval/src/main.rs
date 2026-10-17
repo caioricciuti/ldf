@@ -84,8 +84,12 @@ fn build(args: &[String]) -> ExitCode {
     let mut it = args.iter();
     while let Some(a) = it.next() {
         if a == "--extra" {
-            let Some(spec) = it.next() else { return usage() };
-            let Some((name, path)) = spec.split_once('=') else { return usage() };
+            let Some(spec) = it.next() else {
+                return usage();
+            };
+            let Some((name, path)) = spec.split_once('=') else {
+                return usage();
+            };
             match fs::read_to_string(path) {
                 Ok(text) => extra.push((name.to_string(), text)),
                 Err(e) => {
