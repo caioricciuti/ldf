@@ -133,11 +133,16 @@ def parse_reply(provider, data):
 # names one of these, the field is dropped and the request retried once; the
 # settings actually used are recorded with every response.
 DROPPABLE = ("temperature", "seed", "reasoning_effort", "top_p")
+# Fields the model has already rejected in this run; dropped up front from
+# later requests so the note prints once and no request is sent twice.
+REJECTED = set()
 
 
 def call(url, headers, body, timeout, retries):
     delay = 2.0
     dropped = []
+    for f in REJECTED:
+        body.pop(f, None)
     for attempt in range(retries + 1):
         payload = json.dumps(body).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
@@ -154,7 +159,8 @@ def call(url, headers, body, timeout, retries):
                 if culprit and attempt < retries:
                     body.pop(culprit)
                     dropped.append(culprit)
-                    print(f"  note: {culprit} rejected by the model, retrying without it", file=sys.stderr)
+                    REJECTED.add(culprit)
+                    print(f"  note: {culprit} rejected by the model, dropped for the rest of this run", file=sys.stderr)
                     continue
             if e.code in (408, 409, 429) or e.code >= 500:
                 if attempt < retries:
