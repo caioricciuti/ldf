@@ -10,6 +10,7 @@ license.workspace = true
 ldf-data = { workspace = true }
 serde_json = { workspace = true }
 csv = { workspace = true }
+yaml-rust2 = { workspace = true }
 
 [dev-dependencies]
 serde = { workspace = true }

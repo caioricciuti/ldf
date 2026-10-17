@@ -29,10 +29,25 @@ agree with the process-isolated numbers within the noise discussed below.
 * Peak RSS of each child process after the operation.
 * Exact `o200k_base` and `cl100k_base` token counts and bytes per token.
 
+## LLM comprehension (`eval/`)
+
+One run so far: Claude Opus 5.5, effort low, flat_users bundle, 50 records,
+15 tasks per format, 120 prompts. Table in `eval/flat_users.claude-opus-5-5.md`,
+raw responses and tasks next to it. Every format scored 14 or 15 of 15; the
+two misses were real model errors on a two-record comparison (csv: answered
+with both values, toon: wrong id). Input tokens per prompt ranged from 2 065
+(csv) to 4 853 (json-pretty); 92 percent of input tokens were prompt-cache
+reads. The model explained before answering in about a third of replies
+despite the instruction; the scorer accepts a trailing JSON value.
+
+Reading: at this size and model tier the formats are indistinguishable on
+accuracy; token cost is the only separator. Nested, sparse, GPT and
+smaller-model runs are what can change that.
+
 ## What was not measured
 
-* No LLM accuracy numbers: no paid API call was made. The evaluation
-  bundles exist under `eval/out/` and were dry-run only.
+* No comprehension numbers yet for nested or sparse data, for GPT, or for
+  smaller models.
 * No Claude token counts: needs the count_tokens endpoint and a key.
 * No large-scale (1M row) runs.
 * No cross-machine or Linux numbers.
@@ -41,20 +56,20 @@ agree with the process-isolated numbers within the noise discussed below.
 
 Ratios to compact JSON. Bytes and o200k_base tokens.
 
-| dataset | csv bytes | csv tok | markdown bytes | markdown tok | toon bytes | toon tok | json-pretty tok |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| flat_users | 0.45 | 0.60 | 0.58 | 0.74 | 0.46 | 0.65 | 1.58 |
-| repetitive_logs | 0.48 | 0.65 | 0.59 | 0.74 | 0.50 | 0.69 | 1.54 |
-| wide_table | 0.51 | 0.43 | 0.66 | 0.57 | 0.51 | 0.44 | 1.50 |
-| high_card_strings | 0.78 | 0.88 | 0.84 | 0.93 | 0.79 | 0.90 | 1.19 |
-| numeric_mix | 0.57 | 0.65 | 0.69 | 0.79 | 0.58 | 0.67 | 1.40 |
-| unicode_strings | 0.47 | 0.52 | 0.59 | 0.65 | 0.53 | 0.61 | 1.53 |
-| long_text | 0.97 | 0.94 | 0.98 | 0.97 | 0.97 | 0.97 | 1.07 |
-| sparse_events | 0.45 (lossy) | 0.61 | 0.67 (lossy) | 0.97 | 1.11 | 1.22 | 1.49 |
-| nested_orders | unsupported | | unsupported | | 1.04 | 1.08 | 1.77 |
-| mixed_types | unsupported | | unsupported | | 1.21 | 1.33 | 2.00 |
-| empty_values | unsupported | | unsupported | | 1.18 | 1.27 | 1.62 |
-| deep_nesting | unsupported | | unsupported | | 2.50 | 1.82 | 2.45 |
+| dataset | csv bytes | csv tok | markdown bytes | markdown tok | toon bytes | toon tok | yaml bytes | yaml tok | json-pretty tok |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| flat_users | 0.45 | 0.60 | 0.58 | 0.74 | 0.46 | 0.65 | 0.99 | 1.25 | 1.58 |
+| repetitive_logs | 0.48 | 0.65 | 0.59 | 0.74 | 0.50 | 0.69 | 0.97 | 1.19 | 1.54 |
+| wide_table | 0.51 | 0.43 | 0.66 | 0.57 | 0.51 | 0.44 | 1.04 | 1.27 | 1.50 |
+| high_card_strings | 0.78 | 0.88 | 0.84 | 0.93 | 0.79 | 0.90 | 0.97 | 1.07 | 1.19 |
+| numeric_mix | 0.57 | 0.65 | 0.69 | 0.79 | 0.58 | 0.67 | 1.04 | 1.21 | 1.40 |
+| unicode_strings | 0.47 | 0.52 | 0.59 | 0.65 | 0.53 | 0.61 | 0.99 | 1.13 | 1.53 |
+| long_text | 0.97 | 0.94 | 0.98 | 0.97 | 0.97 | 0.97 | 1.00 | 1.02 | 1.07 |
+| sparse_events | 0.45 (lossy) | 0.61 | 0.67 (lossy) | 0.97 | 1.11 | 1.22 | 0.99 | 1.20 | 1.49 |
+| nested_orders | unsupported | | unsupported | | 1.04 | 1.08 | 1.13 | 1.26 | 1.77 |
+| mixed_types | unsupported | | unsupported | | 1.21 | 1.33 | 1.10 | 1.34 | 2.00 |
+| empty_values | unsupported | | unsupported | | 1.18 | 1.27 | 1.04 | 1.22 | 1.62 |
+| deep_nesting | unsupported | | unsupported | | 2.50 | 1.82 | 2.64 | 1.88 | 2.45 |
 
 Observations:
 
@@ -73,6 +88,11 @@ Observations:
   it costs as many tokens as JSON while still being lossy.
 * long_text is dominated by the body field; format choice moves tokens by
   at most 6 percent.
+* Block YAML is about the same size as compact JSON in bytes but costs 7 to
+  34 percent more tokens on regular data (indentation and newlines tokenize
+  worse than JSON's punctuation), and 1.9x on deep nesting. It is the only
+  non-JSON baseline that round-trips byte-exact on all twelve datasets
+  (integer-valued floats keep their `.0`).
 * JSON Lines costs 1 to 2 percent more tokens than a compact JSON array.
 * o200k_base and cl100k_base agree to within 1 percent except on unicode
   strings, where o200k is 5 to 12 percent cheaper.
@@ -85,17 +105,22 @@ Observations:
 | toon, toon-tab | high_card_strings, repetitive_logs, unicode_strings, deep_nesting, empty_values, long_text | flat_users, nested_orders, sparse_events, mixed_types, wide_table (float kind lost: `1.0` becomes `1`) | numeric_mix (`huge` above 2^53, see research.md Part A item 6) | |
 | csv, tsv | high_card_strings, repetitive_logs, long_text | flat_users | sparse_events (absent and null merge), unicode_strings (`""` becomes null), wide_table (`"null"` becomes null), numeric_mix | nested_orders, mixed_types, deep_nesting, empty_values |
 | markdown | same as csv | | | |
+| yaml | all 12 | | | |
 
 ## Throughput (medium fixtures, warm medians, `perf-medium.md`)
 
 Ranges across datasets. MB = 1e6 bytes of the format's own output (encode)
 or input (decode, parse).
 
-| operation | serde_json / compact json | simd-json | csv (this repo, csv crate) | toon (this repo) | markdown (this repo) |
-|---|---|---|---|---|---|
-| parse JSON input | 200 to 2 100 MB/s | 270 to 1 900 MB/s; 20 to 40 percent faster than serde_json on 9 of 12 datasets, slower on deep_nesting and long_text | | | |
-| encode | 580 to 2 000 MB/s | | 90 to 2 900 MB/s | 110 to 400 MB/s | 130 to 480 MB/s |
-| decode | 220 to 2 200 MB/s | | 140 to 1 200 MB/s | 56 to 250 MB/s | 60 to 340 MB/s |
+| operation | serde_json / compact json | simd-json | csv (this repo, csv crate) | toon (this repo) | markdown (this repo) | yaml (own emitter, yaml-rust2 decoder) |
+|---|---|---|---|---|---|---|
+| parse JSON input | 200 to 2 100 MB/s | 270 to 1 900 MB/s; 20 to 40 percent faster than serde_json on 9 of 12 datasets, slower on deep_nesting and long_text | | | | |
+| encode | 580 to 2 000 MB/s | | 90 to 2 900 MB/s | 110 to 400 MB/s | 130 to 480 MB/s | 210 to 500 MB/s |
+| decode | 220 to 2 200 MB/s | | 140 to 1 200 MB/s | 56 to 250 MB/s | 60 to 340 MB/s | 30 to 140 MB/s |
+
+The YAML and final TOON numbers come from a rerun while an unrelated
+network-bound process was active; compact JSON medians moved by under 7
+percent between the two runs, which bounds the perturbation.
 
 The slowest cell for every tabular format is wide_table (41 columns): csv
 encodes it at 106 MB/s, toon at 114 MB/s, compact JSON at 634 MB/s. Column

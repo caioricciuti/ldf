@@ -14,7 +14,7 @@ Cargo workspace, Rust stable, edition 2024.
 |---|---|---|
 | `ldf-data` | `Value` model (ordered keys, int/float kind kept), `Number` canonical text and JSON number grammar, `FlatSchema` inference, input readers for JSON (serde_json or simd-json), JSONL, CSV/TSV, Parquet (arrow-rs, feature `parquet`) | |
 | `ldf-fixtures` | frozen PRNG (xoshiro256** + splitmix64), dataset catalog, streaming writers for JSON/JSONL/CSV/Parquet | `ldf-gen` |
-| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab. TOON v4.4 is implemented from the spec and tested against the vendored official fixtures | |
+| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml. TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
 | `ldf` | reserved for the format; empty | |
@@ -84,7 +84,8 @@ publish dates on 2026-10-17 and any version younger than seven days was pinned
 back with `cargo update <crate> --precise <older>`; keep doing that after any
 `cargo update`. The direct set is deliberately small: serde, serde_json
 (`float_roundtrip`), simd-json, csv, arrow and parquet (feature gated),
-tiktoken-rs, criterion (dev). Adding a crate is a discussion, not a commit.
+tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
+(dev). Adding a crate is a discussion, not a commit.
 
 ## Measured facts worth knowing
 
@@ -96,3 +97,6 @@ tiktoken-rs, criterion (dev). Adding a crate is a discussion, not a commit.
   (medium `nested_orders`: 1.04x bytes).
 - Arrow JSON schema inference refuses heterogeneous columns and typeless empty
   arrays; `mixed_types` and `empty_values` have no Parquet fixture.
+- yaml-rust2 has no u64: integers above i64::MAX decode as f64.
+- Frontier models explain before answering even when told not to; the
+  scorer takes the trailing JSON value (`ldf_eval::answer::parse_response`).

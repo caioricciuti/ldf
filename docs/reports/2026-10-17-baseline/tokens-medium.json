@@ -1,6 +1,6 @@
 {
   "tool": "ldf-bench",
-  "started_utc": "20261017-202336",
+  "started_utc": "20261017-211646",
   "command": [
     "./target/release/ldf-bench",
     "tokens",
@@ -20,7 +20,7 @@
     "memory_bytes": 17179869184,
     "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
     "cargo_profile": "release",
-    "git_commit": "unknown",
+    "git_commit": "41bf21d",
     "crate_versions": [
       [
         "arrow",
@@ -106,6 +106,12 @@
           "format": "toon-tab",
           "level": "semantic",
           "output_bytes": 64820,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 137864,
           "detail": null
         }
       ],
@@ -254,6 +260,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 137864,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 58498
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 58884
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -310,6 +334,12 @@
           "format": "toon-tab",
           "level": "semantic",
           "output_bytes": 308040,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 335128,
           "detail": null
         }
       ],
@@ -425,6 +455,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 335128,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 125466
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 125581
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -481,6 +529,12 @@
           "format": "toon-tab",
           "level": "semantic",
           "output_bytes": 169176,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 150314,
           "detail": null
         }
       ],
@@ -629,6 +683,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 150314,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 66018
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 66165
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -685,6 +757,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 187453,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 230415,
           "detail": null
         }
       ],
@@ -833,6 +911,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 230415,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 123104
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 124193
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -889,6 +985,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 73314,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 140255,
           "detail": null
         }
       ],
@@ -1037,6 +1139,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 140255,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 55024
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 55024
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1093,6 +1213,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 67812,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 127633,
           "detail": null
         }
       ],
@@ -1241,6 +1367,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 127633,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 47794
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 51154
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1298,6 +1442,12 @@
           "level": "lossy",
           "output_bytes": 137569,
           "detail": "944.huge: 2167128000339913000 vs 2.167128000339913e+18"
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 248421,
+          "detail": null
         }
       ],
       "measurements": [],
@@ -1445,6 +1595,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 248421,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 120446
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 120446
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1501,6 +1669,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 91470,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 83118,
           "detail": null
         }
       ],
@@ -1616,6 +1790,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 83118,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 33258
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 33258
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1672,6 +1864,12 @@
           "format": "toon-tab",
           "level": "semantic",
           "output_bytes": 276454,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 560300,
           "detail": null
         }
       ],
@@ -1820,6 +2018,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 560300,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 296643
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 296643
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -1876,6 +2092,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 815029,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 846129,
           "detail": null
         }
       ],
@@ -1991,6 +2213,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 846129,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 231573
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 231573
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -2047,6 +2287,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 231728,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 202970,
           "detail": null
         }
       ],
@@ -2162,6 +2408,24 @@
             }
           ],
           "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 202970,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 72653
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 73795
+            }
+          ],
+          "unsupported": null
         }
       ]
     },
@@ -2218,6 +2482,12 @@
           "format": "toon-tab",
           "level": "byte",
           "output_bytes": 1210436,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 1240946,
           "detail": null
         }
       ],
@@ -2363,6 +2633,24 @@
               "tokenizer": "cl100k_base",
               "exact": true,
               "tokens": 217310
+            }
+          ],
+          "unsupported": null
+        },
+        {
+          "format": "yaml",
+          "bytes": 1240946,
+          "records": 1000,
+          "counts": [
+            {
+              "tokenizer": "o200k_base",
+              "exact": true,
+              "tokens": 228446
+            },
+            {
+              "tokenizer": "cl100k_base",
+              "exact": true,
+              "tokens": 228707
             }
           ],
           "unsupported": null

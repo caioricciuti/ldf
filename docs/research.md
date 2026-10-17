@@ -86,7 +86,16 @@ All numbers below are from `docs/reports/2026-10-17-baseline/` (Apple M2 Pro,
    to 1 200 MB/s. Those are properties of these implementations, not of the
    formats. **[V]** `perf-medium.md`.
 
-10. **Arrow JSON schema inference cannot type heterogeneous or empty
+10. **Block YAML costs more tokens than compact JSON everywhere.** Bytes are
+    within 4 percent of compact JSON on regular data, but o200k tokens are
+    1.07x to 1.34x (deep nesting 1.88x): indentation and newlines are
+    tokenized less efficiently than JSON's punctuation. YAML is the only
+    non-JSON baseline that round-trips byte-exact on all twelve datasets.
+    The literature's nested-data accuracy wins for YAML (Part B, section 5)
+    are therefore paid for in tokens. **[V]** `tokens-medium.md`,
+    `perf-medium.md`.
+
+11. **Arrow JSON schema inference cannot type heterogeneous or empty
     columns.** mixed_types (a field that is sometimes a scalar, sometimes an
     object) and empty_values (empty arrays with no element type) have no
     Parquet fixture. Any Parquet to text pipeline needs a schema source
@@ -315,8 +324,8 @@ JSON faster. **[V]**
 - Known hazards: boolean coercion of `yes/no/on/off`, invisible indentation
   errors. **[S]**
 
-YAML is not among this repo's baselines yet; given the nested-data results
-above it should be added before the design phase.
+YAML is a baseline in this repo (own block-style emitter, yaml-rust2
+decoder); see Part A item 10 for its measured cost.
 
 ### 6. Apache Arrow and Parquet
 

@@ -13,6 +13,7 @@
 //! * `markdown`     GitHub-flavoured pipe table, flat records only
 //! * `toon`         Token-Oriented Object Notation, spec v4.4, written from
 //!   the spec and checked against its conformance fixtures
+//! * `yaml`         block-style YAML 1.2 (own emitter, yaml-rust2 decoder)
 
 use std::fmt;
 
@@ -21,6 +22,7 @@ use ldf_data::Value;
 pub mod json;
 pub mod tabular;
 pub mod toon;
+pub mod yaml;
 
 /// What a format can do. Reported in benchmark output so that "unsupported"
 /// cells are explained rather than blank.
@@ -128,6 +130,7 @@ pub fn all_formats() -> Vec<Box<dyn Format>> {
         Box::new(tabular::Markdown),
         Box::new(toon::Toon::default()),
         Box::new(toon::Toon::tab()),
+        Box::new(yaml::YamlFormat),
     ]
 }
 

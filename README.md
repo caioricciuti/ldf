@@ -17,7 +17,7 @@ LLM comprehension evaluation. See `docs/roadmap.md` for what comes next and
 |---|---|
 | `crates/ldf-data` | value model, number semantics, readers for JSON, JSONL, CSV, Parquet |
 | `crates/ldf-fixtures` | `ldf-gen`: twelve deterministic datasets at three scales |
-| `crates/ldf-formats` | baselines: json, json-pretty, jsonl, csv, tsv, markdown, toon (spec v4.4, conformance tested) |
+| `crates/ldf-formats` | baselines: json, json-pretty, jsonl, csv, tsv, markdown, toon (spec v4.4, conformance tested), yaml |
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, token counts, Criterion benches |
 | `crates/ldf-eval` | `ldf-eval`: tasks with ground truth, prompt bundles, scoring |
 | `crates/ldf` | reserved for the format |
@@ -91,8 +91,12 @@ network.
 - CSV, TSV and Markdown cannot represent nested data at all and silently
   merge missing fields with nulls and the string `"null"` with null; the
   harness reports these as unsupported or lossy rather than hiding them.
-- The LLM comprehension harness is complete and dry-run tested. No paid
-  evaluation has been run, so there are no accuracy numbers yet.
+- Block YAML matches compact JSON in bytes but costs 7 to 34 percent more
+  tokens on regular data.
+- First comprehension run (Claude Opus 5.5, 50 flat records, 15 questions
+  per format): every format scored 14 or 15 out of 15. At this size and
+  model tier the formats are indistinguishable on accuracy and differ only
+  in tokens. Nested, sparse and GPT runs are next.
 
 Read `docs/benchmark-methodology.md` before quoting any number.
 

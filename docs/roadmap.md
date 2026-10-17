@@ -9,7 +9,7 @@ Done:
 - Deterministic fixture generator, twelve datasets, three scales, four
   containers (JSON, JSONL, CSV, Parquet).
 - Baselines: compact JSON, pretty JSON, JSONL, CSV, TSV, Markdown table, TOON
-  v4.4 (comma and tab delimiters), each with decode and explicit
+  v4.4 (comma and tab delimiters), block YAML, each with decode and explicit
   unsupported-case reporting. TOON passes the full official conformance suite
   (160 encode, 404 decode fixtures).
 - Process-isolated performance harness (I/O, parse, encode, decode, cold and
@@ -17,11 +17,13 @@ Done:
   evaluation bundle builder, scorer, and a stdlib-only Python API runner with a
   spend gate.
 - Initial measured report on small and medium fixtures (`docs/reports/`).
+- One approved comprehension run (Claude Opus 5.5, flat_users, 120 prompts),
+  results and raw responses under `docs/reports/2026-10-17-baseline/eval/`.
 
 Not done, by decision:
 
-- No paid API calls were made. The comprehension evaluation is built and
-  dry-run tested but has no results until a run is approved.
+- No comprehension runs yet on nested or sparse data, on GPT, or on smaller
+  models; those are the runs that can separate the formats.
 - No Claude token counts (needs an API key and a `count_tokens` call).
 - No large-scale (1M row) numbers in the committed report; the tooling runs
   at that scale but the run was not part of the initial deliverable.

@@ -32,6 +32,7 @@ arrow = { version = "=60.0.0", default-features = false, features = ["json"] }
 parquet = { version = "=60.0.0", default-features = false, features = ["arrow", "snap", "zstd"] }
 tiktoken-rs = { version = "=0.12.1" }
 criterion = { version = "=0.8.2", default-features = false }
+yaml-rust2 = { version = "=0.13.0", default-features = false }
 
 [profile.release]
 debug = 1
