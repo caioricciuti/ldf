@@ -31,50 +31,63 @@ agree with the process-isolated numbers within the noise discussed below.
 
 ## LLM comprehension (`eval/`)
 
-Three runs, all Claude Opus 5.5 at effort low, 50 records per bundle,
-`max_tokens` 256, prompt caching on the data block. Tables, raw responses
-and tasks are in `eval/`. Correct answers out of prompts sent, with the mean
-input tokens per prompt as the provider counted them:
+Two models, three bundles of 50 records each, identical prompts. Tables, raw
+responses and tasks are in `eval/`.
 
-| format | flat_users (15 tasks) | nested_orders (20 tasks) | sparse_events (18 tasks) | mean input tokens, flat / nested / sparse |
+* **Claude Opus 5.5**, effort low, `max_tokens` 256, prompt caching on the
+  data block (92 percent of input tokens were cache reads). Cost under $3.
+* **GPT-6.1 Sol**, `reasoning_effort` low, `max_completion_tokens` 2048,
+  temperature rejected by the model and dropped. No cache hits were reported
+  by the API (`cached_tokens` 0 on every call), so input was billed in full.
+  Cost $2.65 for 364 prompts.
+
+Correct answers out of prompts sent:
+
+| format | flat_users (15) Claude / GPT | nested_orders (20) Claude / GPT | sparse_events (18) Claude / GPT | GPT input tokens per prompt, flat / nested / sparse |
 |---|---:|---:|---:|---|
-| json | 15 | 19 | 17 | 3 548 / 7 733 / 3 878 |
-| json-pretty | 15 | 19 | 17 | 4 853 / 11 615 / 5 201 |
-| jsonl | 15 | 19 | 17 | 3 598 / 7 783 / 3 928 |
-| csv | 14 | unsupported | 17 | 2 065 / - / 2 458 |
-| tsv | 15 | unsupported | 16 | 2 066 / - / 2 097 |
-| markdown | 15 | unsupported | 17 | 2 594 / - / 3 331 |
-| toon | 14 | 19 | 17 | 2 121 / 6 835 / 4 104 |
-| toon-tab | 15 | 19 | 17 | 2 125 / 6 889 / 4 108 |
+| json | 15 / 15 | 19 / 20 | 17 / 18 | 2 447 / 5 176 / 2 826 |
+| json-pretty | 15 / 15 | 19 / 20 | 17 / 18 | 3 798 / 9 091 / 4 165 |
+| jsonl | 15 / 15 | 19 / 20 | 17 / 18 | 2 495 / 5 224 / 2 874 |
+| csv | 14 / 15 | unsupported | 17 / 18 | 1 534 / - / 1 797 |
+| tsv | 15 / 15 | unsupported | 16 / 18 | 1 528 / - / 1 789 |
+| markdown | 15 / 15 | unsupported | 17 / 18 | 1 858 / - / 2 831 |
+| toon | 14 / 15 | 19 / 20 | 17 / 18 | 1 638 / 5 549 / 3 436 |
+| toon-tab | 15 / 15 | 19 / 20 | 17 / 18 | 1 633 / 5 551 / 3 438 |
 
-Every miss is one of three things, none of them format specific:
+GPT answered all 364 prompts correctly, in every format, and never added
+prose. Its input token counts equal the o200k_base counts in
+`tokens-*.md` exactly, which confirms those tables as real GPT cost. It spent
+400 to 540 reasoning tokens on the "mean of total" question and got it right
+in all five formats; Claude at low effort got that question wrong in the four
+formats where it finished.
 
-* **Truncation on sums.** The "sum of latency_ms" question made the model
+Claude's misses are one of three things, none format specific:
+
+* **Truncation on sums.** The "sum of latency_ms" question made Claude
   write a running-total table and hit the 256-token output cap in all eight
   formats on sparse_events (and json on nested_orders). Scored as
   truncated, not wrong; the runner's default is now 1 024 tokens.
 * **Arithmetic.** The "mean of total" question on nested_orders completed
-  in four formats and all four answers were wrong by 2 to 10 percent
-  (1 937, 1 896, 1 995, 2 065 against 1 867). A reasoning limit at effort
-  low, independent of format.
+  in four formats and all four answers were wrong by 2 to 10 percent.
 * **Two-record comparison.** Three answers gave both values instead of
   picking one (csv flat, tsv sparse) or named the wrong record (toon flat).
 
 Lookup, filter, missing-value, nested extraction and top-k were answered
-correctly in every format, including the three "absent versus null" questions
-per bundle, which CSV and TSV got right from empty cells.
+correctly by both models in every format, including the "absent versus
+null" questions, which CSV and TSV got right from empty cells.
 
-Reading: at 50 records and this model tier the formats are indistinguishable
-on accuracy, and the only separator is tokens: on the nested bundle TOON is
-the cheapest input and the only one of CSV, TSV, Markdown and TOON that can
-hold the data; on the sparse bundle TOON costs 6 percent more than compact
-JSON while CSV costs 37 percent less. The scorer takes a trailing JSON value
-after prose because the model explained first in roughly a third of replies.
+Reading: at 50 records both models are at ceiling, so accuracy cannot rank
+the formats and tokens are the only separator. On the nested bundle TOON is
+7 percent more expensive than compact JSON for GPT and the only one of CSV,
+TSV, Markdown and TOON that can hold the data; on the sparse bundle TOON
+costs 22 percent more than compact JSON while CSV costs 36 percent less.
+Separation, if it exists, has to come from larger samples or weaker models;
+200 and 500 record bundles are built under `eval/out/`.
 
 ## What was not measured
 
-* No comprehension numbers yet for nested or sparse data, for GPT, or for
-  smaller models.
+* No comprehension numbers yet beyond 50 records or below the frontier tier
+  (Haiku, mini and nano class models).
 * No Claude token counts: needs the count_tokens endpoint and a key.
 * No large-scale (1M row) runs.
 * No cross-machine or Linux numbers.

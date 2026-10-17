@@ -93,10 +93,11 @@ network.
   harness reports these as unsupported or lossy rather than hiding them.
 - Block YAML matches compact JSON in bytes but costs 7 to 34 percent more
   tokens on regular data.
-- First comprehension run (Claude Opus 5.5, 50 flat records, 15 questions
-  per format): every format scored 14 or 15 out of 15. At this size and
-  model tier the formats are indistinguishable on accuracy and differ only
-  in tokens. Nested, sparse and GPT runs are next.
+- Comprehension runs on three 50-record datasets with Claude Opus 5.5 and
+  GPT-6.1 Sol: GPT answered 364 of 364 correctly in every format; Claude's
+  few misses were output truncation, arithmetic, or a two-record comparison,
+  none tied to a format. At this size and model tier the formats differ only
+  in tokens. Larger samples and cheaper models are next.
 
 Read `docs/benchmark-methodology.md` before quoting any number.
 

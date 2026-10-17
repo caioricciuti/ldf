@@ -17,13 +17,15 @@ Done:
   evaluation bundle builder, scorer, and a stdlib-only Python API runner with a
   spend gate.
 - Initial measured report on small and medium fixtures (`docs/reports/`).
-- One approved comprehension run (Claude Opus 5.5, flat_users, 120 prompts),
+- Comprehension runs: Claude Opus 5.5 and GPT-6.1 Sol on flat_users,
+  nested_orders and sparse_events (50 records each, 364 prompts per model),
   results and raw responses under `docs/reports/2026-10-17-baseline/eval/`.
 
 Not done, by decision:
 
-- No comprehension runs yet on nested or sparse data, on GPT, or on smaller
-  models; those are the runs that can separate the formats.
+- No comprehension runs yet beyond 50 records or below the frontier tier;
+  those are the runs that can separate the formats. 200 and 500 record
+  bundles are built.
 - No Claude token counts (needs an API key and a `count_tokens` call).
 - No large-scale (1M row) numbers in the committed report; the tooling runs
   at that scale but the run was not part of the initial deliverable.
