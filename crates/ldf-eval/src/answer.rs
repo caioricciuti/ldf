@@ -158,7 +158,11 @@ impl Answer {
 
 /// Last JSON array, or last trailing number / quoted string, in free text.
 fn trailing_value(text: &str) -> Option<Answer> {
-    let t = text.trim_end().trim_end_matches(['.', '!']);
+    // Trailing punctuation and decorative brackets (ASCII or not) are not
+    // part of the answer.
+    const CLOSERS: [char; 12] = ['.', '!', '*', '`', ')', '〕', '】', '」', '》', '〉', '⟩', '］'];
+    const OPENERS: [char; 11] = ['(', '〔', '【', '「', '《', '〈', '⟨', '［', '*', '`', ','];
+    let t = text.trim_end().trim_end_matches(CLOSERS).trim_end();
     if let Some(close) = t.rfind(']')
         && let Some(open) = t[..close].rfind('[')
         && let Ok(v) = serde_json::from_str::<Value>(&t[open..=close])
@@ -175,7 +179,7 @@ fn trailing_value(text: &str) -> Option<Answer> {
     {
         return Some(Answer::Text(s));
     }
-    let last = t.rsplit([' ', '\n', ':', '=']).next()?.trim_matches(|c: char| c == '*' || c == '`' || c == ',');
+    let last = t.rsplit([' ', '\n', ':', '=']).next()?.trim_start_matches(OPENERS).trim_end_matches(',');
     if let Ok(f) = last.parse::<f64>()
         && last.chars().any(|c| c.is_ascii_digit())
     {
@@ -295,6 +299,8 @@ mod tests {
         assert!(!Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("the two highest are  [\"7\", \"34\"]  The ids are numbers").unwrap(), &t));
         assert!(Answer::Text("dan.34@example.com".into()).accepts(&parse_response("The email is \"dan.34@example.com\"").unwrap(), &t));
         // Prose with no extractable trailing value stays unparsed-as-text and is scored wrong, not correct.
+        assert!(Answer::Number(29258.0).accepts(&parse_response("7760 + 7506 = 29258  〔29258〕").unwrap(), &t));
+        assert!(Answer::Number(49.0).accepts(&parse_response("so the answer is (49)").unwrap(), &t));
         let got = parse_response("Records with score above 86.42: - id 9: 92.69 - id 10: 86.6").unwrap();
         assert!(!Answer::Set(vec![Scalar::Number(9.0), Scalar::Number(10.0)]).accepts(&got, &t));
     }

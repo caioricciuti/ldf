@@ -31,18 +31,45 @@ agree with the process-isolated numbers within the noise discussed below.
 
 ## LLM comprehension (`eval/`)
 
-One run so far: Claude Opus 5.5, effort low, flat_users bundle, 50 records,
-15 tasks per format, 120 prompts. Table in `eval/flat_users.claude-opus-5-5.md`,
-raw responses and tasks next to it. Every format scored 14 or 15 of 15; the
-two misses were real model errors on a two-record comparison (csv: answered
-with both values, toon: wrong id). Input tokens per prompt ranged from 2 065
-(csv) to 4 853 (json-pretty); 92 percent of input tokens were prompt-cache
-reads. The model explained before answering in about a third of replies
-despite the instruction; the scorer accepts a trailing JSON value.
+Three runs, all Claude Opus 5.5 at effort low, 50 records per bundle,
+`max_tokens` 256, prompt caching on the data block. Tables, raw responses
+and tasks are in `eval/`. Correct answers out of prompts sent, with the mean
+input tokens per prompt as the provider counted them:
 
-Reading: at this size and model tier the formats are indistinguishable on
-accuracy; token cost is the only separator. Nested, sparse, GPT and
-smaller-model runs are what can change that.
+| format | flat_users (15 tasks) | nested_orders (20 tasks) | sparse_events (18 tasks) | mean input tokens, flat / nested / sparse |
+|---|---:|---:|---:|---|
+| json | 15 | 19 | 17 | 3 548 / 7 733 / 3 878 |
+| json-pretty | 15 | 19 | 17 | 4 853 / 11 615 / 5 201 |
+| jsonl | 15 | 19 | 17 | 3 598 / 7 783 / 3 928 |
+| csv | 14 | unsupported | 17 | 2 065 / - / 2 458 |
+| tsv | 15 | unsupported | 16 | 2 066 / - / 2 097 |
+| markdown | 15 | unsupported | 17 | 2 594 / - / 3 331 |
+| toon | 14 | 19 | 17 | 2 121 / 6 835 / 4 104 |
+| toon-tab | 15 | 19 | 17 | 2 125 / 6 889 / 4 108 |
+
+Every miss is one of three things, none of them format specific:
+
+* **Truncation on sums.** The "sum of latency_ms" question made the model
+  write a running-total table and hit the 256-token output cap in all eight
+  formats on sparse_events (and json on nested_orders). Scored as
+  truncated, not wrong; the runner's default is now 1 024 tokens.
+* **Arithmetic.** The "mean of total" question on nested_orders completed
+  in four formats and all four answers were wrong by 2 to 10 percent
+  (1 937, 1 896, 1 995, 2 065 against 1 867). A reasoning limit at effort
+  low, independent of format.
+* **Two-record comparison.** Three answers gave both values instead of
+  picking one (csv flat, tsv sparse) or named the wrong record (toon flat).
+
+Lookup, filter, missing-value, nested extraction and top-k were answered
+correctly in every format, including the three "absent versus null" questions
+per bundle, which CSV and TSV got right from empty cells.
+
+Reading: at 50 records and this model tier the formats are indistinguishable
+on accuracy, and the only separator is tokens: on the nested bundle TOON is
+the cheapest input and the only one of CSV, TSV, Markdown and TOON that can
+hold the data; on the sparse bundle TOON costs 6 percent more than compact
+JSON while CSV costs 37 percent less. The scorer takes a trailing JSON value
+after prose because the model explained first in roughly a third of replies.
 
 ## What was not measured
 

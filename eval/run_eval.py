@@ -157,7 +157,9 @@ def main():
     p.add_argument("--model", required=True, help="exact model id, recorded with every response")
     p.add_argument("--formats", help="comma separated subset of formats")
     p.add_argument("--max-prompts", type=int, help="stop after this many prompts (after resume filtering)")
-    p.add_argument("--max-tokens", type=int, default=256, help="answers are short JSON values; 256 leaves headroom")
+    p.add_argument("--max-tokens", type=int, default=1024,
+                   help="answers are short JSON values, but models show arithmetic for sums and means; "
+                        "256 truncated every sum question in the first runs, 1024 leaves room")
     p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"], help="Anthropic output_config.effort")
     p.add_argument("--no-temperature", action="store_true", help="omit temperature (OpenAI reasoning models)")
     p.add_argument("--no-cache", action="store_true", help="Anthropic: do not mark the data block as a prompt-cache breakpoint")
