@@ -5,8 +5,10 @@
 | gpt-6.1-sol | json | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5176 | 1815 ms |
 | gpt-6.1-sol | json-pretty | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 9091 | 1743 ms |
 | gpt-6.1-sol | jsonl | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5224 | 1719 ms |
+| gpt-6.1-sol | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 3430 | 1807 ms |
 | gpt-6.1-sol | toon | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5549 | 1755 ms |
 | gpt-6.1-sol | toon-tab | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5551 | 1714 ms |
+| gpt-6.1-sol | yaml | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 6476 | 2118 ms |
 | - | csv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | tsv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | markdown | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
@@ -36,6 +38,13 @@
 | gpt-6.1-sol | jsonl | missing_value | 3 | 100.0% |
 | gpt-6.1-sol | jsonl | nested_extract | 3 | 100.0% |
 | gpt-6.1-sol | jsonl | multi_record | 2 | 100.0% |
+| gpt-6.1-sol | ldf | lookup | 3 | 100.0% |
+| gpt-6.1-sol | ldf | filter | 3 | 100.0% |
+| gpt-6.1-sol | ldf | aggregate | 3 | 100.0% |
+| gpt-6.1-sol | ldf | compare | 3 | 100.0% |
+| gpt-6.1-sol | ldf | missing_value | 3 | 100.0% |
+| gpt-6.1-sol | ldf | nested_extract | 3 | 100.0% |
+| gpt-6.1-sol | ldf | multi_record | 2 | 100.0% |
 | gpt-6.1-sol | toon | lookup | 3 | 100.0% |
 | gpt-6.1-sol | toon | filter | 3 | 100.0% |
 | gpt-6.1-sol | toon | aggregate | 3 | 100.0% |
@@ -50,3 +59,10 @@
 | gpt-6.1-sol | toon-tab | missing_value | 3 | 100.0% |
 | gpt-6.1-sol | toon-tab | nested_extract | 3 | 100.0% |
 | gpt-6.1-sol | toon-tab | multi_record | 2 | 100.0% |
+| gpt-6.1-sol | yaml | lookup | 3 | 100.0% |
+| gpt-6.1-sol | yaml | filter | 3 | 100.0% |
+| gpt-6.1-sol | yaml | aggregate | 3 | 100.0% |
+| gpt-6.1-sol | yaml | compare | 3 | 100.0% |
+| gpt-6.1-sol | yaml | missing_value | 3 | 100.0% |
+| gpt-6.1-sol | yaml | nested_extract | 3 | 100.0% |
+| gpt-6.1-sol | yaml | multi_record | 2 | 100.0% |

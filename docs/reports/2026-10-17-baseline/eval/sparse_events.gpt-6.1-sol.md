@@ -6,10 +6,12 @@
 | gpt-6.1-sol | json | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2827 | 1483 ms |
 | gpt-6.1-sol | json-pretty | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 4166 | 1382 ms |
 | gpt-6.1-sol | jsonl | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2875 | 1359 ms |
+| gpt-6.1-sol | ldf | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 1885 | 1524 ms |
 | gpt-6.1-sol | markdown | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2832 | 1341 ms |
 | gpt-6.1-sol | toon | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3437 | 1439 ms |
 | gpt-6.1-sol | toon-tab | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3439 | 1495 ms |
 | gpt-6.1-sol | tsv | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 1790 | 1403 ms |
+| gpt-6.1-sol | yaml | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3372 | 1728 ms |
 
 ## By task kind
 
@@ -39,6 +41,12 @@
 | gpt-6.1-sol | jsonl | compare | 3 | 100.0% |
 | gpt-6.1-sol | jsonl | missing_value | 3 | 100.0% |
 | gpt-6.1-sol | jsonl | multi_record | 3 | 100.0% |
+| gpt-6.1-sol | ldf | lookup | 3 | 100.0% |
+| gpt-6.1-sol | ldf | filter | 3 | 100.0% |
+| gpt-6.1-sol | ldf | aggregate | 3 | 100.0% |
+| gpt-6.1-sol | ldf | compare | 3 | 100.0% |
+| gpt-6.1-sol | ldf | missing_value | 3 | 100.0% |
+| gpt-6.1-sol | ldf | multi_record | 3 | 100.0% |
 | gpt-6.1-sol | markdown | lookup | 3 | 100.0% |
 | gpt-6.1-sol | markdown | filter | 3 | 100.0% |
 | gpt-6.1-sol | markdown | aggregate | 3 | 100.0% |
@@ -63,3 +71,9 @@
 | gpt-6.1-sol | tsv | compare | 3 | 100.0% |
 | gpt-6.1-sol | tsv | missing_value | 3 | 100.0% |
 | gpt-6.1-sol | tsv | multi_record | 3 | 100.0% |
+| gpt-6.1-sol | yaml | lookup | 3 | 100.0% |
+| gpt-6.1-sol | yaml | filter | 3 | 100.0% |
+| gpt-6.1-sol | yaml | aggregate | 3 | 100.0% |
+| gpt-6.1-sol | yaml | compare | 3 | 100.0% |
+| gpt-6.1-sol | yaml | missing_value | 3 | 100.0% |
+| gpt-6.1-sol | yaml | multi_record | 3 | 100.0% |

@@ -41,7 +41,8 @@ responses and tasks are in `eval/`.
   by the API (`cached_tokens` 0 on every call), so input was billed in full.
   Cost $2.65 for 364 prompts.
 
-Correct answers out of prompts sent:
+Correct answers out of prompts sent. YAML and LDF were added on 2026-10-18
+and have GPT results only (the Claude key was not available for that run):
 
 | format | flat_users (15) Claude / GPT | nested_orders (20) Claude / GPT | sparse_events (18) Claude / GPT | GPT input tokens per prompt, flat / nested / sparse |
 |---|---:|---:|---:|---|
@@ -53,9 +54,25 @@ Correct answers out of prompts sent:
 | markdown | 15 / 15 | unsupported | 17 / 18 | 1 858 / - / 2 831 |
 | toon | 14 / 15 | 19 / 20 | 17 / 18 | 1 638 / 5 549 / 3 436 |
 | toon-tab | 15 / 15 | 19 / 20 | 17 / 18 | 1 633 / 5 551 / 3 438 |
+| yaml | - / 15 | - / 20 | - / 18 | 3 026 / 6 476 / 3 371 |
+| **ldf** | **- / 15** | **- / 20** | **- / 18** | **1 545 / 3 430 / 1 884** |
 
-GPT answered all 364 prompts correctly, in every format, and never added
-prose. Its input token counts equal the o200k_base counts in
+GPT answered all 470 prompts correctly, in every format including LDF
+zero-shot (the prompt names the format and shows the data, nothing more),
+and never added prose. LDF was the cheapest input in all three bundles: on
+nested orders 34 percent below compact JSON and 38 percent below TOON, on
+sparse events 33 percent below JSON and 45 percent below TOON, on flat users
+within 1 percent of CSV.
+
+**First size step.** flat_users at 200 records, GPT, stopped after 25 of 150
+prompts when the account ran out of credit (`eval/flat_users_200.*`): json
+15 of 15, json-pretty 9 of 10. The miss is the sum over 200 scores:
+json-pretty answered 10 077.78 for a true 9 677.78, off by exactly 400, a
+row double-counted or a transposition, after 1 326 reasoning tokens. The
+same question in compact JSON was right after 1 891 reasoning tokens. One
+data point, but the first format-correlated error, and it appeared where the
+literature says it should: at larger inputs on aggregation. The remaining 125
+prompts of that bundle resume with the same command. Its input token counts equal the o200k_base counts in
 `tokens-*.md` exactly, which confirms those tables as real GPT cost. It spent
 400 to 540 reasoning tokens on the "mean of total" question and got it right
 in all five formats; Claude at low effort got that question wrong in the four

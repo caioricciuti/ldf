@@ -96,10 +96,12 @@ network.
 - Block YAML matches compact JSON in bytes but costs 7 to 34 percent more
   tokens on regular data.
 - Comprehension runs on three 50-record datasets with Claude Opus 5.5 and
-  GPT-6.1 Sol: GPT answered 364 of 364 correctly in every format; Claude's
-  few misses were output truncation, arithmetic, or a two-record comparison,
-  none tied to a format. At this size and model tier the formats differ only
-  in tokens. Larger samples and cheaper models are next.
+  GPT-6.1 Sol: GPT answered 470 of 470 correctly across ten formats, LDF
+  included zero-shot; Claude's few misses were output truncation,
+  arithmetic, or a two-record comparison, none tied to a format. LDF was the
+  cheapest input in every bundle. At 200 records the first format-correlated
+  error appeared (a pretty-JSON sum off by one row). Larger samples and
+  cheaper models are next.
 
 Read `docs/benchmark-methodology.md` before quoting any number.
 
