@@ -57,11 +57,24 @@ def build_request(provider, model, prompt, max_tokens, args):
         }
         return OPENAI_URL, headers, body
     if provider == "anthropic":
+        # The data block is identical for every task of one (dataset, format),
+        # and prompts are ordered so those come consecutively. Marking it as a
+        # cache breakpoint makes the repeated reads cost a fraction of a full
+        # read. Caching does not change the model's answer; --no-cache turns
+        # it off for an A/B check.
+        content = prompt["user"]
+        marker = "</data>\n\n"
+        if not args.no_cache and marker in content:
+            head, tail = content.split(marker, 1)
+            content = [
+                {"type": "text", "text": head + marker, "cache_control": {"type": "ephemeral"}},
+                {"type": "text", "text": tail},
+            ]
         body = {
             "model": model,
             "max_tokens": max_tokens,
             "system": prompt["system"],
-            "messages": [{"role": "user", "content": prompt["user"]}],
+            "messages": [{"role": "user", "content": content}],
         }
         if args.effort:
             body["output_config"] = {"effort": args.effort}
@@ -75,15 +88,23 @@ def build_request(provider, model, prompt, max_tokens, args):
 
 
 def parse_reply(provider, data):
-    """Returns (text, finish_reason, input_tokens, output_tokens, error)."""
+    """Returns (text, finish_reason, input_tokens, output_tokens, cached_tokens, error).
+
+    input_tokens is the full prompt size as the provider counts it (for
+    Anthropic: uncached + cache writes + cache reads), so it is comparable
+    across cached and uncached runs. cached_tokens says how much of it was
+    served from cache.
+    """
     if provider == "openai":
         choice = data["choices"][0]
         usage = data.get("usage", {})
+        cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
         return (
             choice["message"].get("content"),
             choice.get("finish_reason"),
             usage.get("prompt_tokens"),
             usage.get("completion_tokens"),
+            cached,
             None,
         )
     stop = data.get("stop_reason")
@@ -93,7 +114,11 @@ def parse_reply(provider, data):
     if stop == "refusal":
         details = data.get("stop_details") or {}
         error = "refusal: " + str(details.get("category"))
-    return text, stop, usage.get("input_tokens"), usage.get("output_tokens"), error
+    cache_read = usage.get("cache_read_input_tokens") or 0
+    cache_write = usage.get("cache_creation_input_tokens") or 0
+    uncached = usage.get("input_tokens")
+    total_in = None if uncached is None else uncached + cache_read + cache_write
+    return text, stop, total_in, usage.get("output_tokens"), cache_read or None, error
 
 
 def call(url, headers, body, timeout, retries):
@@ -135,6 +160,7 @@ def main():
     p.add_argument("--max-tokens", type=int, default=256, help="answers are short JSON values; 256 leaves headroom")
     p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"], help="Anthropic output_config.effort")
     p.add_argument("--no-temperature", action="store_true", help="omit temperature (OpenAI reasoning models)")
+    p.add_argument("--no-cache", action="store_true", help="Anthropic: do not mark the data block as a prompt-cache breakpoint")
     p.add_argument("--sleep", type=float, default=0.0, help="seconds between requests")
     p.add_argument("--timeout", type=float, default=300.0)
     p.add_argument("--retries", type=int, default=4)
@@ -189,12 +215,13 @@ def main():
                 "error": err,
                 "input_tokens": None,
                 "output_tokens": None,
+                "cached_tokens": None,
                 "latency_ms": latency,
                 "settings": {k: v for k, v in body.items() if k not in ("messages", "system")},
             }
             if data is not None:
-                text, finish, itok, otok, perr = parse_reply(args.provider, data)
-                rec.update(text=text, finish_reason=finish, input_tokens=itok, output_tokens=otok, error=perr)
+                text, finish, itok, otok, cached, perr = parse_reply(args.provider, data)
+                rec.update(text=text, finish_reason=finish, input_tokens=itok, output_tokens=otok, cached_tokens=cached, error=perr)
             out.write(json.dumps(rec, ensure_ascii=False) + "\n")
             out.flush()
             status = rec["error"] or (rec["text"] or "")[:60].replace("\n", " ")
