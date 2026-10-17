@@ -66,6 +66,10 @@ pub struct BundleInput<'a> {
     pub records: &'a [Value],
     pub tasks: &'a [Task],
     pub formats: &'a [Box<dyn Format>],
+    /// Externally encoded renderings of the same records, as (name, text).
+    /// Lets a design candidate be evaluated before it has a Rust encoder.
+    /// The caller is responsible for the text matching `records`.
+    pub extra: &'a [(String, String)],
     pub tokenizer: Option<&'a Tokenizer>,
 }
 
@@ -77,6 +81,7 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
         records,
         tasks,
         formats,
+        extra,
         tokenizer,
     } = *input;
     fs::create_dir_all(out).map_err(|e| e.to_string())?;
@@ -94,36 +99,38 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
     let mut data_tokens = Vec::new();
     let mut max_prompt_tokens: Option<u64> = None;
     let mut prompt_count = 0usize;
+    let mut renderings: Vec<(String, String, String)> = Vec::new();
     for f in formats {
-        let text = match f.encode_to_string(records) {
-            Ok(t) => t,
-            Err(EncodeError::Unsupported(u)) => {
-                unsupported.push((f.name().to_string(), u.reason));
-                continue;
-            }
+        match f.encode_to_string(records) {
+            Ok(t) => renderings.push((f.name().to_string(), f.extension().to_string(), t)),
+            Err(EncodeError::Unsupported(u)) => unsupported.push((f.name().to_string(), u.reason)),
             Err(e) => return Err(e.to_string()),
-        };
-        fs::write(data_dir.join(format!("{dataset}.{}", f.extension())), &text)
-            .map_err(|e| e.to_string())?;
-        let dt = tokenizer.map(|t| t.count(&text));
-        if let Some(n) = dt {
-            data_tokens.push((f.name().to_string(), n));
         }
-        used.push(f.name().to_string());
+    }
+    for (name, text) in extra {
+        renderings.push((name.clone(), format!("{name}.txt"), text.clone()));
+    }
+    for (name, ext, text) in &renderings {
+        fs::write(data_dir.join(format!("{dataset}.{ext}")), text).map_err(|e| e.to_string())?;
+        let dt = tokenizer.map(|t| t.count(text));
+        if let Some(n) = dt {
+            data_tokens.push((name.clone(), n));
+        }
+        used.push(name.clone());
         for t in tasks {
             let user = USER_TEMPLATE
                 .replace("{record_count}", &records.len().to_string())
-                .replace("{format_name}", f.name())
-                .replace("{data}", &text)
+                .replace("{format_name}", name)
+                .replace("{data}", text)
                 .replace("{question}", &t.question);
             let pt = tokenizer.map(|tk| tk.count(SYSTEM_PROMPT) + tk.count(&user));
             if let Some(n) = pt {
                 max_prompt_tokens = Some(max_prompt_tokens.map_or(n, |m| m.max(n)));
             }
             let p = Prompt {
-                prompt_id: format!("{}__{}", t.id, f.name()),
+                prompt_id: format!("{}__{}", t.id, name),
                 task_id: t.id.clone(),
-                format: f.name().to_string(),
+                format: name.clone(),
                 system: SYSTEM_PROMPT.to_string(),
                 user,
                 data_bytes: text.len() as u64,

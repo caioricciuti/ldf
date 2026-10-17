@@ -2,7 +2,7 @@
 //!
 //! ```text
 //! ldf-eval build --input fixtures/small/flat_users.json [--records 50] [--per-kind 3]
-//!                [--formats all] [--seed 1] --out eval/out/flat_users
+//!                [--formats all] [--seed 1] [--extra name=file]... --out eval/out/flat_users
 //! ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.jsonl
 //! ```
 
@@ -79,6 +79,22 @@ fn build(args: &[String]) -> ExitCode {
         .and_then(|s| s.to_str())
         .unwrap_or("dataset")
         .to_string();
+    // --extra name=path pairs: pre-encoded renderings of the same records.
+    let mut extra: Vec<(String, String)> = Vec::new();
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        if a == "--extra" {
+            let Some(spec) = it.next() else { return usage() };
+            let Some((name, path)) = spec.split_once('=') else { return usage() };
+            match fs::read_to_string(path) {
+                Ok(text) => extra.push((name.to_string(), text)),
+                Err(e) => {
+                    eprintln!("{path}: {e}");
+                    return ExitCode::FAILURE;
+                }
+            }
+        }
+    }
     let bundle = BundleInput {
         dataset: &dataset,
         source_path: &input,
@@ -86,6 +102,7 @@ fn build(args: &[String]) -> ExitCode {
         records: &records,
         tasks: &tasks,
         formats: &formats,
+        extra: &extra,
         tokenizer: tokenizer.as_ref(),
     };
     match write_bundle(Path::new(&out), &bundle) {

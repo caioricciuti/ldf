@@ -45,7 +45,10 @@ Not done, by decision:
 
 ## Phase 3: LDF design
 
-Only after Phase 2 numbers exist. Design inputs, in priority order:
+Opened 2026-10-17 with `docs/design-candidates.md`: three candidate families
+measured on the comprehension datasets, a recommendation (typed table, comma,
+dotted paths, child tables) and six decisions still to make together.
+Design inputs, in priority order:
 
 1. Measured accuracy per task kind and format, split by failure cause.
 2. Measured tokens per record for each tokenizer, as a function of width,

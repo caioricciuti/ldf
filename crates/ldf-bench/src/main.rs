@@ -7,6 +7,7 @@
 //!                      [--in-process]
 //! ldf-bench tokens     --input F... | --scale S [--dataset a,b] [--formats all]
 //!                      [--tokenizers o200k_base,cl100k_base] [--sample N] [--out results/<ts>]
+//! ldf-bench count      [--tokenizers o200k_base,cl100k_base] FILE...   (tokens of any text files)
 //! ldf-bench sysinfo
 //! ldf-bench child ...  (internal: one measurement in a fresh process)
 //! ```
@@ -97,6 +98,13 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         "child" => child(&args),
+        "count" => match count(&args) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("error: {e}");
+                ExitCode::FAILURE
+            }
+        },
         "roundtrip" | "perf" | "tokens" => match orchestrate(&args) {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
@@ -106,6 +114,30 @@ fn main() -> ExitCode {
         },
         _ => usage(),
     }
+}
+
+// ---- token counts of arbitrary files --------------------------------------------
+
+fn count(args: &Args) -> Result<(), String> {
+    let spec = args.get("tokenizers").unwrap_or("o200k_base,cl100k_base");
+    let names: Vec<&str> = spec.split(',').map(str::trim).collect();
+    let tk = Tokenizers::new(&names)?;
+    let files = args.all("input");
+    if files.is_empty() {
+        return Err("pass one or more files".into());
+    }
+    println!("| file | bytes | {} |", names.iter().map(|n| format!("{n} | bytes/token")).collect::<Vec<_>>().join(" | "));
+    println!("|---|---:|{}", names.iter().map(|_| "---:|---:|").collect::<String>());
+    for f in files {
+        let text = fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
+        let counts = tk.count(&text);
+        let cells: Vec<String> = counts
+            .iter()
+            .map(|c| format!("{} | {:.2}", c.tokens, if c.tokens > 0 { text.len() as f64 / c.tokens as f64 } else { 0.0 }))
+            .collect();
+        println!("| {} | {} | {} |", Path::new(f).file_name().and_then(|n| n.to_str()).unwrap_or(f), text.len(), cells.join(" | "));
+    }
+    Ok(())
 }
 
 // ---- input selection ----------------------------------------------------------
