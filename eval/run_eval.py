@@ -49,6 +49,8 @@ def build_request(provider, model, prompt, max_tokens, args):
             "max_completion_tokens": max_tokens,
             "seed": 0,
         }
+        if args.reasoning_effort:
+            body["reasoning_effort"] = args.reasoning_effort
         if not args.no_temperature:
             body["temperature"] = 0
         headers = {
@@ -99,13 +101,18 @@ def parse_reply(provider, data):
         choice = data["choices"][0]
         usage = data.get("usage", {})
         cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
+        reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
+        content = choice["message"].get("content")
+        if reasoning:
+            # Keep the visible text; the reasoning count travels in the record.
+            content = content if content is not None else ""
         return (
-            choice["message"].get("content"),
+            content,
             choice.get("finish_reason"),
             usage.get("prompt_tokens"),
             usage.get("completion_tokens"),
             cached,
-            None,
+            None if content else "empty completion (reasoning_tokens=%s)" % reasoning,
         )
     stop = data.get("stop_reason")
     usage = data.get("usage", {})
@@ -121,10 +128,18 @@ def parse_reply(provider, data):
     return text, stop, total_in, usage.get("output_tokens"), cache_read or None, error
 
 
+# Request fields a provider may reject for a given model (reasoning models
+# refuse temperature, some refuse seed or reasoning_effort). On a 400 that
+# names one of these, the field is dropped and the request retried once; the
+# settings actually used are recorded with every response.
+DROPPABLE = ("temperature", "seed", "reasoning_effort", "top_p")
+
+
 def call(url, headers, body, timeout, retries):
-    payload = json.dumps(body).encode("utf-8")
     delay = 2.0
+    dropped = []
     for attempt in range(retries + 1):
+        payload = json.dumps(body).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
         started = time.monotonic()
         try:
@@ -134,6 +149,13 @@ def call(url, headers, body, timeout, retries):
             return json.loads(raw), latency, None
         except urllib.error.HTTPError as e:
             text = e.read().decode("utf-8", "replace")
+            if e.code == 400:
+                culprit = next((f for f in DROPPABLE if f in body and f in text), None)
+                if culprit and attempt < retries:
+                    body.pop(culprit)
+                    dropped.append(culprit)
+                    print(f"  note: {culprit} rejected by the model, retrying without it", file=sys.stderr)
+                    continue
             if e.code in (408, 409, 429) or e.code >= 500:
                 if attempt < retries:
                     wait = e.headers.get("retry-after")
@@ -161,11 +183,17 @@ def main():
                    help="answers are short JSON values, but models show arithmetic for sums and means; "
                         "256 truncated every sum question in the first runs, 1024 leaves room")
     p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"], help="Anthropic output_config.effort")
-    p.add_argument("--no-temperature", action="store_true", help="omit temperature (OpenAI reasoning models)")
+    p.add_argument("--no-temperature", action="store_true", help="omit temperature (OpenAI reasoning models reject it; it is also dropped automatically on a 400)")
+    p.add_argument("--reasoning-effort", choices=["none", "minimal", "low", "medium", "high", "xhigh", "max"],
+                   help="OpenAI reasoning_effort for GPT-5+ models; reasoning tokens are billed as output")
     p.add_argument("--no-cache", action="store_true", help="Anthropic: do not mark the data block as a prompt-cache breakpoint")
     p.add_argument("--sleep", type=float, default=0.0, help="seconds between requests")
     p.add_argument("--timeout", type=float, default=300.0)
     p.add_argument("--retries", type=int, default=4)
+    p.add_argument("--price-input", type=float, help="USD per 1M uncached input tokens, for the running cost line")
+    p.add_argument("--price-cached", type=float, help="USD per 1M cached input tokens")
+    p.add_argument("--price-output", type=float, help="USD per 1M output tokens (reasoning tokens included)")
+    p.add_argument("--budget", type=float, help="stop sending once the running cost estimate reaches this many USD")
     p.add_argument("--dry-run", action="store_true", help="print the first request body and exit")
     p.add_argument("--confirm-spend", action="store_true", help="required to send anything")
     args = p.parse_args()
@@ -202,8 +230,22 @@ def main():
     if not args.confirm_spend:
         raise SystemExit("refusing to send: pass --confirm-spend after reviewing the counts above")
 
+    if args.budget is not None and None in (args.price_input, args.price_cached, args.price_output):
+        raise SystemExit("--budget needs --price-input, --price-cached and --price-output")
+    spent = 0.0
+
+    def cost_of(rec):
+        if None in (args.price_input, args.price_cached, args.price_output):
+            return None
+        cached = rec["cached_tokens"] or 0
+        uncached = max((rec["input_tokens"] or 0) - cached, 0)
+        return (uncached * args.price_input + cached * args.price_cached + (rec["output_tokens"] or 0) * args.price_output) / 1e6
+
     with open(out_path, "a", encoding="utf-8") as out:
         for i, q in enumerate(todo, 1):
+            if args.budget is not None and spent >= args.budget:
+                print(f"budget of ${args.budget:.2f} reached after {i - 1} prompts (${spent:.3f}); stopping. Re-run to resume.")
+                break
             url, headers, body = build_request(args.provider, args.model, q, args.max_tokens, args)
             data, latency, err = call(url, headers, body, args.timeout, args.retries)
             rec = {
@@ -227,9 +269,16 @@ def main():
             out.write(json.dumps(rec, ensure_ascii=False) + "\n")
             out.flush()
             status = rec["error"] or (rec["text"] or "")[:60].replace("\n", " ")
-            print(f"[{i}/{len(todo)}] {q['prompt_id']:<40} {latency:7.0f} ms  in={rec['input_tokens']} out={rec['output_tokens']}  {status}")
+            c = cost_of(rec)
+            cost_txt = ""
+            if c is not None:
+                spent += c
+                cost_txt = f"  ${spent:.3f}"
+            print(f"[{i}/{len(todo)}] {q['prompt_id']:<40} {latency:7.0f} ms  in={rec['input_tokens']} out={rec['output_tokens']}{cost_txt}  {status}")
             if args.sleep:
                 time.sleep(args.sleep)
+    if args.price_input is not None:
+        print(f"estimated spend this invocation: ${spent:.3f} (uncached input at ${args.price_input}/M, cached at ${args.price_cached}/M, output at ${args.price_output}/M; Anthropic cache writes counted at the uncached rate)")
 
 
 if __name__ == "__main__":
