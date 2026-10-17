@@ -156,6 +156,39 @@ impl Answer {
     }
 }
 
+/// Last JSON array, or last trailing number / quoted string, in free text.
+fn trailing_value(text: &str) -> Option<Answer> {
+    let t = text.trim_end().trim_end_matches(['.', '!']);
+    if let Some(close) = t.rfind(']')
+        && let Some(open) = t[..close].rfind('[')
+        && let Ok(v) = serde_json::from_str::<Value>(&t[open..=close])
+        && let Some(a) = Answer::from_value(&v)
+    {
+        // Only accept when nothing but whitespace or punctuation follows.
+        if t[close + 1..].trim().is_empty() {
+            return Some(a);
+        }
+    }
+    if t.ends_with('"')
+        && let Some(open) = t[..t.len() - 1].rfind('"')
+        && let Ok(Value::String(s)) = serde_json::from_str::<Value>(&t[open..])
+    {
+        return Some(Answer::Text(s));
+    }
+    let last = t.rsplit([' ', '\n', ':', '=']).next()?.trim_matches(|c: char| c == '*' || c == '`' || c == ',');
+    if let Ok(f) = last.parse::<f64>()
+        && last.chars().any(|c| c.is_ascii_digit())
+    {
+        return Some(Answer::Number(f));
+    }
+    match last.to_lowercase().as_str() {
+        "true" | "yes" => Some(Answer::Bool(true)),
+        "false" | "no" => Some(Answer::Bool(false)),
+        "null" | "none" => Some(Answer::Null),
+        _ => None,
+    }
+}
+
 fn single_scalar(a: &Answer) -> Option<Scalar> {
     Some(match a {
         Answer::Null => Scalar::Null,
@@ -184,6 +217,12 @@ pub fn parse_response(raw: &str) -> Option<Answer> {
     if let Ok(v) = serde_json::from_str::<Value>(text)
         && let Some(a) = Answer::from_value(&v)
     {
+        return Some(a);
+    }
+    // Prose followed by the answer: take the last JSON array, or the last
+    // bare number or quoted string, at the end of the text. Content before
+    // it is ignored; a wrong trailing value is still scored wrong.
+    if let Some(a) = trailing_value(text) {
         return Some(a);
     }
     // Plain text fallbacks.
@@ -244,5 +283,19 @@ mod tests {
                 .accepts(&parse_response("1200").unwrap(), &Tolerance::aggregate())
         );
         assert!(parse_response("   ").is_none());
+    }
+
+    #[test]
+    fn prose_then_answer() {
+        let t = Tolerance::default();
+        assert!(Answer::Number(50.0).accepts(&parse_response("All 50 records have an age value.  50").unwrap(), &t));
+        assert!(Answer::Number(13.0).accepts(&parse_response("id 48 has 48.16, so id 13 is larger.  13").unwrap(), &t));
+        assert!(Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("Highest ages: id 7 (87), id 34 (85).  [7,34]").unwrap(), &t));
+        assert!(Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("Ages: 87 (id 7).  ```json [7,34] ```").unwrap(), &t));
+        assert!(!Answer::List(vec![Scalar::Number(7.0), Scalar::Number(34.0)]).accepts(&parse_response("the two highest are  [\"7\", \"34\"]  The ids are numbers").unwrap(), &t));
+        assert!(Answer::Text("dan.34@example.com".into()).accepts(&parse_response("The email is \"dan.34@example.com\"").unwrap(), &t));
+        // Prose with no extractable trailing value stays unparsed-as-text and is scored wrong, not correct.
+        let got = parse_response("Records with score above 86.42: - id 9: 92.69 - id 10: 86.6").unwrap();
+        assert!(!Answer::Set(vec![Scalar::Number(9.0), Scalar::Number(10.0)]).accepts(&got, &t));
     }
 }
