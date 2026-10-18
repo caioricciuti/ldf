@@ -5,6 +5,7 @@
 | claude-opus-5-5 | json | 20 | 95.0% | 19 | 0 | 0 | 1 | 0 | 0 | 7733 | 1972 ms |
 | claude-opus-5-5 | json-pretty | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 11615 | 2068 ms |
 | claude-opus-5-5 | jsonl | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 7783 | 1719 ms |
+| claude-opus-5-5 | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 4560 | 2109 ms |
 | claude-opus-5-5 | toon | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 6835 | 1718 ms |
 | claude-opus-5-5 | toon-tab | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 6889 | 1722 ms |
 | - | csv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
@@ -36,6 +37,13 @@
 | claude-opus-5-5 | jsonl | missing_value | 3 | 100.0% |
 | claude-opus-5-5 | jsonl | nested_extract | 3 | 100.0% |
 | claude-opus-5-5 | jsonl | multi_record | 2 | 100.0% |
+| claude-opus-5-5 | ldf | lookup | 3 | 100.0% |
+| claude-opus-5-5 | ldf | filter | 3 | 100.0% |
+| claude-opus-5-5 | ldf | aggregate | 3 | 100.0% |
+| claude-opus-5-5 | ldf | compare | 3 | 100.0% |
+| claude-opus-5-5 | ldf | missing_value | 3 | 100.0% |
+| claude-opus-5-5 | ldf | nested_extract | 3 | 100.0% |
+| claude-opus-5-5 | ldf | multi_record | 2 | 100.0% |
 | claude-opus-5-5 | toon | lookup | 3 | 100.0% |
 | claude-opus-5-5 | toon | filter | 3 | 100.0% |
 | claude-opus-5-5 | toon | aggregate | 3 | 66.7% |

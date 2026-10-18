@@ -164,7 +164,8 @@ not encode the dataset). Accuracy is `correct / n` over prompts actually sent.
 
 `eval/run_eval.py` refuses to send anything without `--confirm-spend` and
 prints the prompt count and total o200k prompt tokens first. API keys come
-from `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` only.
+from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and `DEEPSEEK_API_KEY`, read from
+the environment or from a gitignored `.env` at the repo root.
 
 ### Caveats
 

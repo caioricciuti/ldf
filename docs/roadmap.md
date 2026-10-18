@@ -23,9 +23,9 @@ Done:
 
 Not done, by decision:
 
-- No comprehension runs yet beyond 50 records or below the frontier tier;
-  those are the runs that can separate the formats. 200 and 500 record
-  bundles are built.
+- Comprehension runs beyond 50 records and below the frontier tier exist
+  since 2026-10-18 (Opus 5.5 at 200 records; Haiku 5.5 and DeepSeek at 200
+  and 500), see the baseline report. Nothing beyond 500 records.
 - No Claude token counts (needs an API key and a `count_tokens` call).
 - No large-scale (1M row) numbers in the committed report; the tooling runs
   at that scale but the run was not part of the initial deliverable.

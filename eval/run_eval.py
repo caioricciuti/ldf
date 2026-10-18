@@ -10,12 +10,16 @@ environment: OPENAI_API_KEY or ANTHROPIC_API_KEY. Nothing is sent without
     python3 eval/run_eval.py --bundle eval/out/flat_users --provider openai \
         --model gpt-5 --max-prompts 20 --confirm-spend
 
+Keys come from the environment or from a gitignored .env at the repo root
+(OPENAI_API_KEY, ANTHROPIC_API_KEY, DEEPSEEK_API_KEY). eval/plan.sh runs the
+agreed stages with their prices and budget caps.
+
 Output: <bundle>/responses.<provider>.<model>.jsonl, one line per prompt, in
 the schema `ldf-eval score` reads. Re-running resumes: prompts already in the
 file are skipped.
 
 Sampling settings are fixed per provider and recorded with every response:
-OpenAI: temperature 0 unless --no-temperature (reasoning models reject it),
+OpenAI (and DeepSeek, same wire format, key DEEPSEEK_API_KEY): temperature 0 unless --no-temperature (reasoning models reject it),
 seed 0, max_completion_tokens. Anthropic: no temperature (current models
 reject non-default sampling), max_tokens, optional output_config.effort.
 """
@@ -29,8 +33,30 @@ import urllib.error
 import urllib.request
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"  # OpenAI-compatible
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
+KEY_VARS = {"openai": "OPENAI_API_KEY", "anthropic": "ANTHROPIC_API_KEY", "deepseek": "DEEPSEEK_API_KEY"}
+ENV_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+
+
+def load_env_file(path):
+    """Set KEY=VALUE lines from a .env file into os.environ, without
+    overriding variables that are already set. The file is gitignored and
+    its values are never printed."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip().removeprefix("export ").strip()
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            os.environ.setdefault(key, value)
 
 
 def read_jsonl(path):
@@ -39,7 +65,7 @@ def read_jsonl(path):
 
 
 def build_request(provider, model, prompt, max_tokens, args):
-    if provider == "openai":
+    if provider in ("openai", "deepseek"):
         body = {
             "model": model,
             "messages": [
@@ -55,9 +81,9 @@ def build_request(provider, model, prompt, max_tokens, args):
             body["temperature"] = 0
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + os.environ.get("OPENAI_API_KEY", ""),
+            "Authorization": "Bearer " + os.environ.get(KEY_VARS[provider], ""),
         }
-        return OPENAI_URL, headers, body
+        return OPENAI_URL if provider == "openai" else DEEPSEEK_URL, headers, body
     if provider == "anthropic":
         # The data block is identical for every task of one (dataset, format),
         # and prompts are ordered so those come consecutively. Marking it as a
@@ -97,10 +123,12 @@ def parse_reply(provider, data):
     across cached and uncached runs. cached_tokens says how much of it was
     served from cache.
     """
-    if provider == "openai":
+    if provider in ("openai", "deepseek"):
         choice = data["choices"][0]
         usage = data.get("usage", {})
         cached = (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
+        if cached is None:
+            cached = usage.get("prompt_cache_hit_tokens")  # DeepSeek's own field
         reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
         content = choice["message"].get("content")
         if reasoning:
@@ -181,7 +209,7 @@ def call(url, headers, body, timeout, retries):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--bundle", required=True)
-    p.add_argument("--provider", required=True, choices=["openai", "anthropic"])
+    p.add_argument("--provider", required=True, choices=["openai", "anthropic", "deepseek"])
     p.add_argument("--model", required=True, help="exact model id, recorded with every response")
     p.add_argument("--formats", help="comma separated subset of formats")
     p.add_argument("--max-prompts", type=int, help="stop after this many prompts (after resume filtering)")
@@ -244,9 +272,10 @@ def main():
         print(json.dumps(shown, indent=2)[:4000])
         print("... (dry run, nothing sent)")
         return
-    key_var = "OPENAI_API_KEY" if args.provider == "openai" else "ANTHROPIC_API_KEY"
+    key_var = KEY_VARS[args.provider]
+    load_env_file(ENV_FILE)
     if not os.environ.get(key_var):
-        raise SystemExit(f"{key_var} is not set")
+        raise SystemExit(f"{key_var} is not set (environment or {ENV_FILE})")
     if not args.confirm_spend:
         raise SystemExit("refusing to send: pass --confirm-spend after reviewing the counts above")
 

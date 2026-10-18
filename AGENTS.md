@@ -44,6 +44,7 @@ cargo bench -p ldf-bench              # Criterion microbenchmarks
 ./target/release/ldf-bench tokens --scale medium --sample 1000 --out results/medium
 ./target/release/ldf-eval build --input fixtures/small/flat_users.json --out eval/out/flat_users
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --model claude-opus-5-5 --dry-run
+eval/plan.sh                          # the agreed paid stages with prices and budget caps; `score` regrades everything
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.anthropic.claude-opus-5-5.jsonl
 ```
 
@@ -72,8 +73,9 @@ machine with nothing else compiling.
   not edit them, re-fetch on a spec bump.
 - Named exports, no `unwrap` on user input paths, `clippy --all-targets`
   clean.
-- Secrets never enter the repo. API keys are read from environment variables
-  by the Python scripts only. The Rust code makes no network calls.
+- Secrets never enter the repo. API keys are read by the Python scripts only,
+  from the environment or from a gitignored `.env` at the repo root. The
+  Rust code makes no network calls.
 - No paid API runs without explicit approval from the project owner.
   `run_eval.py` enforces `--confirm-spend`; do not remove the gate.
 
@@ -101,6 +103,12 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
 - yaml-rust2 has no u64: integers above i64::MAX decode as f64.
 - Frontier models explain before answering even when told not to; the
   scorer takes the trailing JSON value (`ldf_eval::answer::parse_response`).
+- At 200 and 500 records a frontier model (Opus 5.5) is still format
+  indifferent and only misses by running out of output cap on sums; weak
+  models (Haiku 5.5, DeepSeek) show no stable format ordering, and Haiku
+  reasons longer over LDF's sparse rows (403 vs 251 output tokens on
+  sparse_events_200). Tabular formats (CSV, TOON, LDF) lost a key lookup on
+  Haiku to a one-row slide that JSON did not.
 - LDF v0 ties CSV on flat data and beats compact JSON by 20 to 64 percent on
   irregular data (tokens). Its codec is young: the decoder attaches child
   rows through a hash map keyed by the join value's canonical text, and the

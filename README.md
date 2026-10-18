@@ -66,14 +66,16 @@ cargo bench -p ldf-bench
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --model claude-opus-5-5 --dry-run
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider openai --model <gpt model id> --confirm-spend
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.openai.<model>.jsonl
+eval/plan.sh                 # the agreed paid stages, each with a price and a budget cap; `eval/plan.sh score` regrades all
 ```
 
 `ldf-bench` writes `perf.md`/`perf.json` or `tokens.md`/`tokens.json` into the
 output directory, including machine, toolchain and crate versions. Any input
 file works too: `ldf-bench perf --input path/to/data.jsonl`.
 
-API keys are read from `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`. Nothing is
-sent without `--confirm-spend`, and nothing in the Rust code touches the
+API keys are read from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and
+`DEEPSEEK_API_KEY`, from the environment or from a gitignored `.env` at the
+repo root. Nothing is sent without `--confirm-spend`, and nothing in the Rust code touches the
 network.
 
 ## Results so far

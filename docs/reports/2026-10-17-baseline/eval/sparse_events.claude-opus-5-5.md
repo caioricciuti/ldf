@@ -6,6 +6,7 @@
 | claude-opus-5-5 | json | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3878 | 1909 ms |
 | claude-opus-5-5 | json-pretty | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 5201 | 1917 ms |
 | claude-opus-5-5 | jsonl | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3928 | 1939 ms |
+| claude-opus-5-5 | ldf | 18 | 94.4% | 17 | 1 | 0 | 0 | 0 | 0 | 2562 | 2073 ms |
 | claude-opus-5-5 | markdown | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3331 | 1891 ms |
 | claude-opus-5-5 | toon | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 4104 | 1890 ms |
 | claude-opus-5-5 | toon-tab | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 4108 | 1954 ms |
@@ -39,6 +40,12 @@
 | claude-opus-5-5 | jsonl | compare | 3 | 100.0% |
 | claude-opus-5-5 | jsonl | missing_value | 3 | 100.0% |
 | claude-opus-5-5 | jsonl | multi_record | 3 | 100.0% |
+| claude-opus-5-5 | ldf | lookup | 3 | 100.0% |
+| claude-opus-5-5 | ldf | filter | 3 | 100.0% |
+| claude-opus-5-5 | ldf | aggregate | 3 | 100.0% |
+| claude-opus-5-5 | ldf | compare | 3 | 66.7% |
+| claude-opus-5-5 | ldf | missing_value | 3 | 100.0% |
+| claude-opus-5-5 | ldf | multi_record | 3 | 100.0% |
 | claude-opus-5-5 | markdown | lookup | 3 | 100.0% |
 | claude-opus-5-5 | markdown | filter | 3 | 100.0% |
 | claude-opus-5-5 | markdown | aggregate | 3 | 66.7% |

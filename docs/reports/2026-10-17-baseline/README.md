@@ -34,15 +34,16 @@ agree with the process-isolated numbers within the noise discussed below.
 Two models, three bundles of 50 records each, identical prompts. Tables, raw
 responses and tasks are in `eval/`.
 
-* **Claude Opus 5.5**, effort low, `max_tokens` 256, prompt caching on the
-  data block (92 percent of input tokens were cache reads). Cost under $3.
+* **Claude Opus 5.5**, effort low, `max_tokens` 256 (1 024 for the LDF rows,
+  which ran on 2026-10-18), prompt caching on the data block (92 percent of
+  input tokens were cache reads). Cost under $3, plus $0.14 for the LDF rows.
 * **GPT-6.1 Sol**, `reasoning_effort` low, `max_completion_tokens` 2048,
   temperature rejected by the model and dropped. No cache hits were reported
   by the API (`cached_tokens` 0 on every call), so input was billed in full.
   Cost $2.65 for 364 prompts.
 
-Correct answers out of prompts sent. YAML and LDF were added on 2026-10-18
-and have GPT results only (the Claude key was not available for that run):
+Correct answers out of prompts sent. YAML was added on 2026-10-18 and has
+GPT results only; LDF's Claude rows ran on 2026-10-18 with the same prompts:
 
 | format | flat_users (15) Claude / GPT | nested_orders (20) Claude / GPT | sparse_events (18) Claude / GPT | GPT input tokens per prompt, flat / nested / sparse |
 |---|---:|---:|---:|---|
@@ -55,7 +56,7 @@ and have GPT results only (the Claude key was not available for that run):
 | toon | 14 / 15 | 19 / 20 | 17 / 18 | 1 638 / 5 549 / 3 436 |
 | toon-tab | 15 / 15 | 19 / 20 | 17 / 18 | 1 633 / 5 551 / 3 438 |
 | yaml | - / 15 | - / 20 | - / 18 | 3 026 / 6 476 / 3 371 |
-| **ldf** | **- / 15** | **- / 20** | **- / 18** | **1 545 / 3 430 / 1 884** |
+| **ldf** | **15 / 15** | **20 / 20** | **17 / 18** | **1 545 / 3 430 / 1 884** |
 
 GPT answered all 470 prompts correctly, in every format including LDF
 zero-shot (the prompt names the format and shows the data, nothing more),
@@ -63,6 +64,13 @@ and never added prose. LDF was the cheapest input in all three bundles: on
 nested orders 34 percent below compact JSON and 38 percent below TOON, on
 sparse events 33 percent below JSON and 45 percent below TOON, on flat users
 within 1 percent of CSV.
+
+Claude answered 52 of 53 LDF prompts. On nested_orders LDF is the only
+format where Claude scored 20 of 20 (the others lost the "mean of total"
+question). The one miss is compare-02 on sparse_events: the right record,
+returned as `{"answer":35}` instead of `35`, which the scorer counts as
+wrong. Claude's input for LDF was 2 084 / 4 560 / 2 562 tokens per prompt
+(flat / nested / sparse), against 3 548 / 7 733 / 3 878 for compact JSON.
 
 **First size step.** flat_users at 200 records, GPT, stopped after 25 of 150
 prompts when the account ran out of credit (`eval/flat_users_200.*`): json
@@ -72,7 +80,8 @@ row double-counted or a transposition, after 1 326 reasoning tokens. The
 same question in compact JSON was right after 1 891 reasoning tokens. One
 data point, but the first format-correlated error, and it appeared where the
 literature says it should: at larger inputs on aggregation. The remaining 125
-prompts of that bundle resume with the same command. Its input token counts equal the o200k_base counts in
+prompts were not sent; the OpenAI credit ran out, and the 200-record
+question moved to Claude and DeepSeek (next section). Its input token counts equal the o200k_base counts in
 `tokens-*.md` exactly, which confirms those tables as real GPT cost. It spent
 400 to 540 reasoning tokens on the "mean of total" question and got it right
 in all five formats; Claude at low effort got that question wrong in the four
@@ -101,11 +110,104 @@ costs 22 percent more than compact JSON while CSV costs 36 percent less.
 Separation, if it exists, has to come from larger samples or weaker models;
 200 and 500 record bundles are built under `eval/out/`.
 
+## Size step: 200 and 500 records (2026-10-18)
+
+Three more models on the 200 and 500 record bundles of flat_users and
+sparse_events, same tasks, same prompt template, all ten formats. Raw
+responses, tasks and per-task tables are in `eval/` (`*_200.*`, `*_500.*`).
+
+* **Claude Opus 5.5**, effort low, `max_tokens` 1 024, caching on the data
+  block (93 percent cache reads), flat_users_200 only. Runner estimate $1.27.
+* **Claude Haiku 5.5**, effort low, `max_tokens` 1 024, 93 to 94 percent cache
+  reads, all four bundles. $0.33.
+* **DeepSeek `deepseek-chat`**, temperature 0, `max_tokens` 1 024, 91 to 94
+  percent cache hits, all four bundles. $0.56.
+
+Correct answers per cell, with the misses split by cause: `T` is a response
+that hit the 1 024 token output cap (for the Claude models that cap includes
+thinking tokens, so `T` means "ran out of room to think", not a wrong
+answer), `W` is a finished answer that was wrong. No response was malformed.
+
+| format | flat 200 (15) Opus / Haiku / DeepSeek | flat 500 (15) Haiku / DeepSeek | sparse 200 (18) Haiku / DeepSeek | sparse 500 (18) Haiku / DeepSeek |
+|---|---:|---:|---:|---:|
+| json | 13 (2T) / 12 (3T) / 11 (4W) | 10 (4T) (1W) / 11 (4W) | 16 (2T) / 12 (6W) | 15 (2T) (1W) / 12 (6W) |
+| json-pretty | 13 (2T) / 10 (4T) (1W) / 11 (4W) | 11 (3T) (1W) / 11 (4W) | 16 (2T) / 12 (6W) | 14 (4T) / 13 (5W) |
+| jsonl | 13 (2T) / 13 (2T) / 10 (5W) | 11 (2T) (2W) / 11 (4W) | 16 (2T) / 12 (6W) | 15 (3T) / 13 (5W) |
+| csv | 13 (2T) / 10 (3T) (2W) / 10 (5W) | 11 (4T) / 9 (6W) | 15 (3T) / 10 (8W) | 13 (3T) (2W) / 13 (5W) |
+| tsv | 13 (2T) / 11 (3T) (1W) / 9 (6W) | 13 (2T) / 9 (6W) | 14 (2T) (2W) / 9 (9W) | 13 (4T) (1W) / 12 (6W) |
+| markdown | 14 (1T) / 12 (3T) / 11 (4W) | 11 (3T) (1W) / 11 (4W) | 16 (2T) / 11 (7W) | 15 (2T) (1W) / 12 (6W) |
+| toon | 13 (2T) / 11 (3T) (1W) / 12 (3W) | 9 (3T) (3W) / 9 (6W) | 16 (2T) / 12 (6W) | 15 (3T) / 13 (5W) |
+| toon-tab | 13 (2T) / 10 (3T) (2W) / 12 (3W) | 11 (3T) (1W) / 10 (5W) | 15 (3T) / 12 (6W) | 14 (4T) / 13 (5W) |
+| yaml | 13 (2T) / 13 (2T) / 10 (5W) | 12 (2T) (1W) / 11 (4W) | 16 (2T) / 11 (7W) | 14 (4T) / 13 (5W) |
+| **ldf** | **13 (2T) / 10 (2T) (3W) / 12 (3W)** | **10 (3T) (2W) / 8 (7W)** | **12 (5T) (1W) / 10 (8W)** | **12 (3T) (3W) / 13 (5W)** |
+
+Input tokens per prompt as each provider counted them (Claude tokenizer
+from the Haiku runs, DeepSeek tokenizer from the DeepSeek runs):
+
+| format | flat 200 Claude / DeepSeek | flat 500 Claude / DeepSeek | sparse 200 Claude / DeepSeek | sparse 500 Claude / DeepSeek |
+|---|---:|---:|---:|---:|
+| json | 13 742 / 10 086 | 34 136 / 25 030 | 15 317 / 11 389 | 37 811 / 28 094 |
+| json-pretty | 18 947 / 15 289 | 47 141 / 38 033 | 20 668 / 16 737 | 51 113 / 41 393 |
+| jsonl | 13 942 / 10 086 | 34 636 / 25 030 | 15 517 / 11 518 | 38 311 / 28 427 |
+| csv | 7 755 / 6 159 | 19 147 / 15 210 | 9 383 / 7 198 | 22 984 / 17 569 |
+| tsv | 7 756 / 6 223 | 19 148 / 15 398 | 7 971 / 7 133 | 19 395 / 17 377 |
+| markdown | 9 784 / 7 255 | 24 176 / 17 931 | 12 683 / 10 951 | 31 220 / 26 988 |
+| toon | 7 961 / 6 364 | 19 653 / 15 715 | 16 245 / 13 746 | 40 113 / 33 995 |
+| toon-tab | 7 965 / 6 430 | 19 657 / 15 905 | 16 249 / 13 749 | 40 117 / 33 998 |
+| yaml | 13 957 / 12 231 | 34 683 / 30 425 | 15 717 / 13 482 | 38 835 / 33 357 |
+| **ldf** | **7 778 / 6 174** | **19 172 / 15 227** | **9 661 / 7 481** | **23 640 / 18 308** |
+
+What the tables say:
+
+* **The frontier model is still format-indifferent at 200 records.** Opus
+  answered 131 of 150 with zero wrong answers. All 19 misses are the "sum of
+  score" and "mean of age" questions, where it spent the whole cap thinking,
+  in every format; markdown got the mean through. LDF is 13 of 15 like
+  everything else, at 7 778 input tokens per prompt against 7 755 for CSV,
+  13 742 for compact JSON and 18 947 for pretty JSON.
+* **Weak models separate from the frontier, not from each other by format.**
+  Haiku scored 10 to 16 per cell and DeepSeek 8 to 13. No ordering of
+  formats survives across bundles: jsonl and yaml lead flat 200, tsv leads
+  flat 500, six formats tie on sparse 200. DeepSeek fails the same questions
+  in every format (filter lists, sums, top-3 by a float field), so its misses
+  belong to the model.
+* **LDF is at or near the bottom for Haiku** (10, 10, 12, 12) and swings from
+  tied best to worst for DeepSeek (12, 8, 10, 13). Most of the gap is one to
+  three answers, which is the swing between any two formats here. The one
+  cell that is not noise is Haiku on sparse_events_200: five truncations
+  against two for JSON, on two filters, a top-3 and the two sums. Haiku's
+  mean output (thinking included) on that bundle was 403 tokens for LDF
+  against 251 for JSON, so the model reasons longer over LDF's sparse rows
+  (nullable `?` columns, empty cells). Whether a higher cap turns those into
+  correct answers is untested; the rerun costs about ten cents.
+* **First evidence that tabular forms lose accuracy on key lookup.** Haiku,
+  asked for the email of id 140 in flat_users_200, answered with the row
+  below in CSV, TOON and LDF, and said why: "pia.139@uni.edu is id 139, so
+  id 140 is Nia Matsumoto". The fixture's emails carry id minus one and the
+  rows are sorted by id; the model slid one row in every format where the id
+  is a cell in a row rather than a key next to its value. JSON, JSONL,
+  Markdown and YAML were right. This is the research note's open question
+  ("where do tabular forms lose accuracy"), answered once, on one model.
+* **Two wrapped answers.** Opus (sparse_events, 50 records) and Haiku
+  (sparse_events_200) both picked the right record on a compare question and
+  returned it as `{"answer":35}` and `{"event_id":94}`; the scorer takes the
+  trailing JSON value as given and counts both as wrong. Both were LDF rows.
+
+Reading: the token advantage of LDF holds on every tokenizer and bundle
+(within 4 percent of CSV, 34 to 44 percent below compact JSON, 40 to 46
+percent below TOON on sparse data), and a frontier model reads it as well as anything else at 200
+records. Below the frontier, no format is reliably better, and LDF's sparse
+encoding costs a weak model extra reasoning. That is the first format-level
+finding against LDF, and the next design question for v1.
+
 ## What was not measured
 
-* No comprehension numbers yet beyond 50 records or below the frontier tier
-  (Haiku, mini and nano class models).
-* No Claude token counts: needs the count_tokens endpoint and a key.
+* No comprehension numbers beyond 500 records, none for GPT beyond the 25
+  prompts at 200 records, and none for nested_orders beyond 50 records.
+* No Haiku run with an output cap above 1 024 tokens, so truncation and
+  inability are not separated for the weak-model cells.
+* No `count_tokens` runs; the Claude per-format input counts come from the
+  `usage` field of real responses, which is the billed number.
 * No large-scale (1M row) runs.
 * No cross-machine or Linux numbers.
 
