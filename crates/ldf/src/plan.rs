@@ -196,7 +196,10 @@ fn plan_table(
             })
             .collect();
         if opts.sparse_threshold > 0.0 {
-            let filled = values.iter().filter(|v| v.is_some_and(|v| !v.is_null())).count();
+            let filled = values
+                .iter()
+                .filter(|v| v.is_some_and(|v| !v.is_null()))
+                .count();
             if (filled as f64) < opts.sparse_threshold * rows.len() as f64 {
                 rest_keys.push(key.to_string());
                 continue;

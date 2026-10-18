@@ -113,7 +113,12 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
         }
     }
     for (name, text) in extra {
-        renderings.push((name.clone(), name.clone(), format!("{name}.txt"), text.clone()));
+        renderings.push((
+            name.clone(),
+            name.clone(),
+            format!("{name}.txt"),
+            text.clone(),
+        ));
     }
     for (name, display, ext, text) in &renderings {
         fs::write(data_dir.join(format!("{dataset}.{ext}")), text).map_err(|e| e.to_string())?;

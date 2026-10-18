@@ -28,7 +28,8 @@ ORD-1,C3,4,157.4\n\
 ORD-2,A1,1,2757.03";
 
 /// Appended to every tool description in `tools/list`.
-pub const TOOL_NOTE: &str = " Large JSON results come back as LDF tables (format described in the server instructions).";
+pub const TOOL_NOTE: &str =
+    " Large JSON results come back as LDF tables (format described in the server instructions).";
 
 /// One text block that was replaced.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -142,22 +143,33 @@ mod tests {
     #[test]
     fn array_of_objects_becomes_a_table() {
         let out = convert_text(ROWS, 0).unwrap();
-        assert_eq!(out, "@records id:i,name:s,score:f\n1,Ana,9.5\n2,Bo,7.25\n3,Cy,8.0\n");
+        assert_eq!(
+            out,
+            "@records id:i,name:s,score:f\n1,Ana,9.5\n2,Bo,7.25\n3,Cy,8.0\n"
+        );
         let back = ldf::decode(&out).unwrap();
         assert_eq!(back.len(), 3);
     }
 
     #[test]
     fn object_with_rows_becomes_root_plus_child_table() {
-        let rows: Vec<String> = (1..=10).map(|i| format!(r#"{{"id":{i},"v":"value {i}"}}"#)).collect();
-        let text = format!(r#"{{"meta":{{"elapsed":0.2}},"rows":[{}]}}"#, rows.join(","));
+        let rows: Vec<String> = (1..=10)
+            .map(|i| format!(r#"{{"id":{i},"v":"value {i}"}}"#))
+            .collect();
+        let text = format!(
+            r#"{{"meta":{{"elapsed":0.2}},"rows":[{}]}}"#,
+            rows.join(",")
+        );
         let out = convert_text(&text, 0).unwrap();
         // With one parent row its first column is unique, so the child
         // table joins on it (spec section 7), here `meta.elapsed`.
         assert!(out.starts_with("@records meta.elapsed:f,rows:t\n0.2,10\n@records.rows meta.elapsed:f,id:i,v:s\n0.2,1,value 1\n"), "{out}");
         let back = ldf::decode(&out).unwrap();
         assert_eq!(back.len(), 1);
-        assert_eq!(back[0].get("rows").and_then(|r| r.as_array()).map(Vec::len), Some(10));
+        assert_eq!(
+            back[0].get("rows").and_then(|r| r.as_array()).map(Vec::len),
+            Some(10)
+        );
     }
 
     #[test]
@@ -185,7 +197,12 @@ mod tests {
         ]});
         let done = rewrite_tool_result(&mut ok, 0);
         assert_eq!(done.len(), 1);
-        assert!(ok["content"][0]["text"].as_str().unwrap().starts_with("@records "));
+        assert!(
+            ok["content"][0]["text"]
+                .as_str()
+                .unwrap()
+                .starts_with("@records ")
+        );
         assert_eq!(ok["content"][1]["text"], "done");
 
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": ROWS}]});
@@ -195,7 +212,8 @@ mod tests {
 
     #[test]
     fn list_and_initialize_get_their_notes() {
-        let mut list = json!({"tools": [{"name": "q", "description": "Runs SQL. "}, {"name": "n"}]});
+        let mut list =
+            json!({"tools": [{"name": "q", "description": "Runs SQL. "}, {"name": "n"}]});
         rewrite_tools_list(&mut list);
         assert_eq!(
             list["tools"][0]["description"],

@@ -85,11 +85,18 @@ fn rewrites_initialize_tools_list_and_large_results() {
     assert!(desc.starts_with("Returns rows as a JSON array."));
     assert!(desc.contains("LDF"));
 
-    let big = s.call(3, "tools/call", json!({"name": "query", "arguments": {"rows": 100}}));
+    let big = s.call(
+        3,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 100}}),
+    );
     let text = big["content"][0]["text"].as_str().unwrap();
     // serde_json's `json!` orders keys alphabetically; the proxy keeps
     // whatever order the downstream server emits.
-    assert!(text.starts_with("@records active:b,email:s,id:i,name:s,note:s?,score:f\n"), "{text}");
+    assert!(
+        text.starts_with("@records active:b,email:s,id:i,name:s,note:s?,score:f\n"),
+        "{text}"
+    );
     let records = ldf::decode(text).unwrap();
     assert_eq!(records.len(), 100);
     assert_eq!(records[6].get("note"), Some(&ldf_data::Value::Null));
@@ -99,15 +106,34 @@ fn rewrites_initialize_tools_list_and_large_results() {
     );
 
     // Two rows are under the 1024 byte floor: still JSON.
-    let small = s.call(4, "tools/call", json!({"name": "query", "arguments": {"rows": 2}}));
-    assert!(small["content"][0]["text"].as_str().unwrap().starts_with("[{"));
+    let small = s.call(
+        4,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 2}}),
+    );
+    assert!(
+        small["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("[{")
+    );
 
     // An object holding the rows becomes a one-row root with a child table.
-    let nested = s.call(5, "tools/call", json!({"name": "query", "arguments": {"rows": 40, "nested": true}}));
+    let nested = s.call(
+        5,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 40, "nested": true}}),
+    );
     let text = nested["content"][0]["text"].as_str().unwrap();
-    assert!(text.starts_with("@records meta.elapsed_ms:i,meta.rows:i,rows:t\n3,40,40\n@records.rows "), "{text}");
+    assert!(
+        text.starts_with("@records meta.elapsed_ms:i,meta.rows:i,rows:t\n3,40,40\n@records.rows "),
+        "{text}"
+    );
     let back = ldf::decode(text).unwrap();
-    assert_eq!(back[0].get("rows").and_then(|r| r.as_array()).map(Vec::len), Some(40));
+    assert_eq!(
+        back[0].get("rows").and_then(|r| r.as_array()).map(Vec::len),
+        Some(40)
+    );
 
     // Unknown method: the downstream error passes through untouched.
     s.send(json!({"jsonrpc": "2.0", "id": 6, "method": "nope"}));
@@ -122,9 +148,21 @@ fn passthrough_and_plain_leave_everything_alone() {
     let init = s.handshake();
     assert_eq!(init["instructions"], "Fake row server.");
     let list = s.call(2, "tools/list", json!({}));
-    assert_eq!(list["tools"][0]["description"], "Returns rows as a JSON array.");
-    let big = s.call(3, "tools/call", json!({"name": "query", "arguments": {"rows": 100}}));
-    assert!(big["content"][0]["text"].as_str().unwrap().starts_with("[{"));
+    assert_eq!(
+        list["tools"][0]["description"],
+        "Returns rows as a JSON array."
+    );
+    let big = s.call(
+        3,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 100}}),
+    );
+    assert!(
+        big["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("[{")
+    );
     s.finish();
 }
 
@@ -132,7 +170,16 @@ fn passthrough_and_plain_leave_everything_alone() {
 fn min_bytes_zero_converts_small_results_too() {
     let mut s = Session::start(&["--min-bytes", "0", "--quiet"]);
     s.handshake();
-    let small = s.call(2, "tools/call", json!({"name": "query", "arguments": {"rows": 2}}));
-    assert!(small["content"][0]["text"].as_str().unwrap().starts_with("@records "));
+    let small = s.call(
+        2,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 2}}),
+    );
+    assert!(
+        small["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("@records ")
+    );
     s.finish();
 }

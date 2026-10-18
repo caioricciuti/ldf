@@ -68,7 +68,9 @@ pub fn run() -> Result<(), String> {
                 let text = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
                 json!({"jsonrpc": "2.0", "id": id, "result": {"content": [{"type": "text", "text": text}]}})
             }
-            _ => json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": format!("Method not found: {method}")}}),
+            _ => {
+                json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": format!("Method not found: {method}")}})
+            }
         };
         let s = serde_json::to_string(&reply).map_err(|e| e.to_string())?;
         out.write_all(s.as_bytes()).map_err(|e| e.to_string())?;

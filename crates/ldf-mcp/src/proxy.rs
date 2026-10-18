@@ -63,7 +63,9 @@ pub fn run(cfg: Config) -> Result<i32, String> {
             if let Ok(msg) = serde_json::from_str::<Json>(line.trim_end()) {
                 note_request(&up_pending, &msg);
             }
-            writer.write_all(line.as_bytes()).map_err(|e| e.to_string())?;
+            writer
+                .write_all(line.as_bytes())
+                .map_err(|e| e.to_string())?;
             if !line.ends_with('\n') {
                 writer.write_all(b"\n").map_err(|e| e.to_string())?;
             }
@@ -118,11 +120,13 @@ fn pump_downstream<R: Read>(from_child: R, pending: &Pending, cfg: &Config) -> R
         }
         match rewrite_line(trimmed, pending, cfg) {
             Some(replaced) => {
-                out.write_all(replaced.as_bytes()).map_err(|e| e.to_string())?;
+                out.write_all(replaced.as_bytes())
+                    .map_err(|e| e.to_string())?;
                 out.write_all(b"\n").map_err(|e| e.to_string())?;
             }
             None => {
-                out.write_all(trimmed.as_bytes()).map_err(|e| e.to_string())?;
+                out.write_all(trimmed.as_bytes())
+                    .map_err(|e| e.to_string())?;
                 out.write_all(b"\n").map_err(|e| e.to_string())?;
             }
         }

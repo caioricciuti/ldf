@@ -85,7 +85,9 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
         url: "http://127.0.0.1:8123".into(),
         database: "default".into(),
         user: "default".into(),
-        password: std::env::var("CLICKHOUSE_PASSWORD").ok().filter(|p| !p.is_empty()),
+        password: std::env::var("CLICKHOUSE_PASSWORD")
+            .ok()
+            .filter(|p| !p.is_empty()),
         passthrough: false,
         min_bytes: 1024,
         max_rows: 10_000,
@@ -139,16 +141,21 @@ fn convert(args: &[String]) -> ExitCode {
         }
     }
     let records = match path {
-        Some(p) => ldf_data::input::read_all(Path::new(p), &ldf_data::input::ReadOptions::default())
-            .map_err(|e| e.to_string()),
+        Some(p) => {
+            ldf_data::input::read_all(Path::new(p), &ldf_data::input::ReadOptions::default())
+                .map_err(|e| e.to_string())
+        }
         None => {
             let mut bytes = Vec::new();
             std::io::stdin()
                 .read_to_end(&mut bytes)
                 .map_err(|e| e.to_string())
                 .and_then(|_| {
-                    ldf_data::input::parse_json_document(bytes, ldf_data::input::JsonEngine::SerdeJson)
-                        .map_err(|e| e.to_string())
+                    ldf_data::input::parse_json_document(
+                        bytes,
+                        ldf_data::input::JsonEngine::SerdeJson,
+                    )
+                    .map_err(|e| e.to_string())
                 })
         }
     };
@@ -161,9 +168,17 @@ fn convert(args: &[String]) -> ExitCode {
     };
     let out = ldf::encode_with(&records, &opts);
     let mut stdout = std::io::stdout().lock();
-    if stdout.write_all(out.as_bytes()).and_then(|_| stdout.flush()).is_err() {
+    if stdout
+        .write_all(out.as_bytes())
+        .and_then(|_| stdout.flush())
+        .is_err()
+    {
         return ExitCode::from(1);
     }
-    eprintln!("ldf-mcp convert: {} records, {} bytes of LDF", records.len(), out.len());
+    eprintln!(
+        "ldf-mcp convert: {} records, {} bytes of LDF",
+        records.len(),
+        out.len()
+    );
     ExitCode::SUCCESS
 }

@@ -71,18 +71,30 @@ pub fn handle(cfg: &Config, msg: &Json) -> Option<Json> {
         "ping" => json!({}),
         "tools/list" => json!({"tools": tools(cfg)}),
         "tools/call" => {
-            let name = msg.pointer("/params/name").and_then(Json::as_str).unwrap_or("");
-            let args = msg.pointer("/params/arguments").cloned().unwrap_or(json!({}));
+            let name = msg
+                .pointer("/params/name")
+                .and_then(Json::as_str)
+                .unwrap_or("");
+            let args = msg
+                .pointer("/params/arguments")
+                .cloned()
+                .unwrap_or(json!({}));
             match call(cfg, name, &args) {
                 Ok(text) => json!({"content": [{"type": "text", "text": text}]}),
                 Err(CallError::Protocol(m)) => {
-                    return Some(json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32602, "message": m}}));
+                    return Some(
+                        json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32602, "message": m}}),
+                    );
                 }
-                Err(CallError::Tool(m)) => json!({"content": [{"type": "text", "text": m}], "isError": true}),
+                Err(CallError::Tool(m)) => {
+                    json!({"content": [{"type": "text", "text": m}], "isError": true})
+                }
             }
         }
         _ => {
-            return Some(json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": format!("Method not found: {method}")}}));
+            return Some(
+                json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": format!("Method not found: {method}")}}),
+            );
         }
     };
     Some(json!({"jsonrpc": "2.0", "id": id, "result": result}))
@@ -231,7 +243,9 @@ pub fn http_post(
         req.push_str("\r\n");
     }
     req.push_str("\r\n");
-    stream.write_all(req.as_bytes()).map_err(|e| e.to_string())?;
+    stream
+        .write_all(req.as_bytes())
+        .map_err(|e| e.to_string())?;
     stream.write_all(body).map_err(|e| e.to_string())?;
     stream.flush().map_err(|e| e.to_string())?;
     let mut raw = Vec::new();
@@ -312,8 +326,14 @@ mod tests {
 
     #[test]
     fn base_urls() {
-        assert_eq!(parse_base("http://127.0.0.1:8124").unwrap(), ("127.0.0.1".into(), 8124));
-        assert_eq!(parse_base("http://ch.local/").unwrap(), ("ch.local".into(), 80));
+        assert_eq!(
+            parse_base("http://127.0.0.1:8124").unwrap(),
+            ("127.0.0.1".into(), 8124)
+        );
+        assert_eq!(
+            parse_base("http://ch.local/").unwrap(),
+            ("ch.local".into(), 80)
+        );
         assert!(parse_base("https://x").is_err());
         assert!(parse_base("http://").is_err());
     }
@@ -330,7 +350,10 @@ mod tests {
     #[test]
     fn chunked_and_plain_responses() {
         let raw = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\n{\"a\":\r\n3;ext\r\n1}\n\r\n0\r\n\r\n";
-        assert_eq!(parse_response(raw).unwrap(), (200, "{\"a\":1}\n".to_string()));
+        assert_eq!(
+            parse_response(raw).unwrap(),
+            (200, "{\"a\":1}\n".to_string())
+        );
         let raw = b"HTTP/1.1 400 Bad Request\r\nContent-Length: 4\r\n\r\noops";
         assert_eq!(parse_response(raw).unwrap(), (400, "oops".to_string()));
         assert!(dechunk(b"zz\r\n").is_err());
@@ -354,14 +377,23 @@ mod tests {
         let c = cfg();
         let init = handle(&c, &json!({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18"}})).unwrap();
         assert_eq!(init["result"]["protocolVersion"], "2025-06-18");
-        assert!(init["result"]["instructions"].as_str().unwrap().contains("@records"));
+        assert!(
+            init["result"]["instructions"]
+                .as_str()
+                .unwrap()
+                .contains("@records")
+        );
         let list = handle(&c, &json!({"id": 2, "method": "tools/list"})).unwrap();
         assert_eq!(list["result"]["tools"].as_array().unwrap().len(), 3);
         assert!(handle(&c, &json!({"method": "notifications/initialized"})).is_none());
         let bad = handle(&c, &json!({"id": 3, "method": "tools/call", "params": {"name": "describe_table", "arguments": {"table": "x; drop"}}})).unwrap();
         assert_eq!(bad["error"]["code"], -32602);
         // Nothing listens on port 1: a tool error, not a protocol error.
-        let down = handle(&c, &json!({"id": 4, "method": "tools/call", "params": {"name": "list_tables"}})).unwrap();
+        let down = handle(
+            &c,
+            &json!({"id": 4, "method": "tools/call", "params": {"name": "list_tables"}}),
+        )
+        .unwrap();
         assert_eq!(down["result"]["isError"], true);
     }
 }

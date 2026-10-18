@@ -1,0 +1,36 @@
+# Formatting, lints, tests and the small round trip on every push and pull
+# request. The only external action is actions/checkout, pinned to a commit
+# hash (v7.0.1, 2026-07-17); the toolchain comes from rust-toolchain.toml
+# through the rustup that GitHub's runners ship with.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Toolchain
+        run: rustup show active-toolchain && cargo --version
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Build
+        run: cargo build --release
+      - name: Tests
+        run: cargo test --release
+      - name: Round trip on the committed fixtures
+        run: ./target/release/ldf-bench roundtrip --scale small

@@ -36,6 +36,7 @@ grades them. Curated reports are copied to `docs/reports/`.
 cargo build --release                 # everything
 cargo test                            # unit, round-trip and TOON conformance tests
 cargo clippy --all-targets            # keep clean
+cargo fmt --all -- --check           # CI fails on formatting drift; clippy runs there with -D warnings
 cargo bench -p ldf-bench              # Criterion microbenchmarks
 ./target/release/ldf-gen list         # dataset catalog
 ./target/release/ldf-gen --scale small          # regenerate committed fixtures
