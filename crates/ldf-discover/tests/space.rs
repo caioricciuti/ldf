@@ -129,6 +129,7 @@ fn edge_cases_are_lossless() {
         ),
     ];
     for (what, recs) in &cases {
+        assert_eq!(encode(recs, &Config::LDF_V01), ldf::encode(recs), "{what}");
         for cfg in space() {
             assert_lossless(cfg, recs, what);
         }

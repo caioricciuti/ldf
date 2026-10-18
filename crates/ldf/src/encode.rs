@@ -6,7 +6,9 @@ use ldf_data::{Number, Object, Value};
 
 use crate::ROOT;
 use crate::plan::{ColType, Column, Join, Options, TablePlan, lookup, lookup_hint, plan_with};
-use crate::text::{push_float, push_int, push_json_value, push_path, push_string_cell};
+use crate::text::{
+    push_float, push_int, push_json_string, push_json_value, push_path, push_string_cell,
+};
 
 /// Encodes a whole dataset (spec section 7 flattening rules apply).
 pub fn encode(records: &[Value]) -> String {
@@ -72,17 +74,22 @@ impl Encoder {
 
     /// Writes one row. `join` is the join cell text for child rows.
     fn write_row(&mut self, p: &TablePlan, o: &Object, join: Option<&str>) {
+        let start = self.out.len();
         let mut first = true;
         if let Some(j) = join {
             self.out.push_str(j);
+            quote_line_start(&mut self.out, start);
             first = false;
         }
         for c in &p.columns {
             if !first {
                 self.out.push(',');
             }
-            first = false;
             self.write_cell(c, lookup_hint(o, &c.path, c.hint));
+            if first {
+                quote_line_start(&mut self.out, start);
+            }
+            first = false;
         }
         if !p.rest_keys.is_empty() {
             if !first {
@@ -175,6 +182,15 @@ impl Encoder {
             *self.offsets.get_mut(&child.name).expect("offset") += elements.len();
             self.write_children(child, &elements, child_base);
         }
+    }
+}
+
+/// Spec 5: a bare first cell starting with `@` would read as a header line.
+/// Only a bare string can start with `@`, so the cell text is the string.
+fn quote_line_start(out: &mut String, start: usize) {
+    if out[start..].starts_with('@') {
+        let s = out.split_off(start);
+        push_json_string(&s, out);
     }
 }
 
@@ -321,6 +337,9 @@ impl StreamEncoder {
                 hint: 0,
             };
             tmp.write_cell(&col, Some(v));
+            if i == 0 {
+                quote_line_start(&mut tmp.out, 0);
+            }
         }
         out.push_str(&tmp.out);
         out.push('\n');

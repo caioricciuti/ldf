@@ -1,6 +1,5 @@
 //! Encoder for any [`Config`]. With [`Config::LDF_V01`] the output is LDF
-//! v0.1 byte for byte (tested against `crates/ldf`), except where v0.1
-//! itself does not round-trip (a null nested object, a row starting with `@`).
+//! v0.1 byte for byte (tested against `crates/ldf`).
 
 use std::fmt::Write as _;
 

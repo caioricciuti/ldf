@@ -290,9 +290,12 @@ fn plan_field(
         .filter(|v| !v.is_null())
         .collect();
     let nullable = present.len() != values.len();
+    let has_null = values.iter().any(|v| v.is_some_and(Value::is_null));
 
-    // 1. Uniform non-empty objects flatten.
-    if !present.is_empty()
+    // 1. Uniform non-empty objects flatten, unless the field is null in
+    // some row: dotted cells cannot tell a null object from an absent one.
+    if !has_null
+        && !present.is_empty()
         && present
             .iter()
             .all(|v| matches!(v, Value::Object(o) if !o.is_empty()))

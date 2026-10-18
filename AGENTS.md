@@ -147,6 +147,8 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   20 percent, which is the v0 layout that cost Haiku accuracy). Keys on every
   row and repeated headers always cost tokens; typed and untyped headers tie;
   `true`/`false` beat `t`/`f` and `1`/`0`. long_text has no layout 10 percent
-  below JSON. LDF v0.1 itself mis-encodes two cases the engine handles: a
-  nested object that is null in some row decodes as absent, and a string
-  starting with `@` as the first cell of a row reads as a header.
+  below JSON. The engine's tests found two v0.1 encoder bugs, fixed the
+  same day (spec sections 5 and 7.1, conformance fixtures added): a nested
+  object null in some row decoded as absent, and a string starting with
+  `@` as the first cell of a row read as a header. Output on all twelve
+  medium fixtures is unchanged by the fix.

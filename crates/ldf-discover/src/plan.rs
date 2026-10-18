@@ -1,7 +1,5 @@
 //! Table planning under a [`Config`]: the rules of LDF v0.1 section 7 with
-//! the nesting and sparse knobs open. One deliberate difference from
-//! `crates/ldf`: an object field that is null in some row stays a JSON
-//! column, because flattening it would turn the null into an absent key.
+//! the nesting and sparse knobs open.
 
 use std::collections::HashSet;
 

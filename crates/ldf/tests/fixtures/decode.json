@@ -158,6 +158,12 @@
       "input": "@records id:i,items:t\n1,1\n2,0\n@records.items _:i,v:s\n1,a\n@records id:i,items:t\n3,2\n@records.items _:i,v:s\n3,b\n3,c\n",
       "expected": [{"id": 1, "items": [{"v": "a"}]}, {"id": 2, "items": []}, {"id": 3, "items": [{"v": "b"}, {"v": "c"}]}],
       "spec": "8"
+    },
+    {
+      "name": "a quoted first cell starting with @ is a row, not a header",
+      "input": "@records s:s,n:i\n\"@x\",1\n",
+      "expected": [{"s": "@x", "n": 1}],
+      "spec": "5"
     }
   ]
 }

@@ -116,6 +116,24 @@
       "input": [{"id": 1, "e": ""}, {"id": 2}],
       "expected": "@records id:i,e:s?\n1,\"\"\n2,\n",
       "spec": "7.4"
+    },
+    {
+      "name": "an object field that is null in some row stays a JSON column",
+      "input": [{"id": 1, "c": {"x": 1, "y": "a"}}, {"id": 2, "c": null}],
+      "expected": "@records id:i,c:j?\n1,{\"x\":1,\"y\":\"a\"}\n2,null\n",
+      "spec": "7.1"
+    },
+    {
+      "name": "a string starting with @ is quoted as the first cell of a row, bare elsewhere",
+      "input": [{"s": "@x", "t": "@y"}, {"s": "y@", "t": "z"}],
+      "expected": "@records s:s,t:s\n\"@x\",@y\ny@,z\n",
+      "spec": "5"
+    },
+    {
+      "name": "a child join key starting with @ is quoted",
+      "input": [{"id": "@a", "items": [{"v": 1}]}, {"id": "b", "items": [{"v": 2}]}],
+      "expected": "@records id:s,items:t\n\"@a\",1\nb,1\n@records.items id:s,v:i\n\"@a\",1\nb,2\n",
+      "spec": "5, 7.2"
     }
   ]
 }

@@ -85,7 +85,9 @@ A string cell is bare unless it
 
 * is empty, or equals `null`, `true` or `false`;
 * starts or ends with a space or tab;
-* contains `,`, `"`, `\`, CR, LF or a control character below U+0020.
+* contains `,`, `"`, `\`, CR, LF or a control character below U+0020;
+* is the first cell of a row and starts with `@` (a line starting with `@`
+  is a header).
 
 A non-bare string is a JSON string literal (`"..."` with JSON escapes).
 Because the column type is `s`, a bare `42`, `1e5`, `-` or `007` is a string.
@@ -102,9 +104,10 @@ infinities are not representable and encode as `null`.
 Flattening is decided per field over the whole dataset (batch encoder):
 
 1. **Objects.** A field whose present values are all objects with the same
-   key set at every record flattens into dotted columns, recursively. If the
-   key sets differ across records, or some values are non-objects, the field
-   is a `j` column. An empty object `{}` is a `j` cell.
+   key set at every record, and which is null in no record, flattens into
+   dotted columns, recursively. If the key sets differ across records, some
+   values are non-objects, or some are null (dotted cells cannot tell a null
+   object from an absent one), the field is a `j` column. An empty object `{}` is a `j` cell.
 2. **Arrays of objects.** A field whose present values are all arrays whose
    elements are all objects becomes a **child table** `parent.field`. The
    parent gets a `t` column holding the element count. Child rows are the
