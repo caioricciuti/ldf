@@ -23,7 +23,7 @@ measurements led to it, `docs/roadmap.md` for what comes next and
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, token counts, Criterion benches |
 | `crates/ldf-eval` | `ldf-eval`: tasks with ground truth, prompt bundles, scoring |
 | `crates/ldf` | LDF v0 encoder, decoder and conformance fixtures |
-| `crates/ldf-mcp` | `ldf-mcp`: MCP stdio proxy that re-encodes JSON tool results as LDF on their way to the model; also `convert` for files and a `fake-server` test double |
+| `crates/ldf-mcp` | `ldf-mcp`: MCP stdio proxy that re-encodes JSON tool results as LDF on their way to the model; `clickhouse` mode, an MCP server over ClickHouse HTTP returning LDF; `convert` for files; a `fake-server` test double |
 | `eval/` | stdlib-only Python: `run_eval.py` (API calls, spend-gated), `count_tokens_claude.py` |
 | `fixtures/small` | committed correctness fixtures (regenerable) |
 | `docs/` | research notes, benchmark methodology, roadmap, measured reports |
@@ -72,6 +72,7 @@ eval/plan.sh                 # the agreed paid stages, each with a price and a b
 # MCP proxy: LDF between any stdio MCP server and the model
 ./target/release/ldf-mcp proxy -- <server command> [args...]
 ./target/release/ldf-mcp convert fixtures/small/nested_orders.json   # any supported input file to LDF on stdout
+./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124 --user ldf   # MCP server over ClickHouse HTTP (docs/ldf-mcp.md)
 ```
 
 `ldf-bench` writes `perf.md`/`perf.json` or `tokens.md`/`tokens.json` into the
@@ -113,6 +114,11 @@ claude mcp add clickhouse -- /abs/path/to/target/release/ldf-mcp proxy -- <click
 `query`, that returns generated rows; the integration tests drive the proxy
 against it, and `ldf-mcp proxy -- ldf-mcp fake-server` is a way to watch
 the rewrite without a database.
+
+`ldf-mcp clickhouse` needs no other MCP server: it is one, with three
+read-only tools (`list_tables`, `describe_table`, `run_select`) over
+ClickHouse's HTTP interface, returning rows as LDF. Local setup with Docker,
+test data and the Claude Code registration are in `docs/ldf-mcp.md`.
 
 ## Results so far
 

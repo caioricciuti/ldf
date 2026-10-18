@@ -19,7 +19,7 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
 | `ldf` | LDF v0 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening and child tables, conformance fixtures under `tests/fixtures` | |
-| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double | `ldf-mcp` |
+| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP, rows returned as LDF | `ldf-mcp` |
 
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
 spend-gated) and `count_tokens_claude.py` (Anthropic count_tokens).
@@ -48,6 +48,7 @@ python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --mod
 eval/plan.sh                          # the agreed paid stages with prices and budget caps; `score` regrades everything
 ./target/release/ldf-mcp proxy -- <mcp server command>   # LDF between a stdio MCP server and the model
 ./target/release/ldf-mcp convert FILE  # json, jsonl, csv, tsv or parquet to LDF on stdout
+./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124   # MCP server over ClickHouse HTTP, see docs/ldf-mcp.md
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.anthropic.claude-opus-5-5.jsonl
 ```
 
@@ -78,7 +79,9 @@ machine with nothing else compiling.
   clean.
 - Secrets never enter the repo. API keys are read by the Python scripts only,
   from the environment or from a gitignored `.env` at the repo root. The
-  Rust code makes no network calls.
+  Rust code makes no calls to paid APIs; the only network code is
+  `ldf-mcp clickhouse`, plain HTTP over `std::net` to the ClickHouse you point
+  it at, password from `CLICKHOUSE_PASSWORD` only.
 - No paid API runs without explicit approval from the project owner.
   `run_eval.py` enforces `--confirm-spend`; do not remove the gate.
 

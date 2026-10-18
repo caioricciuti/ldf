@@ -2,6 +2,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use std::process::ExitCode;
 
+use ldf_mcp::clickhouse;
 use ldf_mcp::proxy::{self, Config};
 
 fn usage() -> ExitCode {
@@ -12,6 +13,10 @@ fn usage() -> ExitCode {
          \x20     --plain        leave initialize instructions and tool descriptions alone\n\
          \x20     --min-bytes N  never convert a text block shorter than N bytes (default 1024)\n\
          \x20     --quiet        no per-result stderr line\n\
+         \x20 ldf-mcp clickhouse [--url http://127.0.0.1:8123] [--database default] [--user default] [--max-rows N]\n\
+         \x20                    [--passthrough] [--min-bytes N] [--quiet]\n\
+         \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
+         \x20     rows come back as LDF; the password is read from CLICKHOUSE_PASSWORD, never from arguments\n\
          \x20 ldf-mcp convert [FILE]\n\
          \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF\n\
          \x20 ldf-mcp fake-server\n\
@@ -25,6 +30,7 @@ fn main() -> ExitCode {
     match args.first().map(String::as_str) {
         Some("proxy") => run_proxy(&args[1..]),
         Some("convert") => convert(args.get(1).map(String::as_str)),
+        Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("fake-server") => match ldf_mcp::fake::run() {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
@@ -68,6 +74,50 @@ fn run_proxy(args: &[String]) -> ExitCode {
         Ok(code) => ExitCode::from(code.clamp(0, 255) as u8),
         Err(e) => {
             eprintln!("ldf-mcp: {e}");
+            ExitCode::from(1)
+        }
+    }
+}
+
+fn run_clickhouse(args: &[String]) -> ExitCode {
+    let mut cfg = clickhouse::Config {
+        url: "http://127.0.0.1:8123".into(),
+        database: "default".into(),
+        user: "default".into(),
+        password: std::env::var("CLICKHOUSE_PASSWORD").ok().filter(|p| !p.is_empty()),
+        passthrough: false,
+        min_bytes: 1024,
+        max_rows: 10_000,
+        log: true,
+    };
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--passthrough" => cfg.passthrough = true,
+            "--quiet" => cfg.log = false,
+            "--url" | "--database" | "--user" | "--max-rows" | "--min-bytes" => {
+                let Some(v) = it.next() else { return usage() };
+                match a.as_str() {
+                    "--url" => cfg.url = v.clone(),
+                    "--database" => cfg.database = v.clone(),
+                    "--user" => cfg.user = v.clone(),
+                    "--max-rows" => match v.parse() {
+                        Ok(n) => cfg.max_rows = n,
+                        Err(_) => return usage(),
+                    },
+                    _ => match v.parse() {
+                        Ok(n) => cfg.min_bytes = n,
+                        Err(_) => return usage(),
+                    },
+                }
+            }
+            _ => return usage(),
+        }
+    }
+    match clickhouse::run(cfg) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("ldf-mcp clickhouse: {e}");
             ExitCode::from(1)
         }
     }

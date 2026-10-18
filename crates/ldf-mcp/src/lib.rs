@@ -10,10 +10,13 @@
 //!   as LDF when that is shorter.
 //!
 //! Nothing else is touched, so the model keeps calling the downstream tools
-//! exactly as before and receives cheaper data. The protocol surface used is
+//! exactly as before and receives cheaper data. `ldf-mcp clickhouse` is a
+//! server of its own with three read-only tools over ClickHouse's HTTP
+//! interface, returning LDF directly. The protocol surface used is
 //! the stdio transport of MCP 2025-06-18: newline-delimited JSON-RPC
 //! messages, logging on stderr only.
 
+pub mod clickhouse;
 pub mod fake;
 pub mod proxy;
 pub mod rewrite;
