@@ -1,10 +1,14 @@
 [package]
 name = "ldf-data"
-description = "Value model, numeric semantics and input readers (JSON, JSONL, CSV, Parquet) for the LDF research workspace"
+description = "Value model, numeric semantics and input readers (JSON, JSONL, CSV, Parquet) for LDF, the Language Data Format"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage = "https://ldflabs.org"
+keywords = ["llm", "json", "parquet", "csv"]
+categories = ["encoding", "parser-implementations"]
 
 [features]
 default = ["parquet", "simd"]

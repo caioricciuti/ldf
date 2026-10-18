@@ -1,14 +1,14 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| gpt-6.1-sol | json | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5176 | 1815 ms |
-| gpt-6.1-sol | json-pretty | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 9091 | 1743 ms |
-| gpt-6.1-sol | jsonl | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5224 | 1719 ms |
-| gpt-6.1-sol | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 3430 | 1807 ms |
-| gpt-6.1-sol | toon | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5549 | 1755 ms |
-| gpt-6.1-sol | toon-tab | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 5551 | 1714 ms |
-| gpt-6.1-sol | yaml | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 6476 | 2118 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| gpt-6.1-sol | json | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 5176 | 1815 ms |
+| gpt-6.1-sol | json-pretty | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 9091 | 1743 ms |
+| gpt-6.1-sol | jsonl | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 5224 | 1719 ms |
+| gpt-6.1-sol | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 3430 | 1807 ms |
+| gpt-6.1-sol | toon | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 5549 | 1755 ms |
+| gpt-6.1-sol | toon-tab | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 5551 | 1714 ms |
+| gpt-6.1-sol | yaml | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 6476 | 2118 ms |
 | - | csv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | tsv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | markdown | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |

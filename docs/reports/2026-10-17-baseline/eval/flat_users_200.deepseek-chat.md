@@ -1,17 +1,17 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| deepseek-chat | csv | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 6159 | 948 ms |
-| deepseek-chat | json | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 10086 | 1169 ms |
-| deepseek-chat | json-pretty | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 15289 | 1364 ms |
-| deepseek-chat | jsonl | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 10086 | 1139 ms |
-| deepseek-chat | ldf | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 6174 | 1038 ms |
-| deepseek-chat | markdown | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 7255 | 1234 ms |
-| deepseek-chat | toon | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 6364 | 1044 ms |
-| deepseek-chat | toon-tab | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 6430 | 1039 ms |
-| deepseek-chat | tsv | 15 | 60.0% | 9 | 6 | 0 | 0 | 0 | 0 | 6223 | 1064 ms |
-| deepseek-chat | yaml | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 12231 | 1135 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| deepseek-chat | csv | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 0 | 6159 | 948 ms |
+| deepseek-chat | json | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 0 | 10086 | 1169 ms |
+| deepseek-chat | json-pretty | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 0 | 15289 | 1364 ms |
+| deepseek-chat | jsonl | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 0 | 10086 | 1139 ms |
+| deepseek-chat | ldf | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 0 | 6174 | 1038 ms |
+| deepseek-chat | markdown | 15 | 73.3% | 11 | 4 | 0 | 0 | 0 | 0 | 0 | 7255 | 1234 ms |
+| deepseek-chat | toon | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 0 | 6364 | 1044 ms |
+| deepseek-chat | toon-tab | 15 | 80.0% | 12 | 3 | 0 | 0 | 0 | 0 | 0 | 6430 | 1039 ms |
+| deepseek-chat | tsv | 15 | 60.0% | 9 | 6 | 0 | 0 | 0 | 0 | 0 | 6223 | 1064 ms |
+| deepseek-chat | yaml | 15 | 66.7% | 10 | 5 | 0 | 0 | 0 | 0 | 0 | 12231 | 1135 ms |
 
 ## By task kind
 

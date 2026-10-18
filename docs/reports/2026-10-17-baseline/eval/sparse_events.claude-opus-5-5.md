@@ -1,16 +1,16 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-opus-5-5 | csv | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 2458 | 1890 ms |
-| claude-opus-5-5 | json | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3878 | 1909 ms |
-| claude-opus-5-5 | json-pretty | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 5201 | 1917 ms |
-| claude-opus-5-5 | jsonl | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3928 | 1939 ms |
-| claude-opus-5-5 | ldf | 18 | 94.4% | 17 | 1 | 0 | 0 | 0 | 0 | 2562 | 2073 ms |
-| claude-opus-5-5 | markdown | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 3331 | 1891 ms |
-| claude-opus-5-5 | toon | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 4104 | 1890 ms |
-| claude-opus-5-5 | toon-tab | 18 | 94.4% | 17 | 0 | 0 | 1 | 0 | 0 | 4108 | 1954 ms |
-| claude-opus-5-5 | tsv | 18 | 88.9% | 16 | 1 | 0 | 1 | 0 | 0 | 2097 | 2254 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-opus-5-5 | csv | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 2458 | 1890 ms |
+| claude-opus-5-5 | json | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 3878 | 1909 ms |
+| claude-opus-5-5 | json-pretty | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 5201 | 1917 ms |
+| claude-opus-5-5 | jsonl | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 3928 | 1939 ms |
+| claude-opus-5-5 | ldf | 18 | 94.4% | 17 | 0 | 1 | 0 | 0 | 0 | 0 | 2562 | 2073 ms |
+| claude-opus-5-5 | markdown | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 3331 | 1891 ms |
+| claude-opus-5-5 | toon | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 4104 | 1890 ms |
+| claude-opus-5-5 | toon-tab | 18 | 94.4% | 17 | 0 | 0 | 0 | 1 | 0 | 0 | 4108 | 1954 ms |
+| claude-opus-5-5 | tsv | 18 | 88.9% | 16 | 1 | 0 | 0 | 1 | 0 | 0 | 2097 | 2254 ms |
 
 ## By task kind
 

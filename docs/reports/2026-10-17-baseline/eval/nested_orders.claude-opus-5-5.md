@@ -1,13 +1,13 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-opus-5-5 | json | 20 | 95.0% | 19 | 0 | 0 | 1 | 0 | 0 | 7733 | 1972 ms |
-| claude-opus-5-5 | json-pretty | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 11615 | 2068 ms |
-| claude-opus-5-5 | jsonl | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 7783 | 1719 ms |
-| claude-opus-5-5 | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 4560 | 2109 ms |
-| claude-opus-5-5 | toon | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 6835 | 1718 ms |
-| claude-opus-5-5 | toon-tab | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 6889 | 1722 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-opus-5-5 | json | 20 | 95.0% | 19 | 0 | 0 | 0 | 1 | 0 | 0 | 7733 | 1972 ms |
+| claude-opus-5-5 | json-pretty | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 0 | 11615 | 2068 ms |
+| claude-opus-5-5 | jsonl | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 0 | 7783 | 1719 ms |
+| claude-opus-5-5 | ldf | 20 | 100.0% | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 4560 | 2109 ms |
+| claude-opus-5-5 | toon | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 0 | 6835 | 1718 ms |
+| claude-opus-5-5 | toon-tab | 20 | 95.0% | 19 | 1 | 0 | 0 | 0 | 0 | 0 | 6889 | 1722 ms |
 | - | csv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | tsv | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |
 | - | markdown | 0 | format unsupported: record 0 field "customer" is a object (nested) | | | | | | | | |

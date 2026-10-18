@@ -1,17 +1,17 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| gpt-6.1-sol | csv | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 1798 | 1385 ms |
-| gpt-6.1-sol | json | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2827 | 1483 ms |
-| gpt-6.1-sol | json-pretty | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 4166 | 1382 ms |
-| gpt-6.1-sol | jsonl | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2875 | 1359 ms |
-| gpt-6.1-sol | ldf | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 1885 | 1524 ms |
-| gpt-6.1-sol | markdown | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 2832 | 1341 ms |
-| gpt-6.1-sol | toon | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3437 | 1439 ms |
-| gpt-6.1-sol | toon-tab | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3439 | 1495 ms |
-| gpt-6.1-sol | tsv | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 1790 | 1403 ms |
-| gpt-6.1-sol | yaml | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 3372 | 1728 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| gpt-6.1-sol | csv | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 1798 | 1385 ms |
+| gpt-6.1-sol | json | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 2827 | 1483 ms |
+| gpt-6.1-sol | json-pretty | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 4166 | 1382 ms |
+| gpt-6.1-sol | jsonl | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 2875 | 1359 ms |
+| gpt-6.1-sol | ldf | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 1885 | 1524 ms |
+| gpt-6.1-sol | markdown | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 2832 | 1341 ms |
+| gpt-6.1-sol | toon | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 3437 | 1439 ms |
+| gpt-6.1-sol | toon-tab | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 3439 | 1495 ms |
+| gpt-6.1-sol | tsv | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 1790 | 1403 ms |
+| gpt-6.1-sol | yaml | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 3372 | 1728 ms |
 
 ## By task kind
 

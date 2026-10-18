@@ -68,8 +68,8 @@ within 1 percent of CSV.
 Claude answered 52 of 53 LDF prompts. On nested_orders LDF is the only
 format where Claude scored 20 of 20 (the others lost the "mean of total"
 question). The one miss is compare-02 on sparse_events: the right record,
-returned as `{"answer":35}` instead of `35`, which the scorer counts as
-wrong. Claude's input for LDF was 2 084 / 4 560 / 2 562 tokens per prompt
+returned as `{"answer":35}` instead of `35`, which the scorer reports as
+*wrapped*, not correct. Claude's input for LDF was 2 084 / 4 560 / 2 562 tokens per prompt
 (flat / nested / sparse), against 3 548 / 7 733 / 3 878 for compact JSON.
 
 **First size step.** flat_users at 200 records, GPT, stopped after 25 of 150
@@ -126,7 +126,9 @@ responses, tasks and per-task tables are in `eval/` (`*_200.*`, `*_500.*`).
 Correct answers per cell, with the misses split by cause: `T` is a response
 that hit the 1 024 token output cap (for the Claude models that cap includes
 thinking tokens, so `T` means "ran out of room to think", not a wrong
-answer), `W` is a finished answer that was wrong. No response was malformed.
+answer), `W` is a finished answer that was wrong, `Wr` a wrapped one: the right value inside a
+one-key object, reported apart from wrong since 2026-10-18 (methodology,
+"Outcomes"). No response was malformed.
 
 | format | flat 200 (15) Opus / Haiku / DeepSeek | flat 500 (15) Haiku / DeepSeek | sparse 200 (18) Haiku / DeepSeek | sparse 500 (18) Haiku / DeepSeek |
 |---|---:|---:|---:|---:|
@@ -134,12 +136,12 @@ answer), `W` is a finished answer that was wrong. No response was malformed.
 | json-pretty | 13 (2T) / 10 (4T) (1W) / 11 (4W) | 11 (3T) (1W) / 11 (4W) | 16 (2T) / 12 (6W) | 14 (4T) / 13 (5W) |
 | jsonl | 13 (2T) / 13 (2T) / 10 (5W) | 11 (2T) (2W) / 11 (4W) | 16 (2T) / 12 (6W) | 15 (3T) / 13 (5W) |
 | csv | 13 (2T) / 10 (3T) (2W) / 10 (5W) | 11 (4T) / 9 (6W) | 15 (3T) / 10 (8W) | 13 (3T) (2W) / 13 (5W) |
-| tsv | 13 (2T) / 11 (3T) (1W) / 9 (6W) | 13 (2T) / 9 (6W) | 14 (2T) (2W) / 9 (9W) | 13 (4T) (1W) / 12 (6W) |
+| tsv | 13 (2T) / 11 (3T) (1W) / 9 (6W) | 13 (2T) / 9 (6W) | 14 (2T) (1W) (1Wr) / 9 (9W) | 13 (4T) (1W) / 12 (6W) |
 | markdown | 14 (1T) / 12 (3T) / 11 (4W) | 11 (3T) (1W) / 11 (4W) | 16 (2T) / 11 (7W) | 15 (2T) (1W) / 12 (6W) |
-| toon | 13 (2T) / 11 (3T) (1W) / 12 (3W) | 9 (3T) (3W) / 9 (6W) | 16 (2T) / 12 (6W) | 15 (3T) / 13 (5W) |
+| toon | 13 (2T) / 11 (3T) (1W) / 12 (3W) | 9 (3T) (3W) / 9 (6W) | 16 (2T) / 12 (6W) | 15 (3T) / 13 (4W) (1Wr) |
 | toon-tab | 13 (2T) / 10 (3T) (2W) / 12 (3W) | 11 (3T) (1W) / 10 (5W) | 15 (3T) / 12 (6W) | 14 (4T) / 13 (5W) |
 | yaml | 13 (2T) / 13 (2T) / 10 (5W) | 12 (2T) (1W) / 11 (4W) | 16 (2T) / 11 (7W) | 14 (4T) / 13 (5W) |
-| **ldf** | **13 (2T) / 10 (2T) (3W) / 12 (3W)** | **10 (3T) (2W) / 8 (7W)** | **12 (5T) (1W) / 10 (8W)** | **12 (3T) (3W) / 13 (5W)** |
+| **ldf** | **13 (2T) / 10 (2T) (3W) / 12 (3W)** | **10 (3T) (2W) / 8 (7W)** | **12 (5T) (1Wr) / 10 (8W)** | **12 (3T) (3W) / 13 (5W)** |
 
 Input tokens per prompt as each provider counted them (Claude tokenizer
 from the Haiku runs, DeepSeek tokenizer from the DeepSeek runs):
@@ -188,10 +190,13 @@ What the tables say:
   is a cell in a row rather than a key next to its value. JSON, JSONL,
   Markdown and YAML were right. This is the research note's open question
   ("where do tabular forms lose accuracy"), answered once, on one model.
-* **Two wrapped answers.** Opus (sparse_events, 50 records) and Haiku
+* **Wrapped answers.** Opus (sparse_events, 50 records) and Haiku
   (sparse_events_200) both picked the right record on a compare question and
-  returned it as `{"answer":35}` and `{"event_id":94}`; the scorer takes the
-  trailing JSON value as given and counts both as wrong. Both were LDF rows.
+  returned it as `{"answer":35}` and `{"event_id":94}`. The scorer reports
+  such answers as *wrapped*, apart from wrong. Across every run there are
+  ten: six on LDF rows, two on TSV, one on Markdown, one on TOON, all on
+  sparse_events compare questions that ask for an event id. A header that
+  names the column invites the echo, and LDF's does most.
 
 Reading: the token advantage of LDF holds on every tokenizer and bundle
 (within 4 percent of CSV, 34 to 44 percent below compact JSON, 40 to 46
@@ -211,12 +216,12 @@ Same 180 prompts, `max_tokens` 4 096 instead of 1 024, $0.08
 | json-pretty | 16 (2T) | 17 (1W) | 251 / 329 |
 | jsonl | 16 (2T) | 18 | 245 / 441 |
 | csv | 15 (3T) | 16 (1T) (1W) | 357 / 563 |
-| tsv | 14 (2T) (2W) | 15 (3W) | 337 / 577 |
-| markdown | 16 (2T) | 17 (1W) | 279 / 449 |
+| tsv | 14 (2T) (1W) (1Wr) | 15 (2W) (1Wr) | 337 / 577 |
+| markdown | 16 (2T) | 17 (1Wr) | 279 / 449 |
 | toon | 16 (2T) | 18 | 235 / 387 |
 | toon-tab | 15 (3T) | 17 (1W) | 253 / 382 |
 | yaml | 16 (2T) | 16 (2W) | 258 / 382 |
-| **ldf** | **12 (5T) (1W)** | **13 (2T) (3W)** | **403 / 870** |
+| **ldf** | **12 (5T) (1Wr)** | **13 (2T) (1W) (2Wr)** | **403 / 870** |
 
 The extra room converts almost every other format's truncations into
 correct answers (15 to 18 of 18, one truncation left in CSV). LDF gains one:
@@ -238,8 +243,9 @@ other positional formats do not have. So the cost is positional columns on
 sparse rows, which is the price of the token saving on this dataset (9 661
 tokens per prompt against 16 245 for TOON), and a weak model pays it in
 reasoning and sometimes in answers. The wrapped answers are a separate,
-smaller effect: all three seen so far (Opus once, Haiku twice) were on LDF,
-whose header names the columns the model then echoes as keys.
+smaller effect, reported on their own: LDF has the most of them (six across
+all runs against four for TSV, Markdown and TOON together), and none is a
+misread.
 
 ### The sparse-key rule, measured (Haiku 5.5, sparse_events_200, 4 096 cap)
 
@@ -250,15 +256,15 @@ and cap as the rerun above, three thresholds, $0.02
 (`eval/sparse_events_200_sparse.*`; the variants share the prompt name
 `ldf`):
 
-| format | correct | truncated | wrong | mean output tokens | input tokens per prompt |
-|---|---:|---:|---:|---:|---:|
-| json | 17 | 0 | 1 | 342 | 15 317 |
-| toon | 18 | 0 | 0 | 387 | 16 245 |
-| csv | 16 | 1 | 1 | 563 | 9 383 |
-| ldf, v0 | 13 | 2 | 3 | 870 | 9 661 |
-| ldf, threshold 0.25 | 16 | 1 | 1 | 564 | 10 290 |
-| **ldf, threshold 0.5** | **17** | **0** | **1** | **382** | **11 443** |
-| ldf, threshold 0.75 | 18 | 0 | 0 | 407 | 13 138 |
+| format | correct | truncated | wrong | wrapped | mean output tokens | input tokens per prompt |
+|---|---:|---:|---:|---:|---:|---:|
+| json | 17 | 0 | 1 | 0 | 342 | 15 317 |
+| toon | 18 | 0 | 0 | 0 | 387 | 16 245 |
+| csv | 16 | 1 | 1 | 0 | 563 | 9 383 |
+| ldf, v0 | 13 | 2 | 1 | 2 | 870 | 9 661 |
+| ldf, threshold 0.25 | 16 | 1 | 0 | 1 | 564 | 10 290 |
+| **ldf, threshold 0.5** | **17** | **0** | **0** | **1** | **382** | **11 443** |
+| ldf, threshold 0.75 | 18 | 0 | 0 | 0 | 407 | 13 138 |
 
 At 0.25 the `retries` filter is answered (the key moved next to its name)
 and the sum of `latency_ms` still fills the cap (that key stays a column

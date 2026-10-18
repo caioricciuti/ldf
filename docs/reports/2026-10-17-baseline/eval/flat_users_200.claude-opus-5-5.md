@@ -1,17 +1,17 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-opus-5-5 | csv | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 7755 | 2962 ms |
-| claude-opus-5-5 | json | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 13742 | 3468 ms |
-| claude-opus-5-5 | json-pretty | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 18947 | 2716 ms |
-| claude-opus-5-5 | jsonl | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 13942 | 2853 ms |
-| claude-opus-5-5 | ldf | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 7778 | 2652 ms |
-| claude-opus-5-5 | markdown | 15 | 93.3% | 14 | 0 | 0 | 1 | 0 | 0 | 9784 | 2557 ms |
-| claude-opus-5-5 | toon | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 7961 | 2764 ms |
-| claude-opus-5-5 | toon-tab | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 7965 | 3010 ms |
-| claude-opus-5-5 | tsv | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 7756 | 2882 ms |
-| claude-opus-5-5 | yaml | 15 | 86.7% | 13 | 0 | 0 | 2 | 0 | 0 | 13957 | 2784 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-opus-5-5 | csv | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 7755 | 2962 ms |
+| claude-opus-5-5 | json | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 13742 | 3468 ms |
+| claude-opus-5-5 | json-pretty | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 18947 | 2716 ms |
+| claude-opus-5-5 | jsonl | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 13942 | 2853 ms |
+| claude-opus-5-5 | ldf | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 7778 | 2652 ms |
+| claude-opus-5-5 | markdown | 15 | 93.3% | 14 | 0 | 0 | 0 | 1 | 0 | 0 | 9784 | 2557 ms |
+| claude-opus-5-5 | toon | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 7961 | 2764 ms |
+| claude-opus-5-5 | toon-tab | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 7965 | 3010 ms |
+| claude-opus-5-5 | tsv | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 7756 | 2882 ms |
+| claude-opus-5-5 | yaml | 15 | 86.7% | 13 | 0 | 0 | 0 | 2 | 0 | 0 | 13957 | 2784 ms |
 
 ## By task kind
 

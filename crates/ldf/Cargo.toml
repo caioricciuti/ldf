@@ -1,10 +1,15 @@
 [package]
 name = "ldf"
-description = "Language Data Format: lossless, token-efficient text encoding of JSON records for language models (v0 prototype)"
+description = "Language Data Format: a lossless, line-oriented text encoding of JSON records that language models read for fewer tokens"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage = "https://ldflabs.org"
+documentation = "https://ldflabs.org/docs/spec/"
+keywords = ["llm", "serialization", "tokens", "json", "format"]
+categories = ["encoding", "parser-implementations"]
 
 [dependencies]
 ldf-data = { workspace = true }

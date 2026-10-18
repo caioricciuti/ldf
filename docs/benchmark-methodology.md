@@ -157,7 +157,9 @@ byte-identical across formats except for the format name and the data block
 pinned by the caller). Prompt token counts (o200k) are in the manifest so
 context budgets can be checked before spending.
 
-Outcomes are reported separately: correct, wrong, malformed (unparseable
+Outcomes are reported separately: correct, wrong, wrapped (the right value
+inside a one-key object such as `{"id": 94}` for `94`, an answer-shape slip
+rather than a misread, not counted as correct), malformed (unparseable
 answer), truncated (`finish_reason` length / `max_tokens`), context exceeded,
 api error, and format unsupported (no prompt existed because the format could
 not encode the dataset). Accuracy is `correct / n` over prompts actually sent.

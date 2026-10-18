@@ -20,11 +20,11 @@ repository = "https://github.com/caioricciuti/ldf"
 # Every external dependency is pinned to an exact version. Transitive versions
 # are pinned by Cargo.lock, which is committed. See AGENTS.md for the policy.
 [workspace.dependencies]
-ldf-data = { path = "crates/ldf-data" }
+ldf-data = { path = "crates/ldf-data", version = "0.1.0" }
 ldf-fixtures = { path = "crates/ldf-fixtures" }
 ldf-formats = { path = "crates/ldf-formats" }
 ldf-eval = { path = "crates/ldf-eval" }
-ldf = { path = "crates/ldf" }
+ldf = { path = "crates/ldf", version = "0.1.0" }
 
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }

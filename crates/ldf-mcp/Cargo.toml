@@ -1,10 +1,15 @@
 [package]
 name = "ldf-mcp"
-description = "MCP stdio proxy that rewrites JSON tool results into LDF before they reach the model"
+description = "MCP server over stdio: a proxy that re-encodes JSON tool results as LDF, plus ClickHouse and files sources that return rows as LDF"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage = "https://ldflabs.org"
+documentation = "https://ldflabs.org/docs/mcp/"
+keywords = ["mcp", "llm", "clickhouse", "tokens"]
+categories = ["command-line-utilities"]
 
 [[bin]]
 name = "ldf-mcp"

@@ -14,7 +14,7 @@ use std::fmt::Write as _;
 
 use serde::{Deserialize, Serialize};
 
-use crate::answer::parse_response;
+use crate::answer::{parse_response, parse_wrapped};
 use crate::tasks::{Task, TaskKind};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,6 +37,10 @@ pub struct Response {
 pub enum Outcome {
     Correct,
     Wrong,
+    /// The right value inside a one-key object (`{"id": 94}` for `94`).
+    /// Not counted as correct; reported so the answer-shape slips are
+    /// visible apart from misreads.
+    Wrapped,
     Malformed,
     Truncated,
     ContextExceeded,
@@ -78,11 +82,19 @@ pub fn grade(tasks: &[Task], responses: &[Response]) -> Vec<Graded> {
             } else if matches!(r.finish_reason.as_deref(), Some("length" | "max_tokens")) {
                 Outcome::Truncated
             } else {
-                match r.text.as_deref().and_then(parse_response) {
+                let text = r.text.as_deref().unwrap_or("");
+                let wrapped = || {
+                    parse_wrapped(text)
+                        .is_some_and(|inner| task.answer.accepts(&inner, &task.tolerance))
+                };
+                match parse_response(text) {
+                    None if wrapped() => Outcome::Wrapped,
                     None => Outcome::Malformed,
                     Some(got) => {
                         if task.answer.accepts(&got, &task.tolerance) {
                             Outcome::Correct
+                        } else if wrapped() {
+                            Outcome::Wrapped
                         } else {
                             Outcome::Wrong
                         }
@@ -111,6 +123,7 @@ pub struct Cell {
     pub n: usize,
     pub correct: usize,
     pub wrong: usize,
+    pub wrapped: usize,
     pub malformed: usize,
     pub truncated: usize,
     pub context_exceeded: usize,
@@ -127,6 +140,7 @@ impl Cell {
         match g.outcome {
             Outcome::Correct => self.correct += 1,
             Outcome::Wrong => self.wrong += 1,
+            Outcome::Wrapped => self.wrapped += 1,
             Outcome::Malformed => self.malformed += 1,
             Outcome::Truncated => self.truncated += 1,
             Outcome::ContextExceeded => self.context_exceeded += 1,
@@ -174,20 +188,21 @@ pub fn render_markdown(graded: &[Graded], unsupported: &[(String, String)]) -> S
     let _ = writeln!(md, "# LLM comprehension results\n");
     let _ = writeln!(
         md,
-        "| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |"
+        "| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |"
     );
     let _ = writeln!(
         md,
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
     );
     for ((model, format), c) in &by_format {
         let _ = writeln!(
             md,
-            "| {model} | {format} | {} | {:.1}% | {} | {} | {} | {} | {} | {} | {:.0} | {} |",
+            "| {model} | {format} | {} | {:.1}% | {} | {} | {} | {} | {} | {} | {} | {:.0} | {} |",
             c.n,
             c.accuracy() * 100.0,
             c.correct,
             c.wrong,
+            c.wrapped,
             c.malformed,
             c.truncated,
             c.context_exceeded,

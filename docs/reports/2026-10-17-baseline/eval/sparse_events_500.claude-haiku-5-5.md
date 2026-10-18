@@ -1,17 +1,17 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-haiku-5-5 | csv | 18 | 72.2% | 13 | 2 | 0 | 3 | 0 | 0 | 22984 | 2493 ms |
-| claude-haiku-5-5 | json | 18 | 83.3% | 15 | 1 | 0 | 2 | 0 | 0 | 37811 | 2232 ms |
-| claude-haiku-5-5 | json-pretty | 18 | 77.8% | 14 | 0 | 0 | 4 | 0 | 0 | 51113 | 2399 ms |
-| claude-haiku-5-5 | jsonl | 18 | 83.3% | 15 | 0 | 0 | 3 | 0 | 0 | 38311 | 2204 ms |
-| claude-haiku-5-5 | ldf | 18 | 66.7% | 12 | 3 | 0 | 3 | 0 | 0 | 23640 | 2524 ms |
-| claude-haiku-5-5 | markdown | 18 | 83.3% | 15 | 1 | 0 | 2 | 0 | 0 | 31220 | 2121 ms |
-| claude-haiku-5-5 | toon | 18 | 83.3% | 15 | 0 | 0 | 3 | 0 | 0 | 40113 | 2086 ms |
-| claude-haiku-5-5 | toon-tab | 18 | 77.8% | 14 | 0 | 0 | 4 | 0 | 0 | 40117 | 2215 ms |
-| claude-haiku-5-5 | tsv | 18 | 72.2% | 13 | 1 | 0 | 4 | 0 | 0 | 19395 | 2484 ms |
-| claude-haiku-5-5 | yaml | 18 | 77.8% | 14 | 0 | 0 | 4 | 0 | 0 | 38835 | 2202 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-haiku-5-5 | csv | 18 | 72.2% | 13 | 2 | 0 | 0 | 3 | 0 | 0 | 22984 | 2493 ms |
+| claude-haiku-5-5 | json | 18 | 83.3% | 15 | 1 | 0 | 0 | 2 | 0 | 0 | 37811 | 2232 ms |
+| claude-haiku-5-5 | json-pretty | 18 | 77.8% | 14 | 0 | 0 | 0 | 4 | 0 | 0 | 51113 | 2399 ms |
+| claude-haiku-5-5 | jsonl | 18 | 83.3% | 15 | 0 | 0 | 0 | 3 | 0 | 0 | 38311 | 2204 ms |
+| claude-haiku-5-5 | ldf | 18 | 66.7% | 12 | 3 | 0 | 0 | 3 | 0 | 0 | 23640 | 2524 ms |
+| claude-haiku-5-5 | markdown | 18 | 83.3% | 15 | 1 | 0 | 0 | 2 | 0 | 0 | 31220 | 2121 ms |
+| claude-haiku-5-5 | toon | 18 | 83.3% | 15 | 0 | 0 | 0 | 3 | 0 | 0 | 40113 | 2086 ms |
+| claude-haiku-5-5 | toon-tab | 18 | 77.8% | 14 | 0 | 0 | 0 | 4 | 0 | 0 | 40117 | 2215 ms |
+| claude-haiku-5-5 | tsv | 18 | 72.2% | 13 | 1 | 0 | 0 | 4 | 0 | 0 | 19395 | 2484 ms |
+| claude-haiku-5-5 | yaml | 18 | 77.8% | 14 | 0 | 0 | 0 | 4 | 0 | 0 | 38835 | 2202 ms |
 
 ## By task kind
 

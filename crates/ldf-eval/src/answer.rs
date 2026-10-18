@@ -209,10 +209,8 @@ fn single_scalar(a: &Answer) -> Option<Scalar> {
     })
 }
 
-/// Parses a raw model response into an [`Answer`]. Accepts a bare JSON
-/// value, a JSON value inside a Markdown code fence, or, failing that, the
-/// trimmed text as a string (numbers and booleans recognised).
-pub fn parse_response(raw: &str) -> Option<Answer> {
+/// The text of a response with a Markdown code fence unwrapped.
+fn unfenced(raw: &str) -> &str {
     let mut text = raw.trim();
     if let Some(start) = text.find("```") {
         let after = &text[start + 3..];
@@ -221,6 +219,30 @@ pub fn parse_response(raw: &str) -> Option<Answer> {
             text = after[..end].trim();
         }
     }
+    text
+}
+
+/// A response that wrapped its value in a one-key object, as in
+/// `{"event_id": 94}` for a question answered by `94`: the value inside.
+/// The scorer reports such answers as *wrapped*, apart from *correct* and
+/// *wrong*, because the model found the right record and missed the
+/// answer shape. The object may stand alone or end a line of prose.
+pub fn parse_wrapped(raw: &str) -> Option<Answer> {
+    let text = unfenced(raw);
+    let start = text.rfind('{')?;
+    let v: Value = serde_json::from_str(&text[start..]).ok()?;
+    let obj = v.as_object()?;
+    if obj.len() != 1 {
+        return None;
+    }
+    Answer::from_value(&obj[0].1)
+}
+
+/// Parses a raw model response into an [`Answer`]. Accepts a bare JSON
+/// value, a JSON value inside a Markdown code fence, or, failing that, the
+/// trimmed text as a string (numbers and booleans recognised).
+pub fn parse_response(raw: &str) -> Option<Answer> {
+    let text = unfenced(raw);
     if text.is_empty() {
         return None;
     }

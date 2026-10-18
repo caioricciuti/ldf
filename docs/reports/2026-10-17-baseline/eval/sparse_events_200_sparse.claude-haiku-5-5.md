@@ -1,10 +1,10 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-haiku-5-5 | ldf-s25 | 18 | 88.9% | 16 | 1 | 0 | 1 | 0 | 0 | 10290 | 3146 ms |
-| claude-haiku-5-5 | ldf-s50 | 18 | 94.4% | 17 | 1 | 0 | 0 | 0 | 0 | 11443 | 2178 ms |
-| claude-haiku-5-5 | ldf-s75 | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 13138 | 2293 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-haiku-5-5 | ldf-s25 | 18 | 88.9% | 16 | 0 | 1 | 0 | 1 | 0 | 0 | 10290 | 3146 ms |
+| claude-haiku-5-5 | ldf-s50 | 18 | 94.4% | 17 | 0 | 1 | 0 | 0 | 0 | 0 | 11443 | 2178 ms |
+| claude-haiku-5-5 | ldf-s75 | 18 | 100.0% | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 13138 | 2293 ms |
 
 ## By task kind
 
