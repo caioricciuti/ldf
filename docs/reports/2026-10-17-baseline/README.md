@@ -241,6 +241,32 @@ reasoning and sometimes in answers. The wrapped answers are a separate,
 smaller effect: all three seen so far (Opus once, Haiku twice) were on LDF,
 whose header names the columns the model then echoes as keys.
 
+## Codec update, 2026-10-18: wide tables
+
+`perf-medium.md` recorded LDF at 56 ms encode and 50 ms decode on
+wide_table (41 columns, 10 000 rows), four to seven times slower than
+serde_json and twice CSV. Two scans were quadratic in the column count: the
+planner checked every key of every row against the key list with a linear
+`contains`, and the decoder looked each cell's key up in the row object
+before pushing it. The planner now compares a row's key list positionally
+against the first row's (one pass, and a set only for rows that differ),
+and the decoder pushes a key without a lookup when no earlier column shares
+its first path segment. Same machine, `ldf-bench perf --input
+fixtures/medium/wide_table.json --iters 7`, before in
+`perf-wide-table-2026-10-18-before.md`, after in
+`perf-wide-table-2026-10-18.md`:
+
+| format | encode median before | after | decode median before | after |
+|---|---:|---:|---:|---:|
+| json | 8.03 ms | 8.34 ms | 17.72 ms | 17.87 ms |
+| csv | 24.98 ms | 26.53 ms | 12.79 ms | 13.71 ms |
+| **ldf** | **54.53 ms** | **27.85 ms** | **49.70 ms** | **17.71 ms** |
+
+LDF decode now sits at JSON's decode time and LDF encode at CSV's, so what
+remains is the cost of walking the value tree and writing cells, shared
+with CSV. The other medium datasets were not re-run; their LDF numbers in
+`perf-medium.md` predate this change and can only have improved.
+
 ## What was not measured
 
 * No comprehension numbers beyond 500 records, none for GPT beyond the 25

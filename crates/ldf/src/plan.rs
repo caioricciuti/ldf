@@ -128,11 +128,17 @@ fn plan_table(
     join_col: Option<(Vec<String>, ColType)>,
 ) -> TablePlan {
     let mut columns = Vec::new();
-    // Top-level keys in first-seen order.
+    // Top-level keys in first-seen order. Rows usually repeat the key list
+    // of the first row exactly, which the zip check catches in O(columns);
+    // the set is only consulted for rows that differ.
     let mut keys: Vec<&str> = Vec::new();
+    let mut seen: HashSet<&str> = HashSet::new();
     for o in rows {
+        if o.len() == keys.len() && o.iter().zip(&keys).all(|((k, _), kk)| k == kk) {
+            continue;
+        }
         for (k, _) in o.iter() {
-            if !keys.contains(&k.as_str()) {
+            if seen.insert(k.as_str()) {
                 keys.push(k);
             }
         }

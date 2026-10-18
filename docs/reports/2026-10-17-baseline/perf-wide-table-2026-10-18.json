@@ -1,0 +1,750 @@
+{
+  "tool": "ldf-bench",
+  "started_utc": "20261018-101009",
+  "command": [
+    "./target/release/ldf-bench",
+    "perf",
+    "--input",
+    "fixtures/medium/wide_table.json",
+    "--iters",
+    "7",
+    "--out",
+    "/private/tmp/claude-501/-Users-caioricciuti-Desktop-ldf/cb127970-93b2-428e-b513-1917cb064e51/scratchpad/perf-after"
+  ],
+  "iters": 7,
+  "sysinfo": {
+    "os": "Darwin 27.0.0",
+    "arch": "aarch64",
+    "cpu": "Apple M2 Pro",
+    "logical_cpus": 10,
+    "memory_bytes": 17179869184,
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo_profile": "release",
+    "git_commit": "7684137",
+    "crate_versions": [
+      [
+        "arrow",
+        "60.0.0"
+      ],
+      [
+        "criterion",
+        "0.8.2"
+      ],
+      [
+        "csv",
+        "1.4.0"
+      ],
+      [
+        "parquet",
+        "60.0.0"
+      ],
+      [
+        "serde_json",
+        "1.0.151"
+      ],
+      [
+        "simd-json",
+        "0.18.1"
+      ],
+      [
+        "tiktoken-rs",
+        "0.12.1"
+      ]
+    ]
+  },
+  "datasets": [
+    {
+      "name": "wide_table",
+      "path": "fixtures/medium/wide_table.json",
+      "input_kind": "json",
+      "records": 10000,
+      "input_bytes": 5410061,
+      "roundtrips": [
+        {
+          "format": "json",
+          "level": "byte",
+          "output_bytes": 5410061,
+          "detail": null
+        },
+        {
+          "format": "json-pretty",
+          "level": "byte",
+          "output_bytes": 7930062,
+          "detail": null
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "output_bytes": 5410060,
+          "detail": null
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "output_bytes": 2739993,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "output_bytes": 2739993,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "markdown",
+          "level": "lossy",
+          "output_bytes": 3580325,
+          "detail": "0.s01: null vs \"null\""
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "output_bytes": 2772828,
+          "detail": null
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "output_bytes": 2772829,
+          "detail": null
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "output_bytes": 5612886,
+          "detail": null
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "output_bytes": 2753140,
+          "detail": null
+        }
+      ],
+      "measurements": [
+        {
+          "op": "io",
+          "format": null,
+          "engine": null,
+          "records": 0,
+          "bytes": 5410061,
+          "secs": [
+            0.000621791,
+            0.000343333,
+            0.000296667,
+            0.000271167,
+            0.00025275,
+            0.000244708,
+            0.00023825
+          ],
+          "usage_before": {
+            "max_rss_bytes": 6062080,
+            "user_cpu_secs": 0.002176,
+            "system_cpu_secs": 0.001429
+          },
+          "usage_after": {
+            "max_rss_bytes": 11567104,
+            "user_cpu_secs": 0.0021869999999999997,
+            "system_cpu_secs": 0.0036929999999999997
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "serde_json",
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.020628042,
+            0.018729958,
+            0.020038083,
+            0.017745458,
+            0.017606833,
+            0.017587542,
+            0.017554
+          ],
+          "usage_before": {
+            "max_rss_bytes": 11534336,
+            "user_cpu_secs": 0.001856,
+            "system_cpu_secs": 0.0016049999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 67092480,
+            "user_cpu_secs": 0.157496,
+            "system_cpu_secs": 0.010594
+          },
+          "error": null
+        },
+        {
+          "op": "parse",
+          "format": null,
+          "engine": "simd-json",
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.016576834,
+            0.015129541,
+            0.015458291,
+            0.012787459,
+            0.012587667,
+            0.012551375,
+            0.012746583
+          ],
+          "usage_before": {
+            "max_rss_bytes": 11534336,
+            "user_cpu_secs": 0.002064,
+            "system_cpu_secs": 0.001987
+          },
+          "usage_after": {
+            "max_rss_bytes": 117735424,
+            "user_cpu_secs": 0.11953699999999999,
+            "system_cpu_secs": 0.015392999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.008206041,
+            0.00819,
+            0.008213417,
+            0.008046375,
+            0.008606541,
+            0.0088125,
+            0.008461834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61947904,
+            "user_cpu_secs": 0.019774,
+            "system_cpu_secs": 0.004521
+          },
+          "usage_after": {
+            "max_rss_bytes": 99205120,
+            "user_cpu_secs": 0.07564599999999999,
+            "system_cpu_secs": 0.007187
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410061,
+          "secs": [
+            0.019133291,
+            0.020003958,
+            0.017882,
+            0.0180345,
+            0.017861,
+            0.017527416,
+            0.017680167
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64438272,
+            "user_cpu_secs": 0.032115,
+            "system_cpu_secs": 0.005474
+          },
+          "usage_after": {
+            "max_rss_bytes": 70352896,
+            "user_cpu_secs": 0.18945199999999998,
+            "system_cpu_secs": 0.010603999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 7930062,
+          "secs": [
+            0.010223417,
+            0.011027875,
+            0.010288,
+            0.010352125,
+            0.011032667,
+            0.010451666,
+            0.01083375
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61947904,
+            "user_cpu_secs": 0.019958999999999998,
+            "system_cpu_secs": 0.004489
+          },
+          "usage_after": {
+            "max_rss_bytes": 116850688,
+            "user_cpu_secs": 0.090627,
+            "system_cpu_secs": 0.007951
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "json-pretty",
+          "engine": null,
+          "records": 10000,
+          "bytes": 7930062,
+          "secs": [
+            0.020407917,
+            0.021800083,
+            0.019867625,
+            0.019157167,
+            0.019004333,
+            0.019302125,
+            0.018916625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66928640,
+            "user_cpu_secs": 0.034212,
+            "system_cpu_secs": 0.005758
+          },
+          "usage_after": {
+            "max_rss_bytes": 75382784,
+            "user_cpu_secs": 0.20136099999999998,
+            "system_cpu_secs": 0.011519
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410060,
+          "secs": [
+            0.00797525,
+            0.008105375,
+            0.008129666,
+            0.008113625,
+            0.008495208,
+            0.008362833,
+            0.008511959
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61931520,
+            "user_cpu_secs": 0.019787,
+            "system_cpu_secs": 0.0042899999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 99188736,
+            "user_cpu_secs": 0.075349,
+            "system_cpu_secs": 0.006371
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "jsonl",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5410060,
+          "secs": [
+            0.019981791,
+            0.020872083,
+            0.018540708,
+            0.018756209,
+            0.0188765,
+            0.018787875,
+            0.018480584
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64438272,
+            "user_cpu_secs": 0.032624,
+            "system_cpu_secs": 0.0051129999999999995
+          },
+          "usage_after": {
+            "max_rss_bytes": 71630848,
+            "user_cpu_secs": 0.195989,
+            "system_cpu_secs": 0.009746999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.027109375,
+            0.026634875,
+            0.026190959,
+            0.027409792,
+            0.027591666,
+            0.025819375,
+            0.026423041
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61931520,
+            "user_cpu_secs": 0.019916,
+            "system_cpu_secs": 0.00406
+          },
+          "usage_after": {
+            "max_rss_bytes": 66797568,
+            "user_cpu_secs": 0.205682,
+            "system_cpu_secs": 0.0053219999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "csv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.015731584,
+            0.013939042,
+            0.013855375,
+            0.013592583,
+            0.013664875,
+            0.0137475,
+            0.013503333
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64618496,
+            "user_cpu_secs": 0.051066,
+            "system_cpu_secs": 0.0050929999999999994
+          },
+          "usage_after": {
+            "max_rss_bytes": 99188736,
+            "user_cpu_secs": 0.17853,
+            "system_cpu_secs": 0.008820999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.026318333,
+            0.026771333,
+            0.026028292,
+            0.026590375,
+            0.026105958,
+            0.026156708,
+            0.026073208
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61964288,
+            "user_cpu_secs": 0.02008,
+            "system_cpu_secs": 0.004029
+          },
+          "usage_after": {
+            "max_rss_bytes": 66273280,
+            "user_cpu_secs": 0.201841,
+            "system_cpu_secs": 0.0062309999999999996
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "tsv",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2739993,
+          "secs": [
+            0.01556425,
+            0.014183792,
+            0.014451542,
+            0.013367041,
+            0.014221417,
+            0.014432167,
+            0.013389708
+          ],
+          "usage_before": {
+            "max_rss_bytes": 64471040,
+            "user_cpu_secs": 0.052502,
+            "system_cpu_secs": 0.005425
+          },
+          "usage_after": {
+            "max_rss_bytes": 98664448,
+            "user_cpu_secs": 0.18145899999999998,
+            "system_cpu_secs": 0.009701999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3580325,
+          "secs": [
+            0.025602458,
+            0.025733833,
+            0.025364541,
+            0.025226208,
+            0.026133834,
+            0.02484625,
+            0.026398834
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61964288,
+            "user_cpu_secs": 0.019733999999999998,
+            "system_cpu_secs": 0.004606
+          },
+          "usage_after": {
+            "max_rss_bytes": 68108288,
+            "user_cpu_secs": 0.196925,
+            "system_cpu_secs": 0.0066879999999999995
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "markdown",
+          "engine": null,
+          "records": 10000,
+          "bytes": 3580325,
+          "secs": [
+            0.036365042,
+            0.03432725,
+            0.034421625,
+            0.034252666,
+            0.034098917,
+            0.034794375,
+            0.035116042
+          ],
+          "usage_before": {
+            "max_rss_bytes": 68141056,
+            "user_cpu_secs": 0.049532,
+            "system_cpu_secs": 0.005986
+          },
+          "usage_after": {
+            "max_rss_bytes": 97370112,
+            "user_cpu_secs": 0.320432,
+            "system_cpu_secs": 0.011391
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772828,
+          "secs": [
+            0.027761,
+            0.026287209,
+            0.023718959,
+            0.025504125,
+            0.024214,
+            0.025690042,
+            0.025943292
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61980672,
+            "user_cpu_secs": 0.020145,
+            "system_cpu_secs": 0.004398
+          },
+          "usage_after": {
+            "max_rss_bytes": 66830336,
+            "user_cpu_secs": 0.19775099999999998,
+            "system_cpu_secs": 0.005614
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772828,
+          "secs": [
+            0.055537416,
+            0.051472791,
+            0.050882167,
+            0.05045625,
+            0.051112208,
+            0.050200084,
+            0.050417541
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66404352,
+            "user_cpu_secs": 0.051095999999999996,
+            "system_cpu_secs": 0.005275
+          },
+          "usage_after": {
+            "max_rss_bytes": 99106816,
+            "user_cpu_secs": 0.437127,
+            "system_cpu_secs": 0.010747999999999999
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772829,
+          "secs": [
+            0.027031334,
+            0.032058083,
+            0.025425167,
+            0.026748958,
+            0.02540875,
+            0.02406775,
+            0.026794625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61947904,
+            "user_cpu_secs": 0.020644,
+            "system_cpu_secs": 0.0043479999999999994
+          },
+          "usage_after": {
+            "max_rss_bytes": 68141056,
+            "user_cpu_secs": 0.20299199999999998,
+            "system_cpu_secs": 0.005535
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "toon-tab",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2772829,
+          "secs": [
+            0.054465875,
+            0.050676167,
+            0.051030292,
+            0.051315958,
+            0.050274834,
+            0.050021125,
+            0.0494425
+          ],
+          "usage_before": {
+            "max_rss_bytes": 66387968,
+            "user_cpu_secs": 0.054228,
+            "system_cpu_secs": 0.005946
+          },
+          "usage_after": {
+            "max_rss_bytes": 98959360,
+            "user_cpu_secs": 0.438225,
+            "system_cpu_secs": 0.011327
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "yaml",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5612886,
+          "secs": [
+            0.026630041,
+            0.025856583,
+            0.026541,
+            0.026999209,
+            0.026913917,
+            0.026678583,
+            0.026683625
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61915136,
+            "user_cpu_secs": 0.019774,
+            "system_cpu_secs": 0.004552
+          },
+          "usage_after": {
+            "max_rss_bytes": 100548608,
+            "user_cpu_secs": 0.202058,
+            "system_cpu_secs": 0.008432
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "yaml",
+          "engine": null,
+          "records": 10000,
+          "bytes": 5612886,
+          "secs": [
+            0.18765575,
+            0.176946583,
+            0.172766167,
+            0.17236725,
+            0.171651083,
+            0.171671375,
+            0.172173458
+          ],
+          "usage_before": {
+            "max_rss_bytes": 70090752,
+            "user_cpu_secs": 0.050857,
+            "system_cpu_secs": 0.006130999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 184090624,
+            "user_cpu_secs": 1.281755,
+            "system_cpu_secs": 0.030695999999999998
+          },
+          "error": null
+        },
+        {
+          "op": "encode",
+          "format": "ldf",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2753140,
+          "secs": [
+            0.028662125,
+            0.027939167,
+            0.028035625,
+            0.026539542,
+            0.027753083,
+            0.028991875,
+            0.02774875
+          ],
+          "usage_before": {
+            "max_rss_bytes": 61964288,
+            "user_cpu_secs": 0.019826999999999997,
+            "system_cpu_secs": 0.004488
+          },
+          "usage_after": {
+            "max_rss_bytes": 69877760,
+            "user_cpu_secs": 0.214049,
+            "system_cpu_secs": 0.005692
+          },
+          "error": null
+        },
+        {
+          "op": "decode",
+          "format": "ldf",
+          "engine": null,
+          "records": 10000,
+          "bytes": 2753140,
+          "secs": [
+            0.021853708,
+            0.017640167,
+            0.018042583,
+            0.01726225,
+            0.017777084,
+            0.017222625,
+            0.018088541
+          ],
+          "usage_before": {
+            "max_rss_bytes": 67518464,
+            "user_cpu_secs": 0.053725999999999996,
+            "system_cpu_secs": 0.005889999999999999
+          },
+          "usage_after": {
+            "max_rss_bytes": 114802688,
+            "user_cpu_secs": 0.209061,
+            "system_cpu_secs": 0.010665
+          },
+          "error": null
+        }
+      ],
+      "tokens": []
+    }
+  ]
+}

@@ -289,25 +289,40 @@ fn typed(tok: &str, ty: ColType, line_no: usize) -> Result<Value> {
 // ---- assembly -------------------------------------------------------------
 
 /// Insert `value` at a dotted path, creating objects along the way.
-fn insert_path(obj: &mut Object, path: &[String], value: Value) {
+///
+/// `new_top` says the caller knows the first segment is not in `obj` yet
+/// (no earlier column of the row shares it), so the key is pushed without a
+/// scan; that keeps a wide flat row O(columns) instead of O(columns^2).
+/// Otherwise the last entry is tried first, since flattened sub-fields of
+/// one object are adjacent in the header, before a full scan.
+fn insert_path(obj: &mut Object, path: &[String], value: Value, new_top: bool) {
     let (first, rest) = path.split_first().expect("non-empty path");
+    let found = if new_top {
+        None
+    } else if obj.last().is_some_and(|(k, _)| k == first) {
+        Some(obj.len() - 1)
+    } else {
+        obj.iter().position(|(k, _)| k == first)
+    };
     if rest.is_empty() {
-        if let Some(slot) = obj.iter_mut().find(|(k, _)| k == first) {
-            slot.1 = value;
-        } else {
-            obj.push((first.clone(), value));
+        match found {
+            Some(i) => obj[i].1 = value,
+            None => obj.push((first.clone(), value)),
         }
         return;
     }
-    if !obj.iter().any(|(k, _)| k == first) {
-        obj.push((first.clone(), Value::Object(Vec::new())));
+    let i = match found {
+        Some(i) => i,
+        None => {
+            obj.push((first.clone(), Value::Object(Vec::new())));
+            obj.len() - 1
+        }
+    };
+    if !matches!(obj[i].1, Value::Object(_)) {
+        obj[i].1 = Value::Object(Vec::new());
     }
-    let slot = obj.iter_mut().find(|(k, _)| k == first).unwrap();
-    if !matches!(slot.1, Value::Object(_)) {
-        slot.1 = Value::Object(Vec::new());
-    }
-    if let Value::Object(child) = &mut slot.1 {
-        insert_path(child, rest, value);
+    if let Value::Object(child) = &mut obj[i].1 {
+        insert_path(child, rest, value, false);
     }
 }
 
@@ -336,6 +351,13 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
         let mut objs = Vec::with_capacity(t.rows.len());
         let mut pending = Vec::with_capacity(t.rows.len());
         let mut join_values = Vec::with_capacity(t.rows.len());
+        // A column opens a new top-level key when no earlier column shares
+        // its first path segment; such keys are pushed without a lookup.
+        let new_top: Vec<bool> = data_cols
+            .iter()
+            .enumerate()
+            .map(|(i, c)| !data_cols[..i].iter().any(|d| d.path[0] == c.path[0]))
+            .collect();
         for row in t.rows {
             let (jv, cells) = if is_root {
                 (None, &row[..])
@@ -348,16 +370,16 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
                 pending.push(Vec::new());
                 continue;
             }
-            let mut obj = Object::new();
+            let mut obj = Object::with_capacity(data_cols.len());
             let mut pend = Vec::new();
-            for (col, cell) in data_cols.iter().zip(cells) {
+            for ((col, cell), fresh) in data_cols.iter().zip(cells).zip(&new_top) {
                 let Some(v) = cell else { continue };
                 if col.ty == ColType::Table && !v.is_null() {
                     let n = v.as_number().map(|n| n.as_f64() as u64).unwrap_or(0);
                     pend.push((col.path.clone(), n));
-                    insert_path(&mut obj, &col.path, Value::Array(Vec::new()));
+                    insert_path(&mut obj, &col.path, Value::Array(Vec::new()), *fresh);
                 } else {
-                    insert_path(&mut obj, &col.path, v.clone());
+                    insert_path(&mut obj, &col.path, v.clone(), *fresh);
                 }
             }
             objs.push(Value::Object(obj));
@@ -456,7 +478,7 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
                 );
             }
             if let Value::Object(o) = &mut built[*ti].objs[*ri] {
-                insert_path(o, &field_path, Value::Array(items));
+                insert_path(o, &field_path, Value::Array(items), false);
             }
         }
         if let Some((k, v)) = groups.iter().next() {

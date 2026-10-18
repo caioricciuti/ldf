@@ -116,4 +116,6 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   irregular data (tokens). Its codec is young: the decoder attaches child
   rows through a hash map keyed by the join value's canonical text, and the
   encoder uses positional key hints; before those two fixes nested decode
-  ran at 1 MB/s. Wide tables still cost O(columns) per cell on insert.
+  ran at 1 MB/s. The quadratic column scans in planning and decode insert
+  were removed on 2026-10-18 (wide_table: encode 55 to 28 ms, decode 50 to
+  18 ms, now level with CSV encode and JSON decode).
