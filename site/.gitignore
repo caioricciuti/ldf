@@ -1,0 +1,15 @@
+# Installed packages and build output.
+node_modules/
+dist/
+.astro/
+
+# Mirrored from the repository's Markdown by scripts/sync-docs.mjs on every
+# build. Edit the originals (docs/, AGENTS.md), not the copies.
+src/content/docs/docs/spec.md
+src/content/docs/docs/mcp.md
+src/content/docs/docs/methodology.md
+src/content/docs/docs/design.md
+src/content/docs/docs/research.md
+src/content/docs/docs/results/
+src/content/docs/docs/roadmap.md
+src/content/docs/docs/working-notes.md

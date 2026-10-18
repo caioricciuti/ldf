@@ -1,0 +1,110 @@
+---
+title: The format in five minutes
+description: Enough LDF to read a document or write one by hand. The specification has the rest.
+---
+
+Take two orders as JSON:
+
+```json
+[{"order_id":"ORD-000001","customer":{"id":4654,"name":"Val Thompson","address":{"city":"São Paulo"}},
+  "items":[{"sku":"E5","qty":3,"price":28.78},{"sku":"C3","qty":4,"price":157.4}],
+  "total":715.94,"status":"shipped","note":"context compare"},
+ {"order_id":"ORD-000002","customer":{"id":50,"name":"Sol Ritchie","address":{"city":"Buenos Aires"}},
+  "items":[{"sku":"A1","qty":1,"price":2757.03}],
+  "total":2757.03,"status":"cancelled","note":null}]
+```
+
+In LDF they are:
+
+```text
+@records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,items:t,total:f,status:s,note:s?
+ORD-000001,4654,Val Thompson,São Paulo,2,715.94,shipped,context compare
+ORD-000002,50,Sol Ritchie,Buenos Aires,1,2757.03,cancelled,null
+@records.items order_id:s,sku:s,qty:i,price:f
+ORD-000001,E5,3,28.78
+ORD-000001,C3,4,157.4
+ORD-000002,A1,1,2757.03
+```
+
+## Headers
+
+A line starting with `@` opens a table. `records` is the root table; a child
+table is named after its path, `records.items`. After the name comes the
+column list: `key:type`, comma separated.
+
+| type | cell |
+|---|---|
+| `i` | integer |
+| `f` | float, shortest text that round-trips, `.0` kept on whole numbers |
+| `s` | string, bare or JSON-quoted |
+| `b` | `true` or `false` |
+| `j` | any JSON value, written as compact JSON |
+| `t` | child table: the cell holds how many child rows this record has |
+
+A `?` after the type says the column may hold `null` or be absent in some
+rows. It is a hint for the reader; decoders accept both in any column.
+
+## Rows
+
+One record per line, exactly as many cells as the header has columns. Two
+cells look alike and mean different things:
+
+* an **empty cell** means the key is absent from the record;
+* **`null`** means the key is present with value null.
+
+That is the distinction CSV loses and LDF keeps.
+
+## Strings
+
+A string is written bare unless it is empty, reads as `null`, `true` or
+`false`, starts or ends with whitespace, or contains a comma, a quote, a
+backslash or a line break. Then it is a JSON string literal: `"a, b"`.
+Because the column is typed `s`, a bare `007` or `1e5` is a string, not a
+number.
+
+## Nested objects
+
+An object field whose keys are the same in every record flattens into dotted
+columns: `customer.address.city`. If the shape varies, the whole object is
+one `j` cell. Segments that are not plain identifiers are quoted:
+`"first name".last:s`.
+
+## Arrays of objects
+
+An array of objects becomes a child table. The parent keeps a `t` column with
+the element count. Each child row starts with a join column: the parent's
+first column when its values are unique across the parent table, otherwise
+`_`, the parent's 1-based row number. Child rows come in parent order, then
+element order. Arrays of scalars, mixed arrays and anything else stay as a
+`j` cell.
+
+## Sparse keys
+
+A key that is present with a non-null value in fewer than half the rows does
+not get its own column. The table ends with a `~:j?` column and each row
+carries a small JSON object of the sparse keys it has:
+
+```text
+@records event_id:i,type:s,ts:s,~:j?
+4,signup,2023-11-14T22:13:44Z,{"latency_ms":4326,"country":"MX","flag":false}
+5,purchase,2023-11-14T22:13:49Z,{"user_id":42499,"amount":543.29}
+```
+
+Dense data never triggers this. It was added in v0.1 after measurements
+showed that counting to the eighth cell of a mostly empty row costs smaller
+models answers; a key next to its value does not.
+
+## Numbers
+
+`1` and `1.0` are different values and stay different. Integers keep every
+digit (`123456789012345678901` is not rounded), floats use the shortest text
+that reads back to the same double, exponents are allowed.
+
+## Reading it back
+
+A decoder splits header paths on unquoted dots, rebuilds objects in header
+order, appends the members of the `~` object, and attaches child rows by the
+join column. Key order is preserved exactly unless a key moved to `~`.
+
+That is the whole format. The [specification](/docs/spec/) has the precise
+wording, the edge cases and the rules for the streaming encoder.

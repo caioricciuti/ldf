@@ -1,0 +1,45 @@
+---
+title: Overview
+description: What LDF is, what it is for, and where to look next.
+---
+
+LDF, the Language Data Format, is a lossless, line-oriented text encoding of
+JSON records. It exists for one reader: a language model. A dataset becomes
+one typed header and one line per record, with child tables for nested
+arrays, and the model reads it for 35 to 45 percent fewer tokens than compact
+JSON while every value, key and distinction between missing and null survives
+the round trip.
+
+Two things set it apart from the other compact formats:
+
+* **It is lossless on real data.** CSV, TSV and Markdown tables cannot hold
+  nested records and quietly merge a missing field, a null and the string
+  `"null"`. TOON holds nesting but costs more tokens than JSON as soon as
+  records stop being uniform. LDF keeps nesting as child tables and keeps
+  the missing-versus-null distinction as empty cell versus `null`.
+* **Its claims are measured.** The format was designed from benchmarks, not
+  taste: deterministic datasets, faithful implementations of the competing
+  formats, exact token counts for two tokenizers, and comprehension runs on
+  four models at three sizes. The misses are in the [baseline
+  report](/docs/results/baseline/), including the one that changed the
+  format.
+
+## Where to go
+
+* [The format in five minutes](/docs/format/): enough to read or write a
+  document by hand.
+* [Specification](/docs/spec/): every rule, checked by the reference
+  implementation's tests.
+* [ldf-mcp](/docs/mcp/): the middle man. Put LDF between any MCP server and
+  the model, or run read-only SQL over ClickHouse and get rows back as LDF.
+* [Baseline report](/docs/results/baseline/): perf, tokens and comprehension
+  numbers with the raw files next to them.
+* [Design candidates](/docs/design/) and [research notes](/docs/research/):
+  how the measurements led to the syntax, and what the other formats do.
+
+## Status
+
+Version 0.1, a prototype in Rust (`crates/ldf` in the
+[repository](https://github.com/caioricciuti/ldf)), MIT or Apache-2.0. The
+encoder and decoder are complete for the spec; the streaming encoder does not
+yet create child tables. The [roadmap](/docs/roadmap/) says what is next.

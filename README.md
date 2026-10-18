@@ -27,6 +27,7 @@ measurements led to it, `docs/roadmap.md` for what comes next and
 | `eval/` | stdlib-only Python: `run_eval.py` (API calls, spend-gated), `count_tokens_claude.py` |
 | `fixtures/small` | committed correctness fixtures (regenerable) |
 | `docs/` | research notes, benchmark methodology, roadmap, measured reports |
+| `site/` | ldflabs.org: landing page and docs (Astro and Starlight, built from the Markdown above by `scripts/sync-docs.mjs`), deployed as static assets on Cloudflare |
 
 ## Build
 

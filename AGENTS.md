@@ -21,6 +21,12 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures` | |
 | `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP, rows returned as LDF | `ldf-mcp` |
 
+`site/` is the website (ldflabs.org): Astro with Starlight, the docs pages
+mirrored from `docs/` and this file by `site/scripts/sync-docs.mjs` at build
+time, deployed by Cloudflare from the repository (root directory `/site`,
+`bun run build`). Its two npm dependencies are pinned exactly and locked;
+`bun install --frozen-lockfile`, never a bare install.
+
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
 spend-gated) and `count_tokens_claude.py` (Anthropic count_tokens).
 

@@ -1,0 +1,431 @@
+/* The docs, on Starlight's tokens, in the LDF palette. Dark
+   matches the landing page; light is a plain light appearance. */
+
+:root {
+  --sl-color-accent-low: #33261a;
+  --sl-color-accent: #d9933a;
+  --sl-color-accent-high: #f2b56b;
+  --sl-color-white: #eef2f0;
+  --sl-color-gray-1: #d3dad7;
+  --sl-color-gray-2: #b0bab6;
+  --sl-color-gray-3: #85918c;
+  --sl-color-gray-4: #56625e;
+  --sl-color-gray-5: #2a3031;
+  --sl-color-gray-6: #1a1e1f;
+  --sl-color-black: #0c0e0e;
+  --sl-color-bg-nav: rgba(12, 14, 14, 0.78);
+  --sl-color-bg-sidebar: #0c0e0e;
+  --sl-color-hairline-light: rgba(255, 255, 255, 0.06);
+  --sl-color-hairline: rgba(255, 255, 255, 0.07);
+  --sl-color-hairline-shade: rgba(255, 255, 255, 0.1);
+  --sl-color-bg-inline-code: rgba(255, 255, 255, 0.06);
+  --sl-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --sl-font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+  --sl-content-width: 46rem;
+  --sl-text-h1: 2.6rem;
+  --sl-text-h2: 1.65rem;
+  --sl-text-h3: 1.25rem;
+  --sl-line-height: 1.7;
+  --ldf-frame: rgba(255, 255, 255, 0.08);
+  --ldf-card: rgba(255, 255, 255, 0.025);
+  --ldf-glow: rgba(242, 181, 107, 0.12);
+  --ldf-key-top: #2a2f30;
+  --ldf-key-bottom: #1e2223;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #fbead6;
+  --sl-color-accent: #b86f1c;
+  --sl-color-accent-high: #6f4110;
+  --sl-color-white: #111615;
+  --sl-color-gray-1: #26302e;
+  --sl-color-gray-2: #3f4a47;
+  --sl-color-gray-3: #62706c;
+  --sl-color-gray-4: #9aa6a2;
+  --sl-color-gray-5: #d7dddb;
+  --sl-color-gray-6: #eef1f0;
+  --sl-color-gray-7: #f7f9f8;
+  --sl-color-black: #ffffff;
+  --sl-color-bg-nav: rgba(255, 255, 255, 0.8);
+  --sl-color-bg-sidebar: #fbfcfc;
+  --sl-color-hairline-light: rgba(0, 0, 0, 0.05);
+  --sl-color-hairline: rgba(0, 0, 0, 0.08);
+  --sl-color-hairline-shade: rgba(0, 0, 0, 0.12);
+  --sl-color-bg-inline-code: rgba(0, 0, 0, 0.05);
+  --ldf-frame: rgba(0, 0, 0, 0.09);
+  --ldf-card: rgba(0, 0, 0, 0.018);
+  --ldf-glow: rgba(31, 138, 99, 0.1);
+  --ldf-key-top: #ffffff;
+  --ldf-key-bottom: #f1f3f2;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--sl-color-accent) 30%, transparent);
+}
+
+/* ---- Header ------------------------------------------------------------ */
+
+.header {
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  border-bottom-color: var(--sl-color-hairline) !important;
+}
+.site-title {
+  gap: 0.55rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--sl-color-white);
+}
+.site-title img {
+  height: 1.6rem;
+  width: auto;
+  border-radius: 6px;
+}
+
+/* ---- Sidebar ----------------------------------------------------------- */
+
+.sidebar-pane {
+  border-inline-end-color: var(--sl-color-hairline) !important;
+}
+nav.sidebar .top-level > li > details > summary .group-label > span,
+.sidebar-content .group-label .large {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--sl-color-gray-3);
+}
+.sidebar-content a {
+  border-radius: 7px;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar-content a:hover {
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-white);
+}
+.sidebar-content a[aria-current="page"],
+.sidebar-content a[aria-current="page"]:hover {
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-accent-high);
+  font-weight: 600;
+}
+.sidebar-content .sl-badge {
+  font-size: 0.65rem;
+}
+
+/* ---- Content ----------------------------------------------------------- */
+
+.content-panel {
+  border-top-color: var(--sl-color-hairline) !important;
+}
+h1#_top {
+  font-weight: 680;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+.sl-markdown-content :is(h2, h3, h4) {
+  letter-spacing: -0.02em;
+  font-weight: 640;
+}
+.sl-markdown-content h2 {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--sl-color-hairline);
+}
+.sl-markdown-content > h2:first-child,
+.sl-markdown-content > .sl-heading-wrapper.level-h2:first-child h2 {
+  border-top: 0;
+  padding-top: 0;
+}
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--sl-color-hairline);
+}
+.sl-markdown-content .sl-heading-wrapper.level-h2 h2 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.sl-markdown-content p,
+.sl-markdown-content li {
+  color: var(--sl-color-gray-2);
+}
+.sl-markdown-content strong {
+  color: var(--sl-color-white);
+  font-weight: 620;
+}
+.sl-markdown-content a:not(:where(.not-content *, .card, .sl-link-card, .sl-link-button)) {
+  color: var(--sl-color-accent-high);
+  text-decoration-color: color-mix(in srgb, var(--sl-color-accent) 45%, transparent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+  text-decoration-color: currentColor;
+}
+.sl-markdown-content :not(pre) > code {
+  border-radius: 5px;
+  padding: 0.12em 0.38em;
+  font-size: 0.86em;
+  border: 1px solid var(--sl-color-hairline);
+}
+
+/* Keycaps. Write <kbd>⌘</kbd><kbd>P</kbd> in any page. */
+.sl-markdown-content kbd,
+.ldf-keys kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.65em;
+  height: 1.65em;
+  padding: 0 0.42em;
+  margin: 0 0.08em;
+  border-radius: 6px;
+  font-family: var(--sl-font);
+  font-size: 0.78em;
+  font-weight: 550;
+  line-height: 1;
+  color: var(--sl-color-white);
+  background: linear-gradient(180deg, var(--ldf-key-top), var(--ldf-key-bottom));
+  border: 1px solid var(--sl-color-hairline-shade);
+  box-shadow: 0 1px 0 var(--sl-color-hairline-shade);
+  vertical-align: 0.08em;
+  white-space: nowrap;
+}
+
+/* Tables: framed, rounded, scrollable when wide. */
+.sl-markdown-content table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--ldf-frame);
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+.sl-markdown-content :is(th, td) {
+  border: 0;
+  border-bottom: 1px solid var(--sl-color-hairline);
+  padding: 0.65rem 1rem;
+}
+.sl-markdown-content tr:last-child td {
+  border-bottom: 0;
+}
+.sl-markdown-content th {
+  background: var(--ldf-card);
+  color: var(--sl-color-gray-3);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sl-markdown-content td:first-child {
+  white-space: nowrap;
+}
+
+@media (max-width: 50rem) {
+  .sl-markdown-content table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Cards and link cards. */
+.card,
+.sl-link-card {
+  border-color: var(--ldf-frame) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(180deg, var(--ldf-card), transparent) !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.sl-link-card:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 45%, transparent) !important;
+  background: radial-gradient(80% 100% at 50% 0%, var(--ldf-glow), transparent) !important;
+  transform: translateY(-1px);
+}
+.card .icon {
+  color: var(--sl-color-accent-high);
+  background: var(--sl-color-accent-low);
+  border: 0;
+  border-radius: 10px;
+  padding: 0.35rem;
+}
+.card .title {
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.card .body p {
+  color: var(--sl-color-gray-2);
+}
+
+/* Asides: softer, rounded. */
+.starlight-aside {
+  border-radius: 12px;
+  border-inline-start-width: 3px;
+}
+
+.starlight-aside--tip {
+  --sl-color-asides-text-accent: var(--sl-color-accent-high);
+  --sl-color-asides-border: var(--sl-color-accent);
+  background-color: color-mix(in srgb, var(--sl-color-accent) 10%, transparent);
+}
+
+/* Steps: an amber rail. */
+.sl-steps > li::before {
+  background: var(--sl-color-accent-low) !important;
+  color: var(--sl-color-accent-high) !important;
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 40%, transparent);
+  font-weight: 650;
+}
+.sl-steps > li::after {
+  background: linear-gradient(var(--sl-color-accent-low), var(--sl-color-hairline)) !important;
+}
+
+/* Tabs. */
+starlight-tabs [role="tablist"] {
+  border-bottom-color: var(--sl-color-hairline) !important;
+}
+starlight-tabs [role="tab"][aria-selected="true"] {
+  color: var(--sl-color-accent-high) !important;
+  border-color: var(--sl-color-accent) !important;
+}
+
+/* Right-hand table of contents. */
+starlight-toc a[aria-current="true"],
+starlight-toc a[aria-current="true"]:hover {
+  color: var(--sl-color-accent-high);
+}
+
+/* Prev/next. */
+.pagination-links a {
+  border-radius: 12px;
+  border-color: var(--ldf-frame);
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+.pagination-links a:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 45%, transparent);
+}
+
+/* ---- Doc-page furniture used by the MDX pages -------------------------- */
+
+/* A screenshot in a window frame. */
+.ldf-shot {
+  margin: 1.75rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--ldf-frame);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+}
+.ldf-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+:root[data-theme="light"] .ldf-shot {
+  box-shadow: 0 24px 60px -24px rgba(20, 30, 28, 0.25);
+}
+.ldf-shot + p em {
+  font-size: 0.85rem;
+  color: var(--sl-color-gray-3);
+}
+
+/* One picture per appearance. */
+.only-light {
+  display: none !important;
+}
+:root[data-theme="light"] .only-dark {
+  display: none !important;
+}
+:root[data-theme="light"] .only-light {
+  display: block !important;
+}
+
+/* The docs home banner. */
+.ldf-intro {
+  position: relative;
+  margin: 0 0 2rem;
+  padding: 2rem;
+  border-radius: 18px;
+  border: 1px solid var(--ldf-frame);
+  background:
+    radial-gradient(70% 120% at 0% 0%, color-mix(in srgb, var(--sl-color-accent) 22%, transparent), transparent 60%),
+    radial-gradient(60% 120% at 100% 0%, rgba(130, 170, 255, 0.14), transparent 60%),
+    var(--ldf-card);
+  overflow: hidden;
+}
+.ldf-intro p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--sl-color-gray-1);
+}
+.ldf-intro .ldf-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+/* A compact grid of shortcut pills. */
+.ldf-keys {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.ldf-keys > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--ldf-frame);
+  background: var(--ldf-card);
+  font-size: 0.88rem;
+  color: var(--sl-color-gray-2);
+}
+.ldf-keys > div > span:last-child {
+  display: inline-flex;
+  flex: none;
+}
+.ldf-keys + * {
+  margin-top: 1.5rem;
+}
+
+/* Status chips: implemented, partial, planned. */
+.ldf-status {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  vertical-align: 0.15em;
+}
+.ldf-status.yes {
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-accent-high);
+}
+.ldf-status.no {
+  background: color-mix(in srgb, #e2a43a 18%, transparent);
+  color: #c98a1f;
+}
+
+/* The highlighted entry in a FileTree: dark text on the amber fill. */
+starlight-file-tree .highlight {
+  color: #0c0e0e !important;
+}
+:root[data-theme="light"] starlight-file-tree .highlight {
+  color: #ffffff !important;
+}
