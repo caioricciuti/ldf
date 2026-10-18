@@ -21,6 +21,18 @@ export default defineConfig({
         "Language Data Format: a lossless, line-oriented text encoding of JSON records that language models read for 35 to 45 percent fewer tokens than JSON.",
       logo: { src: "./src/assets/logo.svg", replacesTitle: false },
       favicon: "/favicon.svg",
+      // Page views, cookieless, on the self-hosted Umami. The landing page
+      // carries the same tag in src/layouts/Landing.astro.
+      head: [
+        {
+          tag: "script",
+          attrs: {
+            defer: true,
+            src: "https://a.caioricciuti.com/b.js",
+            "data-website-id": "1a84e1c7-763c-4551-8bc7-aaa3b6e79eae",
+          },
+        },
+      ],
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/caioricciuti/ldf" },
       ],
