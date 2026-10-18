@@ -1,0 +1,23 @@
+name: Proposal
+description: A change to the format, a new source for ldf-mcp, or a new measurement.
+labels: [proposal]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would change
+      description: For the format, the rule in the words of the spec. For ldf-mcp, the tool or source and what it returns.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What measurement asks for it
+      description: Syntax changes are measured first. Which dataset, which model, which question goes wrong today, or which token count would move. If you have numbers, paste the ldf-bench or ldf-eval output.
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: What it costs
+      description: Tokens on dense data, decoder complexity, a new dependency, a spec version bump.

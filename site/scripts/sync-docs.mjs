@@ -26,6 +26,8 @@ const pages = [
   ["docs/reports/2026-10-17-baseline/README.md", "docs/results/baseline", "Perf, tokens and comprehension runs on an M2 Pro, with the raw files next to them.", "Baseline report (October 2026)"],
   ["docs/roadmap.md", "docs/roadmap", "What is done, what is next, what is deliberately not done yet."],
   ["AGENTS.md", "docs/working-notes", "Architecture, commands and conventions for anyone touching the repository.", "Working notes"],
+  ["CHANGELOG.md", "docs/changelog", "What changed, by version of the specification."],
+  ["CONTRIBUTING.md", "docs/contributing", "The bar for a change: measurements first, fixtures with the spec, pinned dependencies."],
 ];
 
 // The README is not mirrored: the hand-written overview under /docs/

@@ -1,0 +1,43 @@
+name: Bug
+description: Wrong output, a crash, or a mismatch between the spec and the implementation.
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - ldf (encoder or decoder)
+        - ldf-mcp (proxy or clickhouse mode)
+        - ldf-bench or ldf-eval
+        - ldf-data readers
+        - docs or website
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Smallest input that shows it
+      description: JSON records, an LDF document, or the MCP exchange. Attach a file if it is long.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: For a round trip, say which level you expected (byte, semantic, semantic-unordered) and why.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The output, the error with its line number, or the panic message.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      placeholder: git rev-parse --short HEAD
