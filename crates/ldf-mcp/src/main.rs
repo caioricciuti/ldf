@@ -17,6 +17,9 @@ fn usage() -> ExitCode {
          \x20                    [--passthrough] [--min-bytes N] [--quiet]\n\
          \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
          \x20     rows come back as LDF; the password is read from CLICKHOUSE_PASSWORD, never from arguments\n\
+         \x20 ldf-mcp files --root DIR [--max-rows N] [--passthrough] [--min-bytes N] [--quiet]\n\
+         \x20     an MCP server over a directory of json, jsonl, csv, tsv and parquet files: list_files,\n\
+         \x20     describe_file and read_rows (paged, streamed), rows as LDF, paths confined to DIR\n\
          \x20 ldf-mcp convert [FILE] [--sparse T] [--block N]\n\
          \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF; --sparse T moves keys\n\
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
@@ -33,6 +36,7 @@ fn main() -> ExitCode {
         Some("proxy") => run_proxy(&args[1..]),
         Some("convert") => convert(&args[1..]),
         Some("clickhouse") => run_clickhouse(&args[1..]),
+        Some("files") => run_files(&args[1..]),
         Some("fake-server") => match ldf_mcp::fake::run() {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
@@ -122,6 +126,46 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("ldf-mcp clickhouse: {e}");
+            ExitCode::from(1)
+        }
+    }
+}
+
+fn run_files(args: &[String]) -> ExitCode {
+    let mut root: Option<String> = None;
+    let mut cfg = ldf_mcp::files::Config {
+        root: std::path::PathBuf::new(),
+        max_rows: 1000,
+        passthrough: false,
+        min_bytes: 1024,
+        log: true,
+    };
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--passthrough" => cfg.passthrough = true,
+            "--quiet" => cfg.log = false,
+            "--root" => match it.next() {
+                Some(v) => root = Some(v.clone()),
+                None => return usage(),
+            },
+            "--max-rows" => match it.next().and_then(|v| v.parse().ok()) {
+                Some(n) if n > 0 => cfg.max_rows = n,
+                _ => return usage(),
+            },
+            "--min-bytes" => match it.next().and_then(|v| v.parse().ok()) {
+                Some(n) => cfg.min_bytes = n,
+                None => return usage(),
+            },
+            _ => return usage(),
+        }
+    }
+    let Some(root) = root else { return usage() };
+    cfg.root = std::path::PathBuf::from(root);
+    match ldf_mcp::files::run(cfg) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("ldf-mcp files: {e}");
             ExitCode::from(1)
         }
     }

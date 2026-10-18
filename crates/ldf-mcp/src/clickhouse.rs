@@ -4,7 +4,7 @@
 //! crate stays free of external dependencies. The password is read from
 //! `CLICKHOUSE_PASSWORD` only, never from the command line.
 
-use std::io::{BufRead, Read, Write};
+use std::io::{Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
 
@@ -29,27 +29,7 @@ pub struct Config {
 }
 
 pub fn run(cfg: Config) -> Result<(), String> {
-    let stdin = std::io::stdin();
-    let stdout = std::io::stdout();
-    let mut out = stdout.lock();
-    for line in stdin.lock().lines() {
-        let line = line.map_err(|e| e.to_string())?;
-        if line.trim().is_empty() {
-            continue;
-        }
-        let msg: Json = match serde_json::from_str(&line) {
-            Ok(m) => m,
-            Err(_) => continue,
-        };
-        let Some(reply) = handle(&cfg, &msg) else {
-            continue;
-        };
-        let s = serde_json::to_string(&reply).map_err(|e| e.to_string())?;
-        out.write_all(s.as_bytes()).map_err(|e| e.to_string())?;
-        out.write_all(b"\n").map_err(|e| e.to_string())?;
-        out.flush().map_err(|e| e.to_string())?;
-    }
-    Ok(())
+    crate::rpc::serve(|msg| handle(&cfg, msg))
 }
 
 /// One JSON-RPC message in, at most one out (notifications get none).
@@ -80,7 +60,16 @@ pub fn handle(cfg: &Config, msg: &Json) -> Option<Json> {
                 .cloned()
                 .unwrap_or(json!({}));
             match call(cfg, name, &args) {
-                Ok(text) => json!({"content": [{"type": "text", "text": text}]}),
+                Ok(Reply { text, note: None }) => {
+                    json!({"content": [{"type": "text", "text": text}]})
+                }
+                Ok(Reply {
+                    text,
+                    note: Some(note),
+                }) => json!({"content": [
+                    {"type": "text", "text": text},
+                    {"type": "text", "text": note}
+                ]}),
                 Err(CallError::Protocol(m)) => {
                     return Some(
                         json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32602, "message": m}}),
@@ -116,12 +105,22 @@ fn tools(cfg: &Config) -> Json {
         },
         {
             "name": "run_select",
-            "description": format!("Runs one read-only SELECT statement and returns at most {} rows.", cfg.max_rows),
+            "description": format!(
+                "Runs one read-only SELECT statement and returns at most {} rows. A capped result says so in a \
+                 second text block; narrow it with WHERE, aggregate with GROUP BY, or page with LIMIT n OFFSET m.",
+                cfg.max_rows
+            ),
             "inputSchema": {"type": "object", "properties": {
                 "sql": {"type": "string", "description": "A single SELECT (or SHOW/DESCRIBE/EXPLAIN) statement without a FORMAT clause"}
             }, "required": ["sql"]}
         }
     ])
+}
+
+/// A tool result: the rows, and a note when the row cap was hit.
+pub struct Reply {
+    pub text: String,
+    pub note: Option<String>,
 }
 
 enum CallError {
@@ -131,7 +130,7 @@ enum CallError {
     Tool(String),
 }
 
-fn call(cfg: &Config, name: &str, args: &Json) -> Result<String, CallError> {
+fn call(cfg: &Config, name: &str, args: &Json) -> Result<Reply, CallError> {
     let sql = match name {
         "list_tables" => "SELECT name, engine, total_rows, total_bytes FROM system.tables \
                           WHERE database = currentDatabase() ORDER BY name"
@@ -157,11 +156,26 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<String, CallError> {
     let body = query(cfg, &sql).map_err(CallError::Tool)?;
     let rows: Vec<&str> = body.lines().filter(|l| !l.trim().is_empty()).collect();
     if rows.is_empty() {
-        return Ok("(no rows)".to_string());
+        return Ok(Reply {
+            text: "(no rows)".to_string(),
+            note: None,
+        });
     }
+    // ClickHouse stops at max_result_rows silently (result_overflow_mode
+    // break); the model needs to know the result is a prefix.
+    let note = (rows.len() as u64 >= cfg.max_rows).then(|| {
+        format!(
+            "Result capped at {} rows; more may exist. Narrow it with WHERE, aggregate with GROUP BY, \
+             or page with LIMIT {} OFFSET {}.",
+            cfg.max_rows, cfg.max_rows, cfg.max_rows
+        )
+    });
     let json_text = format!("[{}]", rows.join(","));
     if cfg.passthrough {
-        return Ok(json_text);
+        return Ok(Reply {
+            text: json_text,
+            note,
+        });
     }
     match convert_text(&json_text, cfg.min_bytes) {
         Some(ldf) => {
@@ -174,9 +188,12 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<String, CallError> {
                     100.0 * ldf.len() as f64 / json_text.len() as f64
                 );
             }
-            Ok(ldf)
+            Ok(Reply { text: ldf, note })
         }
-        None => Ok(json_text),
+        None => Ok(Reply {
+            text: json_text,
+            note,
+        }),
     }
 }
 

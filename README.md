@@ -55,12 +55,14 @@ The model never has to adopt a format. `ldf-mcp` is an MCP server over
 stdio. In proxy mode it wraps any stdio MCP server you already use, forwards
 every message, and re-encodes JSON tool results as LDF when that is shorter.
 In ClickHouse mode it is the server: read-only SQL over the HTTP interface,
-rows returned as LDF.
+rows returned as LDF. In files mode it serves a directory of JSON, JSONL,
+CSV, TSV or Parquet files, streamed and paged.
 
 ```bash
 cargo build --release
 claude mcp add my-data    -- "$PWD/target/release/ldf-mcp" proxy -- <any stdio MCP server> [its args]
 claude mcp add clickhouse -- "$PWD/target/release/ldf-mcp" clickhouse --url http://127.0.0.1:8123
+claude mcp add exports    -- "$PWD/target/release/ldf-mcp" files --root /path/to/exports
 ```
 
 The initialize result carries a short primer, so the model has read the
@@ -102,7 +104,7 @@ Seven rules, specified in `docs/ldf-spec-v0.md` (v0.1):
 | path | contents |
 |---|---|
 | `crates/ldf` | the encoder, the decoder and 46 conformance fixtures |
-| `crates/ldf-mcp` | `ldf-mcp`: proxy mode, ClickHouse mode, `convert`, a fake server for tests |
+| `crates/ldf-mcp` | `ldf-mcp`: proxy mode, ClickHouse mode, files mode, `convert`, a fake server for tests |
 | `crates/ldf-data` | value model, number semantics, readers for JSON, JSONL, CSV, Parquet |
 | `crates/ldf-formats` | the ten baseline formats, implemented faithfully (TOON passes its official suite) |
 | `crates/ldf-fixtures` | `ldf-gen`: twelve deterministic datasets at three scales |

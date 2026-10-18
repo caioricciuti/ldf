@@ -1,12 +1,17 @@
 # ldf-mcp: LDF between a data source and the model
 
 `ldf-mcp` is the "middle man": the model keeps using ordinary MCP tools and
-receives LDF instead of JSON. Two modes:
+receives LDF instead of JSON. Three modes:
 
 * `ldf-mcp proxy -- <server command>` wraps any stdio MCP server and
   re-encodes its JSON tool results (README, "MCP proxy").
 * `ldf-mcp clickhouse` is an MCP server of its own over ClickHouse's HTTP
-  interface. This page is about that mode and a local setup to try it.
+  interface. Most of this page is about that mode and a local setup to try
+  it.
+* `ldf-mcp files --root DIR` is an MCP server over a directory of data
+  files (json, jsonl, csv, tsv, parquet), read with the streaming readers
+  and paged, so a file larger than memory still works. See the end of this
+  page.
 
 ## Tools
 
@@ -73,6 +78,30 @@ and runs only when `LDF_CLICKHOUSE_URL` is set:
 ```bash
 LDF_CLICKHOUSE_URL=http://127.0.0.1:8124 LDF_CLICKHOUSE_USER=ldf cargo test --release -p ldf-mcp --test clickhouse
 ```
+
+## Row caps and paging
+
+Both servers cap what one call returns (`--max-rows`, default 10 000 for
+ClickHouse and 1 000 for files). A capped result carries a second text
+block saying so and how to continue: narrow with `WHERE`, aggregate with
+`GROUP BY`, or page with `LIMIT n OFFSET m` (ClickHouse) and `offset`
+(files). The tool descriptions say the same, so the model asks for the next
+slice instead of a bigger one.
+
+## Files mode
+
+```bash
+claude mcp add exports -- "$PWD/target/release/ldf-mcp" files --root /path/to/exports
+```
+
+| tool | arguments | returns |
+|---|---|---|
+| `list_files` | none | every supported file under the root, recursively: path, kind, bytes |
+| `describe_file` | `path` | the LDF header inferred from the first 200 records, child tables included |
+| `read_rows` | `path`, `limit`, `offset` | records in file order, at most `--max-rows` per call, with a note when more follow |
+
+Paths are relative to the root and resolved inside it; anything else is
+refused. Hidden directories, `node_modules` and `target` are skipped.
 
 ## Register with Claude Code
 
