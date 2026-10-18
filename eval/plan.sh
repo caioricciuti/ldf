@@ -8,6 +8,7 @@
 #   eval/plan.sh haiku         Haiku 5.5, all formats, 200 and 500 records (~$1.50)
 #   eval/plan.sh opus-200      Opus 5.5, all formats, flat_users_200       (cap $2.50)
 #   eval/plan.sh deepseek      deepseek-chat, all formats, 200 and 500      (cap $1.20 each)
+#   eval/plan.sh haiku-cap     Haiku 5.5, sparse_events_200, max_tokens 4096 (cap $0.50)
 #   eval/plan.sh all           every stage above, in that order
 #   eval/plan.sh score         regrade every responses file into results.<model>.md
 set -euo pipefail
@@ -32,6 +33,11 @@ stage_haiku() {
 stage_opus_200() {
   run --bundle eval/out/flat_users_200 "${OPUS[@]}" --budget 2.50
 }
+stage_haiku_cap() {
+  # Same prompts as the haiku stage with four times the output cap, to tell
+  # truncation from inability on the one cell where LDF lost (5 vs 2 T).
+  run --bundle eval/out/sparse_events_200 "${HAIKU[@]}" --max-tokens 4096 --tag cap4096 --budget 0.50
+}
 stage_deepseek() {
   for b in flat_users_200 sparse_events_200 flat_users_500 sparse_events_500; do
     run --bundle "eval/out/$b" "${DEEPSEEK[@]}" --budget 1.20
@@ -45,13 +51,14 @@ stage_score() {
   done
 }
 
-[ $# -gt 0 ] || { sed -n '2,12p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,13p' "$0"; exit 1; }
 for stage in "$@"; do
   case "$stage" in
     opus-ldf) stage_opus_ldf ;;
     haiku) stage_haiku ;;
     opus-200) stage_opus_200 ;;
     deepseek) stage_deepseek ;;
+    haiku-cap) stage_haiku_cap ;;
     all) stage_opus_ldf; stage_haiku; stage_opus_200; stage_deepseek ;;
     score) stage_score ;;
     *) echo "unknown stage: $stage" >&2; exit 1 ;;

@@ -200,12 +200,53 @@ records. Below the frontier, no format is reliably better, and LDF's sparse
 encoding costs a weak model extra reasoning. That is the first format-level
 finding against LDF, and the next design question for v1.
 
+### Rerun with a 4 096 token cap (Haiku 5.5, sparse_events_200)
+
+Same 180 prompts, `max_tokens` 4 096 instead of 1 024, $0.08
+(`eval/sparse_events_200.*.cap4096.*`):
+
+| format | cap 1 024 | cap 4 096 | mean output tokens, 1 024 / 4 096 |
+|---|---:|---:|---:|
+| json | 16 (2T) | 17 (1W) | 252 / 342 |
+| json-pretty | 16 (2T) | 17 (1W) | 251 / 329 |
+| jsonl | 16 (2T) | 18 | 245 / 441 |
+| csv | 15 (3T) | 16 (1T) (1W) | 357 / 563 |
+| tsv | 14 (2T) (2W) | 15 (3W) | 337 / 577 |
+| markdown | 16 (2T) | 17 (1W) | 279 / 449 |
+| toon | 16 (2T) | 18 | 235 / 387 |
+| toon-tab | 15 (3T) | 17 (1W) | 253 / 382 |
+| yaml | 16 (2T) | 16 (2W) | 258 / 382 |
+| **ldf** | **12 (5T) (1W)** | **13 (2T) (3W)** | **403 / 870** |
+
+The extra room converts almost every other format's truncations into
+correct answers (15 to 18 of 18, one truncation left in CSV). LDF gains one:
+two questions still fill 4 096 tokens of thinking (every record whose
+"retries" is less than 2; the sum of "latency_ms"), and the answers it does
+finish include two more wrapped values (`{"event_id": 138}`) and one wrong
+top-3 by "amount". Its mean output is 870 tokens against 342 for JSON and 387
+for TOON.
+
+The mechanism is visible in the data. sparse_events has 15 columns and most
+cells are empty, so an LDF or CSV row is a run of commas:
+`4,signup,2023-11-14T22:13:44Z,,,,,,4326,MX,false,,,,`. Answering "retries
+less than 2" means counting to the eighth cell in every one of 200 such
+rows. CSV and TSV got that question wrong at both caps and LDF never
+finished it; JSON, JSONL, YAML and TOON (which falls back to its keyed list
+form on this dataset) carry the key next to each value and got it right.
+LDF adds a second thing to track, `null` versus an empty cell, which the
+other positional formats do not have. So the cost is positional columns on
+sparse rows, which is the price of the token saving on this dataset (9 661
+tokens per prompt against 16 245 for TOON), and a weak model pays it in
+reasoning and sometimes in answers. The wrapped answers are a separate,
+smaller effect: all three seen so far (Opus once, Haiku twice) were on LDF,
+whose header names the columns the model then echoes as keys.
+
 ## What was not measured
 
 * No comprehension numbers beyond 500 records, none for GPT beyond the 25
   prompts at 200 records, and none for nested_orders beyond 50 records.
-* No Haiku run with an output cap above 1 024 tokens, so truncation and
-  inability are not separated for the weak-model cells.
+* The 4 096 token cap rerun covers sparse_events_200 only; the other three
+  Haiku bundles still have truncation and inability mixed.
 * No `count_tokens` runs; the Claude per-format input counts come from the
   `usage` field of real responses, which is the billed number.
 * No large-scale (1M row) runs.

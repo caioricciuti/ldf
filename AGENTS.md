@@ -106,8 +106,11 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
 - At 200 and 500 records a frontier model (Opus 5.5) is still format
   indifferent and only misses by running out of output cap on sums; weak
   models (Haiku 5.5, DeepSeek) show no stable format ordering, and Haiku
-  reasons longer over LDF's sparse rows (403 vs 251 output tokens on
-  sparse_events_200). Tabular formats (CSV, TOON, LDF) lost a key lookup on
+  reasons longer over LDF's sparse rows (870 vs 342 output tokens on
+  sparse_events_200 with a 4 096 cap) and still loses two questions that
+  need counting to a column across 200 mostly-empty rows; CSV and TSV lose
+  the same question. Positional columns on sparse rows are the price of the
+  token saving there. Tabular formats (CSV, TOON, LDF) lost a key lookup on
   Haiku to a one-row slide that JSON did not.
 - LDF v0 ties CSV on flat data and beats compact JSON by 20 to 64 percent on
   irregular data (tokens). Its codec is young: the decoder attaches child

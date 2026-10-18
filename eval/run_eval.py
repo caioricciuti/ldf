@@ -212,6 +212,7 @@ def main():
     p.add_argument("--provider", required=True, choices=["openai", "anthropic", "deepseek"])
     p.add_argument("--model", required=True, help="exact model id, recorded with every response")
     p.add_argument("--formats", help="comma separated subset of formats")
+    p.add_argument("--tag", help="suffix on the output file name, to keep a second run of the same model (other settings) apart")
     p.add_argument("--max-prompts", type=int, help="stop after this many prompts (after resume filtering)")
     p.add_argument("--max-tokens", type=int, default=1024,
                    help="answers are short JSON values, but models show arithmetic for sums and means; "
@@ -237,7 +238,8 @@ def main():
     if args.formats:
         keep = set(args.formats.split(","))
         prompts = [q for q in prompts if q["format"] in keep]
-    out_path = os.path.join(args.bundle, f"responses.{args.provider}.{args.model}.jsonl")
+    suffix = f".{args.tag}" if args.tag else ""
+    out_path = os.path.join(args.bundle, f"responses.{args.provider}.{args.model}{suffix}.jsonl")
     done = set()
     if os.path.exists(out_path):
         # Errored attempts (auth failures, transport errors) are not results:
