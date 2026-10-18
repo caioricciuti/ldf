@@ -43,14 +43,22 @@ export default defineConfig({
       expressiveCode: {
         themes: ["github-dark-dimmed", "github-light"],
         styleOverrides: {
-          borderRadius: "10px",
+          borderRadius: "6px",
           borderColor: "var(--ldf-frame)",
           codeFontFamily: "var(--sl-font-mono)",
+          codeFontSize: "0.8125rem",
+          codeLineHeight: "1.6",
+          codePaddingBlock: "0.75rem",
+          codePaddingInline: "1rem",
+          codeBackground: "var(--ldf-surface)",
           uiFontFamily: "var(--sl-font)",
           frames: {
             shadowColor: "transparent",
           },
         },
+        // No terminal title bar on shell blocks: three dots and an empty
+        // bar cost a line of height on every command.
+        defaultProps: { frame: "none" },
       },
       sidebar: [
         {

@@ -25,7 +25,7 @@ ignored outside tables and forbidden inside a table. There are no comments.
 
 ## 3. Header
 
-```
+```text
 @name col,col,col
 ```
 
@@ -150,7 +150,7 @@ LDF and decodes with the same decoder.
 
 ## 9. Example
 
-```
+```text
 @records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,items:t,total:f,status:s,note:s?
 ORD-000001,4654,Val Thompson,São Paulo,2,715.94,shipped,context compare
 ORD-000002,50,Sol Ritchie,Buenos Aires,1,2757.03,cancelled,null
