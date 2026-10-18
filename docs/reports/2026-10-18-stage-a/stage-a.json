@@ -1,0 +1,5852 @@
+{
+  "scale": "medium",
+  "sample": 200,
+  "recheck": 1000,
+  "tokenizer": "o200k_base",
+  "max_ratio": 0.9,
+  "space": 154440,
+  "machine_threads": 10,
+  "seconds": 65.777175084,
+  "datasets": [
+    {
+      "name": "deep_nesting",
+      "records": 200,
+      "json_tokens": 25218,
+      "ldf_tokens": 20360,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 25218,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 25415,
+          "ratio_json": 1.0078118804028868
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "detail": "record 0 field \"tree\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "detail": "record 0 field \"tree\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 45641,
+          "ratio_json": 1.8098580379094298
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 48242,
+          "ratio_json": 1.9129986517566817
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 47039,
+          "ratio_json": 1.8652946308192562
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20360,
+          "ratio_json": 0.8073598223491157
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20360,
+          "ratio_json": 0.8073598223491157
+        }
+      ],
+      "distinct": 36,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 36,
+      "passing": 12,
+      "top": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45072,
+          "tokens": 20352,
+          "ratio_json": 0.807042588627171,
+          "ratio_ldf": 0.999607072691552
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45088,
+          "tokens": 20360,
+          "ratio_json": 0.8073598223491157,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45072,
+          "tokens": 20447,
+          "ratio_json": 0.8108097390752637,
+          "ratio_ldf": 1.0042730844793712
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 648,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45474,
+          "tokens": 20448,
+          "ratio_json": 0.8108493932905068,
+          "ratio_ldf": 1.0043222003929273
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45088,
+          "tokens": 20455,
+          "ratio_json": 0.8111269727972084,
+          "ratio_ldf": 1.0046660117878192
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 7776,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45538,
+          "tokens": 20480,
+          "ratio_json": 0.8121183281782853,
+          "ratio_ldf": 1.005893909626719
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 648,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45474,
+          "tokens": 20543,
+          "ratio_json": 0.8146165437385994,
+          "ratio_ldf": 1.0089882121807465
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45072,
+          "tokens": 20546,
+          "ratio_json": 0.8147355063843287,
+          "ratio_ldf": 1.0091355599214145
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45088,
+          "tokens": 20554,
+          "ratio_json": 0.8150527401062733,
+          "ratio_ldf": 1.0095284872298624
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 7776,
+          "level": "byte",
+          "detail": null,
+          "bytes": 45538,
+          "tokens": 20575,
+          "ratio_json": 0.815885478626378,
+          "ratio_ldf": 1.0105599214145382
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              20352
+            ],
+            [
+              "tab",
+              20546
+            ],
+            [
+              "pipe",
+              20447
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              20360
+            ],
+            [
+              "untyped",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              20360
+            ],
+            [
+              "0",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": true,
+          "best_by_value": [
+            [
+              "dotted",
+              20352
+            ],
+            [
+              "json",
+              23930
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              20352
+            ],
+            [
+              "child-ord",
+              20352
+            ],
+            [
+              "hoisted",
+              20352
+            ],
+            [
+              "json",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              20352
+            ],
+            [
+              "25",
+              20352
+            ],
+            [
+              "50",
+              20352
+            ],
+            [
+              "75",
+              20352
+            ],
+            [
+              "100",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              20352
+            ],
+            [
+              "pairs",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              20352
+            ],
+            [
+              "dash/empty",
+              20352
+            ],
+            [
+              "empty/?",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              20352
+            ],
+            [
+              "csv",
+              20352
+            ],
+            [
+              "backslash",
+              20352
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              20352
+            ],
+            [
+              "every50",
+              20448
+            ],
+            [
+              "every200",
+              20352
+            ],
+            [
+              "row",
+              24928
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              20352
+            ],
+            [
+              "typed",
+              20360
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              20352
+            ],
+            [
+              "digits",
+              20360
+            ],
+            [
+              "letters",
+              20360
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              20352
+            ],
+            [
+              "1",
+              20352
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "empty_values",
+      "records": 200,
+      "json_tokens": 11920,
+      "ldf_tokens": 4358,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 11920,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 12118,
+          "ratio_json": 1.0166107382550336
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "detail": "record 0 field \"empty_a\" is a array (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "detail": "record 0 field \"empty_a\" is a array (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 15153,
+          "ratio_json": 1.271224832214765
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 15154,
+          "ratio_json": 1.2713087248322148
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 14500,
+          "ratio_json": 1.2164429530201342
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4358,
+          "ratio_json": 0.3656040268456376
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4358,
+          "ratio_json": 0.3656040268456376
+        }
+      ],
+      "distinct": 1428,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 1428,
+      "passing": 1176,
+      "top": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 224,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11770,
+          "tokens": 4198,
+          "ratio_json": 0.3521812080536913,
+          "ratio_ldf": 0.963285910968334
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=letters tr=0",
+          "configs": 448,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11098,
+          "tokens": 4216,
+          "ratio_json": 0.35369127516778526,
+          "ratio_ldf": 0.9674162459843965
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 448,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11794,
+          "tokens": 4216,
+          "ratio_json": 0.35369127516778526,
+          "ratio_ldf": 0.9674162459843965
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=letters tr=0",
+          "configs": 448,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11101,
+          "tokens": 4217,
+          "ratio_json": 0.3537751677852349,
+          "ratio_ldf": 0.9676457090408445
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 448,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11797,
+          "tokens": 4217,
+          "ratio_json": 0.3537751677852349,
+          "ratio_ldf": 0.9676457090408445
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 112,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11770,
+          "tokens": 4218,
+          "ratio_json": 0.35385906040268456,
+          "ratio_ldf": 0.9678751720972923
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=letters tr=0",
+          "configs": 224,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11098,
+          "tokens": 4236,
+          "ratio_json": 0.3553691275167785,
+          "ratio_ldf": 0.9720055071133548
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 224,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11794,
+          "tokens": 4236,
+          "ratio_json": 0.3553691275167785,
+          "ratio_ldf": 0.9720055071133548
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=letters tr=0",
+          "configs": 224,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11101,
+          "tokens": 4237,
+          "ratio_json": 0.3554530201342282,
+          "ratio_ldf": 0.9722349701698026
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 224,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11797,
+          "tokens": 4237,
+          "ratio_json": 0.3554530201342282,
+          "ratio_ldf": 0.9722349701698026
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              4198
+            ],
+            [
+              "tab",
+              4674
+            ],
+            [
+              "pipe",
+              4884
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              4216
+            ],
+            [
+              "untyped",
+              4198
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": true,
+          "best_by_value": [
+            [
+              "1",
+              4217
+            ],
+            [
+              "0",
+              4198
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": true,
+          "best_by_value": [
+            [
+              "dotted",
+              4198
+            ],
+            [
+              "json",
+              5393
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              4198
+            ],
+            [
+              "child-ord",
+              4198
+            ],
+            [
+              "hoisted",
+              4198
+            ],
+            [
+              "json",
+              4198
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              4198
+            ],
+            [
+              "25",
+              4198
+            ],
+            [
+              "50",
+              4198
+            ],
+            [
+              "75",
+              4198
+            ],
+            [
+              "100",
+              5405
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              4198
+            ],
+            [
+              "pairs",
+              4198
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "null/empty",
+              4339
+            ],
+            [
+              "dash/empty",
+              4248
+            ],
+            [
+              "empty/?",
+              4198
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              4198
+            ],
+            [
+              "csv",
+              4198
+            ],
+            [
+              "backslash",
+              4218
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              4198
+            ],
+            [
+              "every50",
+              4312
+            ],
+            [
+              "every200",
+              4198
+            ],
+            [
+              "row",
+              12106
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              4198
+            ],
+            [
+              "typed",
+              4216
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              4198
+            ],
+            [
+              "digits",
+              4416
+            ],
+            [
+              "letters",
+              4216
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              4198
+            ],
+            [
+              "1",
+              4198
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "flat_users",
+      "records": 200,
+      "json_tokens": 9376,
+      "ldf_tokens": 5702,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 9376,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 9573,
+          "ratio_json": 1.0210110921501707
+        },
+        {
+          "format": "csv",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 5688,
+          "ratio_json": 0.606655290102389
+        },
+        {
+          "format": "tsv",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 5665,
+          "ratio_json": 0.6042022184300341
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 6091,
+          "ratio_json": 0.6496373720136519
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 6069,
+          "ratio_json": 0.6472909556313993
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 11692,
+          "ratio_json": 1.247013651877133
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5702,
+          "ratio_json": 0.6081484641638225
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5702,
+          "ratio_json": 0.6081484641638225
+        }
+      ],
+      "distinct": 63,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 63,
+      "passing": 47,
+      "top": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12492,
+          "tokens": 5671,
+          "ratio_json": 0.6048421501706485,
+          "ratio_ldf": 0.9945633111189056
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11844,
+          "tokens": 5675,
+          "ratio_json": 0.605268771331058,
+          "ratio_ldf": 0.9952648193616275
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12504,
+          "tokens": 5675,
+          "ratio_json": 0.605268771331058,
+          "ratio_ldf": 0.9952648193616275
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11848,
+          "tokens": 5679,
+          "ratio_json": 0.6056953924914675,
+          "ratio_ldf": 0.9959663276043493
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12508,
+          "tokens": 5679,
+          "ratio_json": 0.6056953924914675,
+          "ratio_ldf": 0.9959663276043493
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12492,
+          "tokens": 5694,
+          "ratio_json": 0.6072952218430034,
+          "ratio_ldf": 0.9985969835145563
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11844,
+          "tokens": 5698,
+          "ratio_json": 0.6077218430034129,
+          "ratio_ldf": 0.9992984917572781
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12504,
+          "tokens": 5698,
+          "ratio_json": 0.6077218430034129,
+          "ratio_ldf": 0.9992984917572781
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 11848,
+          "tokens": 5702,
+          "ratio_json": 0.6081484641638225,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12508,
+          "tokens": 5702,
+          "ratio_json": 0.6081484641638225,
+          "ratio_ldf": 1.0
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              5694
+            ],
+            [
+              "tab",
+              5671
+            ],
+            [
+              "pipe",
+              5989
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              5675
+            ],
+            [
+              "untyped",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              5675
+            ],
+            [
+              "0",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              5671
+            ],
+            [
+              "json",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              5671
+            ],
+            [
+              "child-ord",
+              5671
+            ],
+            [
+              "hoisted",
+              5671
+            ],
+            [
+              "json",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              5671
+            ],
+            [
+              "25",
+              5671
+            ],
+            [
+              "50",
+              5671
+            ],
+            [
+              "75",
+              5671
+            ],
+            [
+              "100",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              5671
+            ],
+            [
+              "pairs",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              5671
+            ],
+            [
+              "dash/empty",
+              5671
+            ],
+            [
+              "empty/?",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              5671
+            ],
+            [
+              "csv",
+              5671
+            ],
+            [
+              "backslash",
+              5671
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              5671
+            ],
+            [
+              "every50",
+              5716
+            ],
+            [
+              "every200",
+              5671
+            ],
+            [
+              "row",
+              8330
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": true,
+          "best_by_value": [
+            [
+              "keep",
+              5671
+            ],
+            [
+              "typed",
+              5675
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              5671
+            ],
+            [
+              "digits",
+              5875
+            ],
+            [
+              "letters",
+              5675
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              5671
+            ],
+            [
+              "1",
+              5671
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "high_card_strings",
+      "records": 200,
+      "json_tokens": 22863,
+      "ldf_tokens": 20219,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 22863,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 23060,
+          "ratio_json": 1.0086165420111097
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20211,
+          "ratio_json": 0.8840047237895289
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20135,
+          "ratio_json": 0.8806805756025019
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20670,
+          "ratio_json": 0.9040808292874951
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20739,
+          "ratio_json": 0.9070988059309801
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 24551,
+          "ratio_json": 1.0738310807855487
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20219,
+          "ratio_json": 0.8843546341250055
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20219,
+          "ratio_json": 0.8843546341250055
+        }
+      ],
+      "distinct": 18,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 18,
+      "passing": 12,
+      "top": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36654,
+          "tokens": 20137,
+          "ratio_json": 0.880768053186371,
+          "ratio_ldf": 0.9959444087244671
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36666,
+          "tokens": 20143,
+          "ratio_json": 0.8810304859379784,
+          "ratio_ldf": 0.9962411593056036
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36768,
+          "tokens": 20167,
+          "ratio_json": 0.882080216944408,
+          "ratio_ldf": 0.9974281616301499
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36816,
+          "tokens": 20191,
+          "ratio_json": 0.8831299479508375,
+          "ratio_ldf": 0.9986151639546961
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36654,
+          "tokens": 20213,
+          "ratio_json": 0.8840922013733981,
+          "ratio_ldf": 0.9997032494188635
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36666,
+          "tokens": 20219,
+          "ratio_json": 0.8843546341250055,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36768,
+          "tokens": 20249,
+          "ratio_json": 0.8856667978830425,
+          "ratio_ldf": 1.0014837529056828
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36816,
+          "tokens": 20273,
+          "ratio_json": 0.886716528889472,
+          "ratio_ldf": 1.002670755230229
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36654,
+          "tokens": 20466,
+          "ratio_json": 0.8951581157328434,
+          "ratio_ldf": 1.0122162322567883
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 36666,
+          "tokens": 20472,
+          "ratio_json": 0.8954205484844509,
+          "ratio_ldf": 1.0125129828379247
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              20213
+            ],
+            [
+              "tab",
+              20137
+            ],
+            [
+              "pipe",
+              20466
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              20143
+            ],
+            [
+              "untyped",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              20143
+            ],
+            [
+              "0",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              20137
+            ],
+            [
+              "json",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              20137
+            ],
+            [
+              "child-ord",
+              20137
+            ],
+            [
+              "hoisted",
+              20137
+            ],
+            [
+              "json",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              20137
+            ],
+            [
+              "25",
+              20137
+            ],
+            [
+              "50",
+              20137
+            ],
+            [
+              "75",
+              20137
+            ],
+            [
+              "100",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              20137
+            ],
+            [
+              "pairs",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              20137
+            ],
+            [
+              "dash/empty",
+              20137
+            ],
+            [
+              "empty/?",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              20137
+            ],
+            [
+              "csv",
+              20137
+            ],
+            [
+              "backslash",
+              20137
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              20137
+            ],
+            [
+              "every50",
+              20167
+            ],
+            [
+              "every200",
+              20137
+            ],
+            [
+              "row",
+              21640
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              20137
+            ],
+            [
+              "typed",
+              20143
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              20137
+            ],
+            [
+              "digits",
+              20143
+            ],
+            [
+              "letters",
+              20143
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              20137
+            ],
+            [
+              "1",
+              20137
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "long_text",
+      "records": 200,
+      "json_tokens": 43862,
+      "ldf_tokens": 41947,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 43862,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 44060,
+          "ratio_json": 1.004514158041129
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 41199,
+          "ratio_json": 0.9392868542246136
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 41281,
+          "ratio_json": 0.9411563540194245
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 42345,
+          "ratio_json": 0.9654142537959965
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 42450,
+          "ratio_json": 0.967808125484474
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 44681,
+          "ratio_json": 1.0186721991701244
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 41947,
+          "ratio_json": 0.9563403401577676
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 41947,
+          "ratio_json": 0.9563403401577676
+        }
+      ],
+      "distinct": 54,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 54,
+      "passing": 0,
+      "top": [],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              41201
+            ],
+            [
+              "tab",
+              41283
+            ],
+            [
+              "pipe",
+              41321
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              41205
+            ],
+            [
+              "untyped",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              41205
+            ],
+            [
+              "0",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              41201
+            ],
+            [
+              "json",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              41201
+            ],
+            [
+              "child-ord",
+              41201
+            ],
+            [
+              "hoisted",
+              41201
+            ],
+            [
+              "json",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              41201
+            ],
+            [
+              "25",
+              41201
+            ],
+            [
+              "50",
+              41201
+            ],
+            [
+              "75",
+              41201
+            ],
+            [
+              "100",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              41201
+            ],
+            [
+              "pairs",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              41201
+            ],
+            [
+              "dash/empty",
+              41201
+            ],
+            [
+              "empty/?",
+              41201
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              41943
+            ],
+            [
+              "csv",
+              41201
+            ],
+            [
+              "backslash",
+              41586
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              41201
+            ],
+            [
+              "every50",
+              41228
+            ],
+            [
+              "every200",
+              41201
+            ],
+            [
+              "row",
+              42428
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              41201
+            ],
+            [
+              "typed",
+              41205
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              41201
+            ],
+            [
+              "digits",
+              41205
+            ],
+            [
+              "letters",
+              41205
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              41201
+            ],
+            [
+              "1",
+              41201
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "mixed_types",
+      "records": 200,
+      "json_tokens": 4917,
+      "ldf_tokens": 3566,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4917,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4986,
+          "ratio_json": 1.014032946918853
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "detail": "record 0 field \"value\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "detail": "record 0 field \"value\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 6523,
+          "ratio_json": 1.3266219239373602
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 6571,
+          "ratio_json": 1.3363839739678667
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 6542,
+          "ratio_json": 1.3304860687411022
+        },
+        {
+          "format": "ldf",
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "tokens": 3566,
+          "ratio_json": 0.7252389668497051
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 3350,
+          "ratio_json": 0.6813097417124263
+        }
+      ],
+      "distinct": 486,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 486,
+      "passing": 468,
+      "top": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 192,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9033,
+          "tokens": 3284,
+          "ratio_json": 0.66788692292048,
+          "ratio_ldf": 0.9209197980931015
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 96,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9033,
+          "tokens": 3285,
+          "ratio_json": 0.6680902989627822,
+          "ratio_ldf": 0.9212002243409984
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 192,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9057,
+          "tokens": 3303,
+          "ratio_json": 0.6717510677242221,
+          "ratio_ldf": 0.9262478968031408
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 96,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9057,
+          "tokens": 3305,
+          "ratio_json": 0.6721578198088265,
+          "ratio_ldf": 0.9268087492989344
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 96,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9117,
+          "tokens": 3311,
+          "ratio_json": 0.6733780760626398,
+          "ratio_ldf": 0.9284913067863152
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=every50 fl=keep b=words tr=0",
+          "configs": 48,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9117,
+          "tokens": 3312,
+          "ratio_json": 0.673581452104942,
+          "ratio_ldf": 0.928771733034212
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9185,
+          "tokens": 3313,
+          "ratio_json": 0.6737848281472443,
+          "ratio_ldf": 0.9290521592821088
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9187,
+          "tokens": 3313,
+          "ratio_json": 0.6737848281472443,
+          "ratio_ldf": 0.9290521592821088
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 192,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9300,
+          "tokens": 3317,
+          "ratio_json": 0.6745983323164532,
+          "ratio_ldf": 0.930173864273696
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 96,
+          "level": "byte",
+          "detail": null,
+          "bytes": 9300,
+          "tokens": 3318,
+          "ratio_json": 0.6748017083587553,
+          "ratio_ldf": 0.9304542905215928
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              3284
+            ],
+            [
+              "tab",
+              3475
+            ],
+            [
+              "pipe",
+              3387
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              3313
+            ],
+            [
+              "untyped",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": true,
+          "best_by_value": [
+            [
+              "1",
+              3313
+            ],
+            [
+              "0",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              3284
+            ],
+            [
+              "json",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              3284
+            ],
+            [
+              "child-ord",
+              3284
+            ],
+            [
+              "hoisted",
+              3284
+            ],
+            [
+              "json",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              3284
+            ],
+            [
+              "25",
+              3284
+            ],
+            [
+              "50",
+              3418
+            ],
+            [
+              "75",
+              3418
+            ],
+            [
+              "100",
+              3817
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              3284
+            ],
+            [
+              "pairs",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "null/empty",
+              3317
+            ],
+            [
+              "dash/empty",
+              3303
+            ],
+            [
+              "empty/?",
+              3284
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              3284
+            ],
+            [
+              "csv",
+              3284
+            ],
+            [
+              "backslash",
+              3285
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              3284
+            ],
+            [
+              "every50",
+              3311
+            ],
+            [
+              "every200",
+              3284
+            ],
+            [
+              "row",
+              4188
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              3284
+            ],
+            [
+              "typed",
+              3313
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              3284
+            ],
+            [
+              "digits",
+              3313
+            ],
+            [
+              "letters",
+              3313
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              3284
+            ],
+            [
+              "1",
+              3284
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "nested_orders",
+      "records": 200,
+      "json_tokens": 19980,
+      "ldf_tokens": 12888,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 19980,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20177,
+          "ratio_json": 1.0098598598598598
+        },
+        {
+          "format": "csv",
+          "level": "unsupported",
+          "detail": "record 0 field \"customer\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "tsv",
+          "level": "unsupported",
+          "detail": "record 0 field \"customer\" is a object (nested)",
+          "tokens": null,
+          "ratio_json": null
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 21617,
+          "ratio_json": 1.0819319319319318
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 21618,
+          "ratio_json": 1.081981981981982
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 25087,
+          "ratio_json": 1.2556056056056055
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 12888,
+          "ratio_json": 0.645045045045045
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 12888,
+          "ratio_json": 0.645045045045045
+        }
+      ],
+      "distinct": 6642,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 6642,
+      "passing": 5913,
+      "top": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 40,
+          "level": "byte",
+          "detail": null,
+          "bytes": 24070,
+          "tokens": 10931,
+          "ratio_json": 0.5470970970970971,
+          "ratio_ldf": 0.848153320918684
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "configs": 40,
+          "level": "byte",
+          "detail": null,
+          "bytes": 24018,
+          "tokens": 10931,
+          "ratio_json": 0.5470970970970971,
+          "ratio_ldf": 0.848153320918684
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23030,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23724,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=letters tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 22978,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=words tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23672,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23031,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23725,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=letters tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 22979,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=words tr=0",
+          "configs": 60,
+          "level": "byte",
+          "detail": null,
+          "bytes": 23673,
+          "tokens": 10933,
+          "ratio_json": 0.5471971971971972,
+          "ratio_ldf": 0.848308504034761
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              10931
+            ],
+            [
+              "tab",
+              11143
+            ],
+            [
+              "pipe",
+              11632
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              10933
+            ],
+            [
+              "untyped",
+              10931
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": true,
+          "best_by_value": [
+            [
+              "1",
+              10933
+            ],
+            [
+              "0",
+              10931
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": true,
+          "best_by_value": [
+            [
+              "dotted",
+              10931
+            ],
+            [
+              "json",
+              13980
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": true,
+          "best_by_value": [
+            [
+              "child-key",
+              12629
+            ],
+            [
+              "child-ord",
+              11143
+            ],
+            [
+              "hoisted",
+              10931
+            ],
+            [
+              "json",
+              13599
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              10931
+            ],
+            [
+              "25",
+              10931
+            ],
+            [
+              "50",
+              10931
+            ],
+            [
+              "75",
+              11331
+            ],
+            [
+              "100",
+              11331
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              10931
+            ],
+            [
+              "pairs",
+              10931
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "null/empty",
+              10983
+            ],
+            [
+              "dash/empty",
+              10931
+            ],
+            [
+              "empty/?",
+              10931
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              10931
+            ],
+            [
+              "csv",
+              10931
+            ],
+            [
+              "backslash",
+              10933
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              10931
+            ],
+            [
+              "every50",
+              11048
+            ],
+            [
+              "every200",
+              10931
+            ],
+            [
+              "row",
+              15727
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": true,
+          "best_by_value": [
+            [
+              "keep",
+              10931
+            ],
+            [
+              "typed",
+              10933
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              10931
+            ],
+            [
+              "digits",
+              11133
+            ],
+            [
+              "letters",
+              10933
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              10931
+            ],
+            [
+              "1",
+              10931
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "numeric_mix",
+      "records": 200,
+      "json_tokens": 19968,
+      "ldf_tokens": 13129,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 19968,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20166,
+          "ratio_json": 1.0099158653846154
+        },
+        {
+          "format": "csv",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 12992,
+          "ratio_json": 0.6506410256410257
+        },
+        {
+          "format": "tsv",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 13281,
+          "ratio_json": 0.6651141826923077
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 13395,
+          "ratio_json": 0.6708233173076923
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 13685,
+          "ratio_json": 0.6853465544871795
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 24085,
+          "ratio_json": 1.2061798878205128
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 13129,
+          "ratio_json": 0.6575020032051282
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 13129,
+          "ratio_json": 0.6575020032051282
+        }
+      ],
+      "distinct": 63,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 63,
+      "passing": 42,
+      "top": [
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 25553,
+          "tokens": 13077,
+          "ratio_json": 0.6548978365384616,
+          "ratio_ldf": 0.9960393023078681
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27017,
+          "tokens": 13077,
+          "ratio_json": 0.6548978365384616,
+          "ratio_ldf": 0.9960393023078681
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27043,
+          "tokens": 13116,
+          "ratio_json": 0.6568509615384616,
+          "ratio_ldf": 0.999009825576967
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 25605,
+          "tokens": 13129,
+          "ratio_json": 0.6575020032051282,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27069,
+          "tokens": 13129,
+          "ratio_json": 0.6575020032051282,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=typed b=letters tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 25880,
+          "tokens": 13209,
+          "ratio_json": 0.6615084134615384,
+          "ratio_ldf": 1.0060933810648183
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=typed b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27344,
+          "tokens": 13209,
+          "ratio_json": 0.6615084134615384,
+          "ratio_ldf": 1.0060933810648183
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27292,
+          "tokens": 13209,
+          "ratio_json": 0.6615084134615384,
+          "ratio_ldf": 1.0060933810648183
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=letters tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 25932,
+          "tokens": 13261,
+          "ratio_json": 0.6641125801282052,
+          "ratio_ldf": 1.0100540787569503
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 27396,
+          "tokens": 13261,
+          "ratio_json": 0.6641125801282052,
+          "ratio_ldf": 1.0100540787569503
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              13077
+            ],
+            [
+              "tab",
+              13366
+            ],
+            [
+              "pipe",
+              13478
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              13077
+            ],
+            [
+              "untyped",
+              13116
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              13077
+            ],
+            [
+              "0",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              13077
+            ],
+            [
+              "json",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              13077
+            ],
+            [
+              "child-ord",
+              13077
+            ],
+            [
+              "hoisted",
+              13077
+            ],
+            [
+              "json",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              13077
+            ],
+            [
+              "25",
+              13077
+            ],
+            [
+              "50",
+              13077
+            ],
+            [
+              "75",
+              13077
+            ],
+            [
+              "100",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              13077
+            ],
+            [
+              "pairs",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              13077
+            ],
+            [
+              "dash/empty",
+              13077
+            ],
+            [
+              "empty/?",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              13077
+            ],
+            [
+              "csv",
+              13077
+            ],
+            [
+              "backslash",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              13077
+            ],
+            [
+              "every50",
+              13209
+            ],
+            [
+              "every200",
+              13077
+            ],
+            [
+              "row",
+              18475
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": true,
+          "best_by_value": [
+            [
+              "keep",
+              13116
+            ],
+            [
+              "typed",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              13077
+            ],
+            [
+              "digits",
+              13477
+            ],
+            [
+              "letters",
+              13077
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              13077
+            ],
+            [
+              "1",
+              13077
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "repetitive_logs",
+      "records": 200,
+      "json_tokens": 9226,
+      "ldf_tokens": 5974,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 9226,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 9424,
+          "ratio_json": 1.0214610882289183
+        },
+        {
+          "format": "csv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5965,
+          "ratio_json": 0.6465423802297854
+        },
+        {
+          "format": "tsv",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5642,
+          "ratio_json": 0.6115326251896813
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 6370,
+          "ratio_json": 0.6904400606980273
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 6246,
+          "ratio_json": 0.676999783221331
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 11011,
+          "ratio_json": 1.1934749620637328
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5974,
+          "ratio_json": 0.6475178842401907
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5974,
+          "ratio_json": 0.6475178842401907
+        }
+      ],
+      "distinct": 18,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 18,
+      "passing": 12,
+      "top": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13939,
+          "tokens": 5644,
+          "ratio_json": 0.6117494038586603,
+          "ratio_ldf": 0.9447606293940408
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13953,
+          "tokens": 5651,
+          "ratio_json": 0.6125081292000867,
+          "ratio_ldf": 0.9459323736190157
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 14116,
+          "tokens": 5686,
+          "ratio_json": 0.6163017559072187,
+          "ratio_ldf": 0.9517910947438902
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 14172,
+          "tokens": 5714,
+          "ratio_json": 0.6193366572729243,
+          "ratio_ldf": 0.9564780716437897
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13939,
+          "tokens": 5967,
+          "ratio_json": 0.6467591588987643,
+          "ratio_ldf": 0.9988282557750251
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13953,
+          "tokens": 5974,
+          "ratio_json": 0.6475178842401907,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 1296,
+          "level": "byte",
+          "detail": null,
+          "bytes": 14116,
+          "tokens": 6015,
+          "ratio_json": 0.6519618469542597,
+          "ratio_ldf": 1.00686307331771
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 2592,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13939,
+          "tokens": 6042,
+          "ratio_json": 0.6548883589854758,
+          "ratio_ldf": 1.0113826581854704
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "configs": 15552,
+          "level": "byte",
+          "detail": null,
+          "bytes": 14172,
+          "tokens": 6043,
+          "ratio_json": 0.6549967483199653,
+          "ratio_ldf": 1.0115500502176096
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 31104,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13953,
+          "tokens": 6049,
+          "ratio_json": 0.6556470843269022,
+          "ratio_ldf": 1.0125544024104454
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              5967
+            ],
+            [
+              "tab",
+              5644
+            ],
+            [
+              "pipe",
+              6042
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              5651
+            ],
+            [
+              "untyped",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              5651
+            ],
+            [
+              "0",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              5644
+            ],
+            [
+              "json",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              5644
+            ],
+            [
+              "child-ord",
+              5644
+            ],
+            [
+              "hoisted",
+              5644
+            ],
+            [
+              "json",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              5644
+            ],
+            [
+              "25",
+              5644
+            ],
+            [
+              "50",
+              5644
+            ],
+            [
+              "75",
+              5644
+            ],
+            [
+              "100",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              5644
+            ],
+            [
+              "pairs",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              5644
+            ],
+            [
+              "dash/empty",
+              5644
+            ],
+            [
+              "empty/?",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              5644
+            ],
+            [
+              "csv",
+              5644
+            ],
+            [
+              "backslash",
+              5644
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              5644
+            ],
+            [
+              "every50",
+              5686
+            ],
+            [
+              "every200",
+              5644
+            ],
+            [
+              "row",
+              8361
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              5644
+            ],
+            [
+              "typed",
+              5651
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              5644
+            ],
+            [
+              "digits",
+              5651
+            ],
+            [
+              "letters",
+              5651
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              5644
+            ],
+            [
+              "1",
+              5644
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "sparse_events",
+      "records": 200,
+      "json_tokens": 11050,
+      "ldf_tokens": 8578,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 11050,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 11248,
+          "ratio_json": 1.017918552036199
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "detail": "0: object size 15 vs 9",
+          "tokens": 6762,
+          "ratio_json": 0.6119457013574661
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "detail": "0: object size 15 vs 9",
+          "tokens": 6726,
+          "ratio_json": 0.6086877828054299
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 13503,
+          "ratio_json": 1.2219909502262443
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 13504,
+          "ratio_json": 1.222081447963801
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 13240,
+          "ratio_json": 1.1981900452488687
+        },
+        {
+          "format": "ldf",
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "tokens": 8578,
+          "ratio_json": 0.776289592760181
+        },
+        {
+          "format": "ldf-v0",
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "tokens": 7047,
+          "ratio_json": 0.637737556561086
+        }
+      ],
+      "distinct": 2466,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 2466,
+      "passing": 2310,
+      "top": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=1",
+          "configs": 32,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13853,
+          "tokens": 6835,
+          "ratio_json": 0.618552036199095,
+          "ratio_ldf": 0.7968057822336209
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=1",
+          "configs": 16,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13853,
+          "tokens": 6836,
+          "ratio_json": 0.6186425339366516,
+          "ratio_ldf": 0.7969223595243646
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=1",
+          "configs": 32,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13702,
+          "tokens": 6848,
+          "ratio_json": 0.6197285067873303,
+          "ratio_ldf": 0.7983212870132899
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=1",
+          "configs": 32,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13881,
+          "tokens": 6848,
+          "ratio_json": 0.6197285067873303,
+          "ratio_ldf": 0.7983212870132899
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=typed b=letters tr=1",
+          "configs": 16,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13702,
+          "tokens": 6849,
+          "ratio_json": 0.6198190045248869,
+          "ratio_ldf": 0.7984378643040336
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=typed b=words tr=1",
+          "configs": 16,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13881,
+          "tokens": 6849,
+          "ratio_json": 0.6198190045248869,
+          "ratio_ldf": 0.7984378643040336
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=letters tr=1",
+          "configs": 32,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13704,
+          "tokens": 6850,
+          "ratio_json": 0.6199095022624435,
+          "ratio_ldf": 0.7985544415947773
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=1",
+          "configs": 32,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13883,
+          "tokens": 6850,
+          "ratio_json": 0.6199095022624435,
+          "ratio_ldf": 0.7985544415947773
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=letters tr=1",
+          "configs": 16,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13704,
+          "tokens": 6851,
+          "ratio_json": 0.62,
+          "ratio_ldf": 0.7986710188855211
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=1",
+          "configs": 16,
+          "level": "semantic-unordered",
+          "detail": "object key order changed",
+          "bytes": 13883,
+          "tokens": 6851,
+          "ratio_json": 0.62,
+          "ratio_ldf": 0.7986710188855211
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              6835
+            ],
+            [
+              "tab",
+              7013
+            ],
+            [
+              "pipe",
+              6925
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              6848
+            ],
+            [
+              "untyped",
+              6835
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": true,
+          "best_by_value": [
+            [
+              "1",
+              6851
+            ],
+            [
+              "0",
+              6835
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              6835
+            ],
+            [
+              "json",
+              6835
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              6835
+            ],
+            [
+              "child-ord",
+              6835
+            ],
+            [
+              "hoisted",
+              6835
+            ],
+            [
+              "json",
+              6835
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              6835
+            ],
+            [
+              "25",
+              7240
+            ],
+            [
+              "50",
+              7704
+            ],
+            [
+              "75",
+              8431
+            ],
+            [
+              "100",
+              8431
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              6835
+            ],
+            [
+              "pairs",
+              7240
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "null/empty",
+              6898
+            ],
+            [
+              "dash/empty",
+              6835
+            ],
+            [
+              "empty/?",
+              7180
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              6835
+            ],
+            [
+              "csv",
+              6835
+            ],
+            [
+              "backslash",
+              6836
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              6835
+            ],
+            [
+              "every50",
+              6937
+            ],
+            [
+              "every200",
+              6835
+            ],
+            [
+              "row",
+              9525
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": true,
+          "best_by_value": [
+            [
+              "keep",
+              6835
+            ],
+            [
+              "typed",
+              6848
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              6835
+            ],
+            [
+              "digits",
+              6870
+            ],
+            [
+              "letters",
+              6848
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": true,
+          "best_by_value": [
+            [
+              "0",
+              7014
+            ],
+            [
+              "1",
+              6835
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "unicode_strings",
+      "records": 200,
+      "json_tokens": 8431,
+      "ldf_tokens": 4693,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 8431,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 8629,
+          "ratio_json": 1.0234847586288696
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "detail": "0.empty: null vs \"\"",
+          "tokens": 4381,
+          "ratio_json": 0.5196299371367572
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "detail": "0.empty: null vs \"\"",
+          "tokens": 4642,
+          "ratio_json": 0.5505871189657218
+        },
+        {
+          "format": "toon",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5188,
+          "ratio_json": 0.6153481200332108
+        },
+        {
+          "format": "toon-tab",
+          "level": "byte",
+          "detail": null,
+          "tokens": 5967,
+          "ratio_json": 0.7077452259518444
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 9559,
+          "ratio_json": 1.1337919582493179
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4693,
+          "ratio_json": 0.5566362234610367
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 4693,
+          "ratio_json": 0.5566362234610367
+        }
+      ],
+      "distinct": 54,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 54,
+      "passing": 48,
+      "top": [
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 10368,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12515,
+          "tokens": 4638,
+          "ratio_json": 0.5501126793974618,
+          "ratio_ldf": 0.9882804176432985
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=once fl=keep b=words tr=0",
+          "configs": 10368,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12621,
+          "tokens": 4638,
+          "ratio_json": 0.5501126793974618,
+          "ratio_ldf": 0.9882804176432985
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=once fl=keep b=words tr=0",
+          "configs": 864,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12689,
+          "tokens": 4662,
+          "ratio_json": 0.5529593168070217,
+          "ratio_ldf": 0.993394417217132
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 864,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12583,
+          "tokens": 4675,
+          "ratio_json": 0.5545012454038667,
+          "ratio_ldf": 0.996164500319625
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 10368,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12954,
+          "tokens": 4693,
+          "ratio_json": 0.5566362234610367,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=every50 fl=keep b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12707,
+          "tokens": 4707,
+          "ratio_json": 0.5582967619499466,
+          "ratio_ldf": 1.0029831664180695
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=every50 fl=keep b=words tr=0",
+          "configs": 5184,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12813,
+          "tokens": 4707,
+          "ratio_json": 0.5582967619499466,
+          "ratio_ldf": 1.0029831664180695
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=every50 fl=keep b=words tr=0",
+          "configs": 432,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12839,
+          "tokens": 4710,
+          "ratio_json": 0.5586525916261417,
+          "ratio_ldf": 1.0036224163647987
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 864,
+          "level": "byte",
+          "detail": null,
+          "bytes": 13022,
+          "tokens": 4721,
+          "ratio_json": 0.5599573004388566,
+          "ratio_ldf": 1.005966332836139
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=every50 fl=keep b=words tr=0",
+          "configs": 432,
+          "level": "byte",
+          "detail": null,
+          "bytes": 12733,
+          "tokens": 4723,
+          "ratio_json": 0.5601945202229865,
+          "ratio_ldf": 1.0063924994672917
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              4638
+            ],
+            [
+              "tab",
+              5028
+            ],
+            [
+              "pipe",
+              4843
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              4638
+            ],
+            [
+              "untyped",
+              4662
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              4638
+            ],
+            [
+              "0",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              4638
+            ],
+            [
+              "json",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              4638
+            ],
+            [
+              "child-ord",
+              4638
+            ],
+            [
+              "hoisted",
+              4638
+            ],
+            [
+              "json",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              4638
+            ],
+            [
+              "25",
+              4638
+            ],
+            [
+              "50",
+              4638
+            ],
+            [
+              "75",
+              4638
+            ],
+            [
+              "100",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              4638
+            ],
+            [
+              "pairs",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              4638
+            ],
+            [
+              "dash/empty",
+              4638
+            ],
+            [
+              "empty/?",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              4693
+            ],
+            [
+              "csv",
+              4638
+            ],
+            [
+              "backslash",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              4638
+            ],
+            [
+              "every50",
+              4707
+            ],
+            [
+              "every200",
+              4638
+            ],
+            [
+              "row",
+              7327
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": false,
+          "best_by_value": [
+            [
+              "keep",
+              4638
+            ],
+            [
+              "typed",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": false,
+          "best_by_value": [
+            [
+              "words",
+              4638
+            ],
+            [
+              "digits",
+              4638
+            ],
+            [
+              "letters",
+              4638
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              4638
+            ],
+            [
+              "1",
+              4638
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    },
+    {
+      "name": "wide_table",
+      "records": 200,
+      "json_tokens": 46836,
+      "ldf_tokens": 20250,
+      "v01_identical": true,
+      "references": [
+        {
+          "format": "json",
+          "level": "byte",
+          "detail": null,
+          "tokens": 46836,
+          "ratio_json": 1.0
+        },
+        {
+          "format": "jsonl",
+          "level": "byte",
+          "detail": null,
+          "tokens": 47034,
+          "ratio_json": 1.0042275172943889
+        },
+        {
+          "format": "csv",
+          "level": "lossy",
+          "detail": "0.s01: null vs \"null\"",
+          "tokens": 20027,
+          "ratio_json": 0.4275984285592279
+        },
+        {
+          "format": "tsv",
+          "level": "lossy",
+          "detail": "0.s01: null vs \"null\"",
+          "tokens": 19391,
+          "ratio_json": 0.41401913058331197
+        },
+        {
+          "format": "toon",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 20604,
+          "ratio_json": 0.4399180117858058
+        },
+        {
+          "format": "toon-tab",
+          "level": "semantic",
+          "detail": null,
+          "tokens": 20206,
+          "ratio_json": 0.4314202750021351
+        },
+        {
+          "format": "yaml",
+          "level": "byte",
+          "detail": null,
+          "tokens": 59336,
+          "ratio_json": 1.2668887180801094
+        },
+        {
+          "format": "ldf",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20250,
+          "ratio_json": 0.4323597232897771
+        },
+        {
+          "format": "ldf-v0",
+          "level": "byte",
+          "detail": null,
+          "tokens": 20250,
+          "ratio_json": 0.4323597232897771
+        }
+      ],
+      "distinct": 126,
+      "lossy": 0,
+      "decode_errors": 0,
+      "lossless": 126,
+      "passing": 112,
+      "top": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 864,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54904,
+          "tokens": 19810,
+          "ratio_json": 0.42296524041335726,
+          "ratio_ldf": 0.9782716049382716
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54904,
+          "tokens": 19810,
+          "ratio_json": 0.42296524041335726,
+          "ratio_ldf": 0.9782716049382716
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=typed b=letters tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 48017,
+          "tokens": 19845,
+          "ratio_json": 0.4237125288239815,
+          "ratio_ldf": 0.98
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=typed b=words tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54980,
+          "tokens": 19845,
+          "ratio_json": 0.4237125288239815,
+          "ratio_ldf": 0.98
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "configs": 3456,
+          "level": "byte",
+          "detail": null,
+          "bytes": 48017,
+          "tokens": 19845,
+          "ratio_json": 0.4237125288239815,
+          "ratio_ldf": 0.98
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "configs": 3456,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54980,
+          "tokens": 19845,
+          "ratio_json": 0.4237125288239815,
+          "ratio_ldf": 0.98
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=letters tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 48023,
+          "tokens": 19851,
+          "ratio_json": 0.42384063540866,
+          "ratio_ldf": 0.9802962962962963
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "configs": 1728,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54986,
+          "tokens": 19851,
+          "ratio_json": 0.42384063540866,
+          "ratio_ldf": 0.9802962962962963
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "configs": 3456,
+          "level": "byte",
+          "detail": null,
+          "bytes": 48023,
+          "tokens": 19851,
+          "ratio_json": 0.42384063540866,
+          "ratio_ldf": 0.9802962962962963
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "configs": 3456,
+          "level": "byte",
+          "detail": null,
+          "bytes": 54986,
+          "tokens": 19851,
+          "ratio_json": 0.42384063540866,
+          "ratio_ldf": 0.9802962962962963
+        }
+      ],
+      "knobs": [
+        {
+          "knob": "delimiter",
+          "matters": true,
+          "best_by_value": [
+            [
+              "comma",
+              20209
+            ],
+            [
+              "tab",
+              19810
+            ],
+            [
+              "pipe",
+              22532
+            ]
+          ]
+        },
+        {
+          "knob": "header typing",
+          "matters": true,
+          "best_by_value": [
+            [
+              "typed",
+              19845
+            ],
+            [
+              "untyped",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "nullable mark",
+          "matters": false,
+          "best_by_value": [
+            [
+              "1",
+              19845
+            ],
+            [
+              "0",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "dotted",
+              19810
+            ],
+            [
+              "json",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "arrays of objects",
+          "matters": false,
+          "best_by_value": [
+            [
+              "child-key",
+              19810
+            ],
+            [
+              "child-ord",
+              19810
+            ],
+            [
+              "hoisted",
+              19810
+            ],
+            [
+              "json",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "sparse threshold",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              19810
+            ],
+            [
+              "25",
+              19810
+            ],
+            [
+              "50",
+              19810
+            ],
+            [
+              "75",
+              19810
+            ],
+            [
+              "100",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "sparse cell form",
+          "matters": false,
+          "best_by_value": [
+            [
+              "json",
+              19810
+            ],
+            [
+              "pairs",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "null / absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "null/empty",
+              19810
+            ],
+            [
+              "dash/empty",
+              19810
+            ],
+            [
+              "empty/?",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "quoting",
+          "matters": true,
+          "best_by_value": [
+            [
+              "json",
+              19810
+            ],
+            [
+              "csv",
+              19810
+            ],
+            [
+              "backslash",
+              19810
+            ]
+          ]
+        },
+        {
+          "knob": "key repetition",
+          "matters": true,
+          "best_by_value": [
+            [
+              "once",
+              19810
+            ],
+            [
+              "every50",
+              20062
+            ],
+            [
+              "every200",
+              19810
+            ],
+            [
+              "row",
+              36706
+            ]
+          ]
+        },
+        {
+          "knob": "float kind",
+          "matters": true,
+          "best_by_value": [
+            [
+              "keep",
+              19810
+            ],
+            [
+              "typed",
+              19845
+            ]
+          ]
+        },
+        {
+          "knob": "booleans",
+          "matters": true,
+          "best_by_value": [
+            [
+              "words",
+              19810
+            ],
+            [
+              "digits",
+              21845
+            ],
+            [
+              "letters",
+              19845
+            ]
+          ]
+        },
+        {
+          "knob": "trim trailing absent",
+          "matters": false,
+          "best_by_value": [
+            [
+              "0",
+              19810
+            ],
+            [
+              "1",
+              19810
+            ]
+          ]
+        }
+      ],
+      "failures": []
+    }
+  ],
+  "global": [
+    {
+      "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=once fl=keep b=words tr=1",
+      "mean_ratio_json": 0.6432993557591224,
+      "mean_ratio_ldf": 0.9596080691390236,
+      "max_ratio_json": 0.9393324517805846
+    },
+    {
+      "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=every200 fl=keep b=words tr=1",
+      "mean_ratio_json": 0.6432993557591224,
+      "mean_ratio_ldf": 0.9596080691390236,
+      "max_ratio_json": 0.9393324517805846
+    },
+    {
+      "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=once fl=typed b=words tr=1",
+      "mean_ratio_json": 0.6438061495118709,
+      "mean_ratio_ldf": 0.9604142935231564,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=once fl=typed b=letters tr=1",
+      "mean_ratio_json": 0.6438061495118709,
+      "mean_ratio_ldf": 0.9604142935231564,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=every200 fl=typed b=words tr=1",
+      "mean_ratio_json": 0.6438061495118709,
+      "mean_ratio_ldf": 0.9604142935231564,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=every200 fl=typed b=letters tr=1",
+      "mean_ratio_json": 0.6438061495118709,
+      "mean_ratio_ldf": 0.9604142935231564,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=once fl=typed b=words tr=1",
+      "mean_ratio_json": 0.6438357649977141,
+      "mean_ratio_ldf": 0.9604625597672128,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=once fl=typed b=letters tr=1",
+      "mean_ratio_json": 0.6438357649977141,
+      "mean_ratio_ldf": 0.9604625597672128,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=every200 fl=typed b=words tr=1",
+      "mean_ratio_json": 0.6438357649977141,
+      "mean_ratio_ldf": 0.9604625597672128,
+      "max_ratio_json": 0.9394236468925266
+    },
+    {
+      "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=csv k=every200 fl=typed b=letters tr=1",
+      "mean_ratio_json": 0.6438357649977141,
+      "mean_ratio_ldf": 0.9604625597672128,
+      "max_ratio_json": 0.9394236468925266
+    }
+  ],
+  "v01_global": {
+    "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=50 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+    "mean_ratio_json": 0.6718663938743678,
+    "mean_ratio_ldf": 1.0,
+    "max_ratio_json": 0.9563403401577676
+  },
+  "rechecks": [
+    {
+      "dataset": "deep_nesting",
+      "records": 1000,
+      "json_tokens": 123455,
+      "ldf_tokens": 99049,
+      "rows": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 99041,
+          "ratio_json": 0.8022437325341217,
+          "ratio_ldf": 0.9999192318953245
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 99049,
+          "ratio_json": 0.8023085334737353,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 99484,
+          "ratio_json": 0.8058320845652261,
+          "ratio_ldf": 1.0043917656917283
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 99492,
+          "ratio_json": 0.8058968855048398,
+          "ratio_ldf": 1.0044725337964038
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 99649,
+          "ratio_json": 0.8071686039447572,
+          "ratio_ldf": 1.0060576078506598
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 99809,
+          "ratio_json": 0.8084646227370297,
+          "ratio_ldf": 1.007672969944169
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 100035,
+          "ratio_json": 0.8102952492811146,
+          "ratio_ldf": 1.0099546689012509
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 100043,
+          "ratio_json": 0.8103600502207282,
+          "ratio_ldf": 1.0100354370059264
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 100092,
+          "ratio_json": 0.8107569559758616,
+          "ratio_ldf": 1.0105301416470636
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 100252,
+          "ratio_json": 0.8120529747681341,
+          "ratio_ldf": 1.0121455037405729
+        }
+      ]
+    },
+    {
+      "dataset": "empty_values",
+      "records": 1000,
+      "json_tokens": 59714,
+      "ldf_tokens": 21665,
+      "rows": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 20949,
+          "ratio_json": 0.3508222527380514,
+          "ratio_ldf": 0.9669513039464575
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 20967,
+          "ratio_json": 0.3511236895870315,
+          "ratio_ldf": 0.9677821370874683
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 20967,
+          "ratio_json": 0.3511236895870315,
+          "ratio_ldf": 0.9677821370874683
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 20968,
+          "ratio_json": 0.35114043607864154,
+          "ratio_ldf": 0.967828294484191
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 20968,
+          "ratio_json": 0.35114043607864154,
+          "ratio_ldf": 0.967828294484191
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 21063,
+          "ratio_json": 0.35273135278159223,
+          "ratio_ldf": 0.9722132471728594
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 21081,
+          "ratio_json": 0.3530327896305724,
+          "ratio_ldf": 0.9730440803138704
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 21081,
+          "ratio_json": 0.3530327896305724,
+          "ratio_ldf": 0.9730440803138704
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 21082,
+          "ratio_json": 0.35304953612218243,
+          "ratio_ldf": 0.9730902377105931
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 21082,
+          "ratio_json": 0.35304953612218243,
+          "ratio_ldf": 0.9730902377105931
+        }
+      ]
+    },
+    {
+      "dataset": "flat_users",
+      "records": 1000,
+      "json_tokens": 46854,
+      "ldf_tokens": 28371,
+      "rows": [
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 28264,
+          "ratio_json": 0.6032355828744611,
+          "ratio_ldf": 0.9962285432307638
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 28264,
+          "ratio_json": 0.6032355828744611,
+          "ratio_ldf": 0.9962285432307638
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 28272,
+          "ratio_json": 0.6034063260340633,
+          "ratio_ldf": 0.9965105213069684
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 28280,
+          "ratio_json": 0.6035770691936654,
+          "ratio_ldf": 0.9967924993831729
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 28280,
+          "ratio_json": 0.6035770691936654,
+          "ratio_ldf": 0.9967924993831729
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 28355,
+          "ratio_json": 0.6051777863149358,
+          "ratio_ldf": 0.9994360438475909
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 28355,
+          "ratio_json": 0.6051777863149358,
+          "ratio_ldf": 0.9994360438475909
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 28363,
+          "ratio_json": 0.6053485294745379,
+          "ratio_ldf": 0.9997180219237954
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 28371,
+          "ratio_json": 0.6055192726341401,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 28371,
+          "ratio_json": 0.6055192726341401,
+          "ratio_ldf": 1.0
+        }
+      ]
+    },
+    {
+      "dataset": "high_card_strings",
+      "records": 1000,
+      "json_tokens": 114671,
+      "ldf_tokens": 101416,
+      "rows": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 101003,
+          "ratio_json": 0.8808068299744486,
+          "ratio_ldf": 0.9959276642738818
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 101009,
+          "ratio_json": 0.8808591535784985,
+          "ratio_ldf": 0.9959868265362467
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 101193,
+          "ratio_json": 0.8824637441026938,
+          "ratio_ldf": 0.9978011359154374
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 101313,
+          "ratio_json": 0.8835102161836907,
+          "ratio_ldf": 0.9989843811627357
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 101410,
+          "ratio_json": 0.8843561144491633,
+          "ratio_ldf": 0.9999408377376351
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 101416,
+          "ratio_json": 0.8844084380532131,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 101638,
+          "ratio_json": 0.8863444114030574,
+          "ratio_ldf": 1.0021890037075019
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 101758,
+          "ratio_json": 0.8873908834840544,
+          "ratio_ldf": 1.0033722489548
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 102644,
+          "ratio_json": 0.8951173356820817,
+          "ratio_ldf": 1.0121085430306855
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 102650,
+          "ratio_json": 0.8951696592861317,
+          "ratio_ldf": 1.0121677052930504
+        }
+      ]
+    },
+    {
+      "dataset": "long_text",
+      "records": 1000,
+      "json_tokens": 224271,
+      "ldf_tokens": 214649,
+      "rows": []
+    },
+    {
+      "dataset": "mixed_types",
+      "records": 1000,
+      "json_tokens": 24896,
+      "ldf_tokens": 18118,
+      "rows": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 16555,
+          "ratio_json": 0.6649662596401028,
+          "ratio_ldf": 0.9137322000220774
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 16580,
+          "ratio_json": 0.6659704370179949,
+          "ratio_ldf": 0.9151120432718843
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 16670,
+          "ratio_json": 0.6695854755784062,
+          "ratio_ldf": 0.9200794789711889
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 16670,
+          "ratio_json": 0.6695854755784062,
+          "ratio_ldf": 0.9200794789711889
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 16694,
+          "ratio_json": 0.6705494858611826,
+          "ratio_ldf": 0.9214041284910034
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 16720,
+          "ratio_json": 0.6715938303341902,
+          "ratio_ldf": 0.9228391654708025
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 16726,
+          "ratio_json": 0.6718348329048843,
+          "ratio_ldf": 0.9231703278507561
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 16750,
+          "ratio_json": 0.6727988431876607,
+          "ratio_ldf": 0.9244949773705707
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=empty/? qt=backslash k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 16751,
+          "ratio_json": 0.6728390102827764,
+          "ratio_ldf": 0.9245501711005629
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 16773,
+          "ratio_json": 0.6737226863753213,
+          "ratio_ldf": 0.925764433160393
+        }
+      ]
+    },
+    {
+      "dataset": "nested_orders",
+      "records": 1000,
+      "json_tokens": 99948,
+      "ldf_tokens": 64238,
+      "rows": [
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 54453,
+          "ratio_json": 0.5448133029175171,
+          "ratio_ldf": 0.8476758305053084
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 54479,
+          "ratio_json": 0.5450734381878577,
+          "ratio_ldf": 0.8480805753603786
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=hoisted sp=0 rf=json n=empty/? qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 54479,
+          "ratio_json": 0.5450734381878577,
+          "ratio_ldf": 0.8480805753603786
+        }
+      ]
+    },
+    {
+      "dataset": "numeric_mix",
+      "records": 1000,
+      "json_tokens": 99863,
+      "ldf_tokens": 65490,
+      "rows": [
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 65272,
+          "ratio_json": 0.653615453170844,
+          "ratio_ldf": 0.9966712475187052
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 65272,
+          "ratio_json": 0.653615453170844,
+          "ratio_ldf": 0.9966712475187052
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 65477,
+          "ratio_json": 0.6556682655237676,
+          "ratio_ldf": 0.9998014964116659
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 65490,
+          "ratio_json": 0.6557984438680993,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 65490,
+          "ratio_json": 0.6557984438680993,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 66066,
+          "ratio_json": 0.6615663458938746,
+          "ratio_ldf": 1.0087952359138799
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=typed b=letters tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 66108,
+          "ratio_json": 0.661986922083254,
+          "ratio_ldf": 1.009436555199267
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=typed b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 66108,
+          "ratio_json": 0.661986922083254,
+          "ratio_ldf": 1.009436555199267
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=letters tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 66326,
+          "ratio_json": 0.6641699127805093,
+          "ratio_ldf": 1.0127653076805618
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 66326,
+          "ratio_json": 0.6641699127805093,
+          "ratio_ldf": 1.0127653076805618
+        }
+      ]
+    },
+    {
+      "dataset": "repetitive_logs",
+      "records": 1000,
+      "json_tokens": 46047,
+      "ldf_tokens": 29729,
+      "rows": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 28147,
+          "ratio_json": 0.611266749191044,
+          "ratio_ldf": 0.9467859665646339
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 28154,
+          "ratio_json": 0.6114187677807458,
+          "ratio_ldf": 0.9470214268895691
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 28413,
+          "ratio_json": 0.6170434555997133,
+          "ratio_ldf": 0.9557334589121733
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 28553,
+          "ratio_json": 0.6200838273937499,
+          "ratio_ldf": 0.9604426654108783
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 29722,
+          "ratio_json": 0.6454709318739549,
+          "ratio_ldf": 0.9997645396750647
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 29729,
+          "ratio_json": 0.6456229504636567,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 30026,
+          "ratio_json": 0.6520728820552913,
+          "ratio_ldf": 1.0099902452151097
+        },
+        {
+          "id": "d=pipe h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 30063,
+          "ratio_json": 0.6528764088865724,
+          "ratio_ldf": 1.011234821218339
+        },
+        {
+          "id": "d=pipe h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 30070,
+          "ratio_json": 0.6530284274762742,
+          "ratio_ldf": 1.0114702815432743
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 30166,
+          "ratio_json": 0.6551132538493278,
+          "ratio_ldf": 1.0146994517138148
+        }
+      ]
+    },
+    {
+      "dataset": "sparse_events",
+      "records": 1000,
+      "json_tokens": 54975,
+      "ldf_tokens": 43943,
+      "rows": [
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=1",
+          "rank_at_sample": 1,
+          "level": "semantic-unordered",
+          "tokens": 33743,
+          "ratio_json": 0.6137880854934061,
+          "ratio_ldf": 0.7678811187219807
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=letters tr=1",
+          "rank_at_sample": 3,
+          "level": "semantic-unordered",
+          "tokens": 33750,
+          "ratio_json": 0.6139154160982264,
+          "ratio_ldf": 0.7680404159934461
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=typed b=words tr=1",
+          "rank_at_sample": 4,
+          "level": "semantic-unordered",
+          "tokens": 33750,
+          "ratio_json": 0.6139154160982264,
+          "ratio_ldf": 0.7680404159934461
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=1",
+          "rank_at_sample": 2,
+          "level": "semantic-unordered",
+          "tokens": 33756,
+          "ratio_json": 0.6140245566166439,
+          "ratio_ldf": 0.7681769565118449
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=letters tr=1",
+          "rank_at_sample": 7,
+          "level": "semantic-unordered",
+          "tokens": 33758,
+          "ratio_json": 0.6140609367894497,
+          "ratio_ldf": 0.7682224700179778
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=json k=once fl=keep b=words tr=1",
+          "rank_at_sample": 8,
+          "level": "semantic-unordered",
+          "tokens": 33758,
+          "ratio_json": 0.6140609367894497,
+          "ratio_ldf": 0.7682224700179778
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=typed b=letters tr=1",
+          "rank_at_sample": 5,
+          "level": "semantic-unordered",
+          "tokens": 33763,
+          "ratio_json": 0.6141518872214643,
+          "ratio_ldf": 0.7683362537833102
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=typed b=words tr=1",
+          "rank_at_sample": 6,
+          "level": "semantic-unordered",
+          "tokens": 33763,
+          "ratio_json": 0.6141518872214643,
+          "ratio_ldf": 0.7683362537833102
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=letters tr=1",
+          "rank_at_sample": 9,
+          "level": "semantic-unordered",
+          "tokens": 33771,
+          "ratio_json": 0.6142974079126876,
+          "ratio_ldf": 0.768518307807842
+        },
+        {
+          "id": "d=comma h=typed q?=0 o=dotted a=child-key sp=0 rf=json n=dash/empty qt=backslash k=once fl=keep b=words tr=1",
+          "rank_at_sample": 10,
+          "level": "semantic-unordered",
+          "tokens": 33771,
+          "ratio_json": 0.6142974079126876,
+          "ratio_ldf": 0.768518307807842
+        }
+      ]
+    },
+    {
+      "dataset": "unicode_strings",
+      "records": 1000,
+      "json_tokens": 42188,
+      "ldf_tokens": 23345,
+      "rows": [
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 23082,
+          "ratio_json": 0.5471224044752062,
+          "ratio_ldf": 0.9887342043264082
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 23158,
+          "ratio_json": 0.5489238646060491,
+          "ratio_ldf": 0.9919897194260013
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=once fl=keep b=words tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 23220,
+          "ratio_json": 0.5503934768180525,
+          "ratio_ldf": 0.9946455343756693
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 23345,
+          "ratio_json": 0.5533564046648336,
+          "ratio_ldf": 1.0
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 23352,
+          "ratio_json": 0.5535223286242533,
+          "ratio_ldf": 1.0002998500749625
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 23500,
+          "ratio_json": 0.5570304351948422,
+          "ratio_ldf": 1.0066395373741701
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 23519,
+          "ratio_json": 0.5574808002275529,
+          "ratio_ldf": 1.0074534161490682
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=csv k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 23524,
+          "ratio_json": 0.5575993173414241,
+          "ratio_ldf": 1.0076675947740414
+        },
+        {
+          "id": "d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 23595,
+          "ratio_json": 0.5592822603583958,
+          "ratio_ldf": 1.0107089312486615
+        },
+        {
+          "id": "d=comma h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=every50 fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 23656,
+          "ratio_json": 0.5607281691476249,
+          "ratio_ldf": 1.0133219104733349
+        }
+      ]
+    },
+    {
+      "dataset": "wide_table",
+      "records": 1000,
+      "json_tokens": 234201,
+      "ldf_tokens": 100603,
+      "rows": [
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 1,
+          "level": "byte",
+          "tokens": 98506,
+          "ratio_json": 0.420604523464887,
+          "ratio_ldf": 0.9791556911821715
+        },
+        {
+          "id": "d=tab h=untyped q?=0 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 2,
+          "level": "byte",
+          "tokens": 98506,
+          "ratio_json": 0.420604523464887,
+          "ratio_ldf": 0.9791556911821715
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 3,
+          "level": "byte",
+          "tokens": 98529,
+          "ratio_json": 0.4207027297065341,
+          "ratio_ldf": 0.9793843125950519
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=typed b=words tr=0",
+          "rank_at_sample": 4,
+          "level": "byte",
+          "tokens": 98529,
+          "ratio_json": 0.4207027297065341,
+          "ratio_ldf": 0.9793843125950519
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=letters tr=0",
+          "rank_at_sample": 5,
+          "level": "byte",
+          "tokens": 98529,
+          "ratio_json": 0.4207027297065341,
+          "ratio_ldf": 0.9793843125950519
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=typed b=words tr=0",
+          "rank_at_sample": 6,
+          "level": "byte",
+          "tokens": 98529,
+          "ratio_json": 0.4207027297065341,
+          "ratio_ldf": 0.9793843125950519
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 7,
+          "level": "byte",
+          "tokens": 98547,
+          "ratio_json": 0.4207795867652145,
+          "ratio_ldf": 0.9795632337007842
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=backslash k=once fl=keep b=words tr=0",
+          "rank_at_sample": 8,
+          "level": "byte",
+          "tokens": 98547,
+          "ratio_json": 0.4207795867652145,
+          "ratio_ldf": 0.9795632337007842
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=letters tr=0",
+          "rank_at_sample": 9,
+          "level": "byte",
+          "tokens": 98547,
+          "ratio_json": 0.4207795867652145,
+          "ratio_ldf": 0.9795632337007842
+        },
+        {
+          "id": "d=tab h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0",
+          "rank_at_sample": 10,
+          "level": "byte",
+          "tokens": 98547,
+          "ratio_json": 0.4207795867652145,
+          "ratio_ldf": 0.9795632337007842
+        }
+      ]
+    }
+  ]
+}

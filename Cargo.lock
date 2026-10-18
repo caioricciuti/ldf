@@ -797,6 +797,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ldf-discover"
+version = "0.1.0"
+dependencies = [
+ "ldf",
+ "ldf-bench",
+ "ldf-data",
+ "ldf-formats",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ldf-eval"
 version = "0.1.0"
 dependencies = [

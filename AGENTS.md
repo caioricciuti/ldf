@@ -20,6 +20,7 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
 | `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures` | |
 | `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop | `ldf-mcp` |
+| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01` and `LDF_V0` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1 | `ldf-discover` |
 
 `site/` is the website (ldflabs.org): Astro with Starlight, the docs pages
 mirrored from `docs/` and this file by `site/scripts/sync-docs.mjs` at build
@@ -57,6 +58,9 @@ eval/plan.sh                          # the agreed paid stages with prices and b
 ./target/release/ldf-mcp convert FILE  # json, jsonl, csv, tsv or parquet to LDF on stdout
 ./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124   # MCP server over ClickHouse HTTP, see docs/ldf-mcp.md
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.anthropic.claude-opus-5-5.jsonl
+./target/release/ldf-discover space   # knob list and size
+./target/release/ldf-discover stage-a --scale medium --sample 200 --recheck 1000 --out results/discovery/<name>   # about a minute, no API calls
+./target/release/ldf-discover show --id v0.1 --input fixtures/small/nested_orders.json   # one candidate's output; --id takes any id from a report
 ```
 
 Benchmarks only count in release builds. Perf runs should happen on a quiet
@@ -135,3 +139,14 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   ran at 1 MB/s. The quadratic column scans in planning and decode insert
   were removed on 2026-10-18 (wide_table: encode 55 to 28 ms, decode 50 to
   18 ms, now level with CSV encode and JSON decode).
+- Stage A (2026-10-18, `docs/reports/2026-10-18-stage-a/`): over 154 440
+  configurations on 200 records per dataset, the best lossless layout per
+  dataset is 0 to 20 percent below LDF v0.1 in o200k tokens; one config for
+  all datasets is 4 percent below v0.1 on average. The large gaps are nested_orders
+  (hoisted `items` keys, 15 percent) and sparse_events (sparse threshold 0,
+  20 percent, which is the v0 layout that cost Haiku accuracy). Keys on every
+  row and repeated headers always cost tokens; typed and untyped headers tie;
+  `true`/`false` beat `t`/`f` and `1`/`0`. long_text has no layout 10 percent
+  below JSON. LDF v0.1 itself mis-encodes two cases the engine handles: a
+  nested object that is null in some row decodes as absent, and a string
+  starting with `@` as the first cell of a row reads as a header.
