@@ -17,7 +17,7 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-fixtures` | frozen PRNG (xoshiro256** + splitmix64), dataset catalog, streaming writers for JSON/JSONL/CSV/Parquet | `ldf-gen` |
 | `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter (`ldf` current, `ldf-v0` old layout, same display name in prompts). TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
-| `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
+| `ldf-eval` | task generation with ground truth (eleven kinds; new kinds are appended to `TaskKind::all` and a golden test pins the original stream, so old bundles regenerate as an exact prefix; the manifest reports per-kind counts, short where a dataset runs out of distinct questions), prompt bundles (`--candidate name=ID` adds an `ldf-discover` configuration, shown to the model as `ldf`), response scoring | `ldf-eval` |
 | `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures` | |
 | `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop | `ldf-mcp` |
 | `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01` and `LDF_V0` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1 | `ldf-discover` |
@@ -48,12 +48,14 @@ cargo bench -p ldf-bench              # Criterion microbenchmarks
 ./target/release/ldf-gen list         # dataset catalog
 ./target/release/ldf-gen --scale small          # regenerate committed fixtures
 ./target/release/ldf-gen --scale medium         # 10k-row fixtures (gitignored)
+./target/release/ldf-gen --scale medium --seed 20261118 --out fixtures/holdout --containers json   # held-out data for Stage C (gitignored)
 ./target/release/ldf-bench roundtrip --scale small
 ./target/release/ldf-bench perf --scale medium --iters 7 --out results/medium
 ./target/release/ldf-bench tokens --scale medium --sample 1000 --out results/medium
 ./target/release/ldf-eval build --input fixtures/small/flat_users.json --out eval/out/flat_users
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --model claude-opus-5-5 --dry-run
 eval/plan.sh                          # the agreed paid stages with prices and budget caps; `score` regrades everything
+eval/plan.sh stage-b-build            # Stage B bundles, free and deterministic; the paid stages need Caio's go
 ./target/release/ldf-mcp proxy -- <mcp server command>   # LDF between a stdio MCP server and the model
 ./target/release/ldf-mcp convert FILE  # json, jsonl, csv, tsv or parquet to LDF on stdout
 ./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124   # MCP server over ClickHouse HTTP, see docs/ldf-mcp.md

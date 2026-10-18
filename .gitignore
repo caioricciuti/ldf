@@ -4,6 +4,8 @@
 /fixtures/medium
 /fixtures/large
 /fixtures/custom
+# Held-out data for Stage C: same shapes, seed 20261118 (ldf-gen --seed).
+/fixtures/holdout
 # Benchmark outputs and encoded samples. Curated reports live in docs/reports.
 /results
 # Evaluation bundles, API responses and scores.

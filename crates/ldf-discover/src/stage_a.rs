@@ -191,7 +191,7 @@ pub fn run_dataset(
     // Pass 2: round trip and tokens per distinct output.
     let distinct: Vec<Distinct> = parallel(reps.len(), s.threads, |d| {
         let cfg = space[reps[d]];
-        let rt = roundtrip::check(&Candidate(cfg), records);
+        let rt = roundtrip::check(&Candidate::new(cfg), records);
         let text = encode(records, &cfg);
         let tokens = counter.count(&text);
         Distinct {

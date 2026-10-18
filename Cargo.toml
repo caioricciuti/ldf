@@ -26,6 +26,7 @@ ldf-fixtures = { path = "crates/ldf-fixtures" }
 ldf-formats = { path = "crates/ldf-formats" }
 ldf-eval = { path = "crates/ldf-eval" }
 ldf-bench = { path = "crates/ldf-bench" }
+ldf-discover = { path = "crates/ldf-discover" }
 ldf = { path = "crates/ldf", version = "0.1.0" }
 
 serde = { version = "=1.0.229", features = ["derive"] }

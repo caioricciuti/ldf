@@ -2,7 +2,8 @@
 //!
 //! ```text
 //! ldf-eval build --input fixtures/small/flat_users.json [--records 50] [--per-kind 3]
-//!                [--formats all] [--seed 1] [--extra name=file]... --out eval/out/flat_users
+//!                [--formats all] [--seed 1] [--extra name=file]... [--candidate name=ID]...
+//!                --out eval/out/flat_users
 //! ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.jsonl
 //! ```
 
@@ -24,6 +25,7 @@ fn flag(args: &[String], name: &str) -> Option<String> {
 fn usage() -> ExitCode {
     eprintln!(
         "usage:\n  ldf-eval build --input FILE --out DIR [--records N] [--per-kind N] [--formats all|a,b] [--seed N]\n\
+         \x20     [--extra name=file]... [--candidate name=ID]...\n\
          \x20 ldf-eval score --bundle DIR --responses FILE [--out FILE.md]"
     );
     ExitCode::from(2)
@@ -51,7 +53,7 @@ fn build(args: &[String]) -> ExitCode {
     let seed: u64 = flag(args, "--seed")
         .and_then(|v| v.parse().ok())
         .unwrap_or(1);
-    let formats =
+    let mut formats =
         match ldf_formats::select(&flag(args, "--formats").unwrap_or_else(|| "all".into())) {
             Ok(f) => f,
             Err(e) => {
@@ -59,6 +61,24 @@ fn build(args: &[String]) -> ExitCode {
                 return ExitCode::from(2);
             }
         };
+    // --candidate name=ID: a configuration from `ldf-discover`, shown to the
+    // model as `ldf` like every other LDF variant.
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        if a != "--candidate" {
+            continue;
+        }
+        let Some((name, id)) = it.next().and_then(|s| s.split_once('=')) else {
+            return usage();
+        };
+        let Some(config) = ldf_discover::Config::from_id(id) else {
+            eprintln!("unknown candidate id {id:?}; see `ldf-discover space`");
+            return ExitCode::from(2);
+        };
+        // Format names are &'static str; a CLI run builds a handful.
+        let name: &'static str = Box::leak(name.to_string().into_boxed_str());
+        formats.push(Box::new(ldf_discover::Candidate { config, name }));
+    }
     let path = PathBuf::from(&input);
     let mut records = match read_all(&path, &ReadOptions::default()) {
         Ok(r) => r,
@@ -122,6 +142,8 @@ fn build(args: &[String]) -> ExitCode {
                     .map(|t| format!(", largest prompt {t} o200k tokens"))
                     .unwrap_or_default()
             );
+            let kinds: Vec<String> = m.per_kind.iter().map(|(k, n)| format!("{k} {n}")).collect();
+            println!("  tasks per kind (asked {per_kind}): {}", kinds.join(", "));
             for (f, t) in &m.data_tokens_o200k {
                 println!("  {f:<12} data tokens (o200k_base): {t}");
             }

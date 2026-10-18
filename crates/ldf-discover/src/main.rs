@@ -35,9 +35,7 @@ fn load(path: &Path, sample: usize) -> Result<Vec<Value>, String> {
 }
 
 fn config_by_id(id: &str) -> Result<Config, String> {
-    space()
-        .into_iter()
-        .find(|c| c.id() == id)
+    Config::from_id(id)
         .ok_or_else(|| format!("no configuration with id {id:?}; see `ldf-discover space`"))
 }
 
@@ -81,14 +79,10 @@ fn cmd_show(args: &[String]) -> Result<(), String> {
     let sample = flag(args, "--sample")
         .and_then(|s| s.parse().ok())
         .unwrap_or(20);
-    let cfg = if id == "v0.1" {
-        Config::LDF_V01
-    } else {
-        config_by_id(id)?
-    };
+    let cfg = config_by_id(id)?;
     let recs = load(Path::new(input), sample)?;
     print!("{}", encode(&recs, &cfg));
-    let rt = roundtrip::check(&Candidate(cfg), &recs);
+    let rt = roundtrip::check(&Candidate::new(cfg), &recs);
     eprintln!(
         "{} records, round trip {}{}",
         recs.len(),
@@ -249,7 +243,7 @@ fn cmd_stage_a(args: &[String]) -> Result<(), String> {
                 .enumerate()
                 .map(|(rank, d)| {
                     let cfg = config_by_id(&d.id).expect("id from the space");
-                    let rt = roundtrip::check(&Candidate(cfg), &recs);
+                    let rt = roundtrip::check(&Candidate::new(cfg), &recs);
                     let tokens = counter.count(&encode(&recs, &cfg));
                     RecheckRow {
                         id: d.id.clone(),

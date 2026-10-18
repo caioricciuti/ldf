@@ -260,6 +260,15 @@ impl Config {
         s
     }
 
+    /// The configuration with this [`Config::id`], or `v0.1` / `v0`.
+    pub fn from_id(id: &str) -> Option<Config> {
+        match id {
+            "v0.1" => Some(Config::LDF_V01),
+            "v0" => Some(Config::LDF_V0),
+            _ => space().into_iter().find(|c| c.id() == id),
+        }
+    }
+
     /// The value of knob `k` (index into [`KNOBS`]) as text, for the
     /// per-knob analysis.
     pub fn knob_value(&self, k: usize) -> String {

@@ -8,7 +8,7 @@ use ldf_data::Value;
 use ldf_formats::{EncodeError, Format};
 use serde::{Deserialize, Serialize};
 
-use crate::tasks::Task;
+use crate::tasks::{Task, TaskKind};
 
 /// The prompt template. Kept deliberately plain and identical for every
 /// format; only `{format_name}` and the data block change.
@@ -41,6 +41,10 @@ pub struct Manifest {
     pub formats: Vec<String>,
     pub unsupported: Vec<(String, String)>,
     pub tasks: usize,
+    /// Tasks generated per kind. A kind below the requested count ran out
+    /// of distinct questions on this dataset (or does not apply to it).
+    #[serde(default)]
+    pub per_kind: Vec<(String, usize)>,
     pub prompts: usize,
     pub system_prompt: String,
     pub user_template: String,
@@ -160,6 +164,13 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
         formats: used,
         unsupported,
         tasks: tasks.len(),
+        per_kind: TaskKind::all()
+            .iter()
+            .map(|k| {
+                let n = tasks.iter().filter(|t| t.kind == *k).count();
+                (k.name().to_string(), n)
+            })
+            .collect(),
         prompts: prompt_count,
         system_prompt: SYSTEM_PROMPT.to_string(),
         user_template: USER_TEMPLATE.to_string(),

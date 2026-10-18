@@ -32,7 +32,7 @@ fn fixture(name: &str) -> Vec<Value> {
 }
 
 fn assert_lossless(cfg: Config, recs: &[Value], what: &str) {
-    let rt = roundtrip::check(&Candidate(cfg), recs);
+    let rt = roundtrip::check(&Candidate::new(cfg), recs);
     assert!(
         matches!(
             rt.level,

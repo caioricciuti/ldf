@@ -813,6 +813,7 @@ name = "ldf-eval"
 version = "0.1.0"
 dependencies = [
  "ldf-data",
+ "ldf-discover",
  "ldf-fixtures",
  "ldf-formats",
  "serde",
