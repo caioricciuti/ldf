@@ -10,3 +10,6 @@
 /eval/out
 .env
 .DS_Store
+
+# Local Claude Code settings and state.
+.claude/
