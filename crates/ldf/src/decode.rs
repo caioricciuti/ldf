@@ -410,13 +410,19 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
         });
     }
 
-    // Attach children, deepest (latest) first.
+    // Attach children, deepest first. A table name may appear several times
+    // (a block encoder writes one child table per block); all its rows are
+    // one table, so each name is attached once, from all its occurrences.
     let names: Vec<String> = built.iter().map(|b| b.name.clone()).collect();
-    for ci in (0..built.len()).rev() {
-        if built[ci].name == ROOT {
-            continue;
-        }
+    let mut order: Vec<usize> = (0..built.len())
+        .filter(|&i| built[i].name != ROOT && !names[..i].contains(&names[i]))
+        .collect();
+    order.sort_by_key(|&i| std::cmp::Reverse((names[i].matches('.').count(), i)));
+    for ci in order {
         let child_name = built[ci].name.clone();
+        let occurrences: Vec<usize> = (0..built.len())
+            .filter(|&i| built[i].name == child_name)
+            .collect();
         // Parent table: the longest proper prefix of the child's name that
         // names a table.
         let parent_name = {
@@ -441,8 +447,8 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
         // Group child rows by join value once (O(children)), keyed by the
         // JSON text of the join value so 1 and 1.0 land in the same bucket.
         let mut groups: HashMap<String, Vec<Value>> = HashMap::new();
-        {
-            let child = &mut built[ci];
+        for &oi in &occurrences {
+            let child = &mut built[oi];
             let objs = std::mem::take(&mut child.objs);
             let joins = std::mem::take(&mut child.join_values);
             for (jv, obj) in joins.into_iter().zip(objs) {

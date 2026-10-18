@@ -7,6 +7,14 @@ versions follow the specification, not the crates, until the first release.
 
 ### Added
 
+- Block encoder: the streaming path plans one block of records at a time
+  and writes child tables with ordinals numbered across the document, so
+  memory is bounded (10 MB peak against 32 MB for the batch path on the
+  2.8 MB nested_orders fixture) and the output matches the batch encoder
+  on flat data; on nested data it is smaller, since ordinal joins are
+  shorter than key joins. `ldf-mcp convert --block N` streams a file
+  through it. The decoder attaches a child table name once from all its
+  occurrences, which block-interleaved documents need.
 - `ldf-mcp`, an MCP server over stdio: `proxy` wraps any stdio MCP server
   and re-encodes JSON tool results as LDF; `clickhouse` exposes read-only
   SQL over ClickHouse's HTTP interface and returns rows as LDF; `convert`

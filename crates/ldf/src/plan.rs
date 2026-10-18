@@ -91,6 +91,10 @@ pub struct Options {
     /// this moves from a positional column into the row's `~` object
     /// (spec section 7, rule 4). `0.0` disables the rule.
     pub sparse_threshold: f64,
+    /// Join child tables by the parent's ordinal even when its first column
+    /// is unique. The block encoder sets this: uniqueness within one block
+    /// says nothing about the whole document.
+    pub ordinal_joins: bool,
 }
 
 impl Options {
@@ -101,6 +105,7 @@ impl Options {
     /// v0 layout: every key is a column.
     pub const V0: Options = Options {
         sparse_threshold: 0.0,
+        ordinal_joins: false,
     };
 }
 
@@ -108,6 +113,7 @@ impl Default for Options {
     fn default() -> Self {
         Options {
             sparse_threshold: Options::DEFAULT_SPARSE_THRESHOLD,
+            ordinal_joins: false,
         }
     }
 }
@@ -221,7 +227,11 @@ fn plan_table(
     };
     // Child tables need to know how to join: decide now that the parent's
     // first column is known.
-    let parent_key = parent_join_key(&plan, rows);
+    let parent_key = if opts.ordinal_joins {
+        None
+    } else {
+        parent_join_key(&plan, rows)
+    };
     for col in plan.columns.iter_mut() {
         if let Some(child) = col.child.as_mut() {
             match &parent_key {

@@ -127,8 +127,8 @@ processes untrusted input and how to report a problem.
 ## Status
 
 v0.1, a prototype with its evidence attached. What is next is in
-`docs/roadmap.md`: block-interleaved child tables for the streaming encoder,
-more sources for `ldf-mcp`, a first tagged release.
+`docs/roadmap.md`: more sources for `ldf-mcp`, a first tagged release, the
+open questions at the end of the spec.
 
 ## License
 

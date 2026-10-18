@@ -18,7 +18,7 @@ pub mod plan;
 pub mod text;
 
 pub use decode::{DecodeError, decode};
-pub use encode::{Encoder, StreamEncoder, encode, encode_with};
+pub use encode::{BlockEncoder, Encoder, StreamEncoder, encode, encode_with};
 pub use plan::Options;
 
 /// Name of the root table.

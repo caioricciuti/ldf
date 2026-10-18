@@ -140,13 +140,33 @@ inserting the array at the position of the `t` column within the parent's
 key order. Key order is therefore preserved exactly only when no key moved
 to the rest column; otherwise equality is semantic (key order may differ).
 
-## 8. Streaming encoder
+## 8. Streaming encoders
 
-Emits a header when the next record's key set differs from the current
-header, then one row per record. It never creates child tables (arrays of
-objects are `j` cells) and never flattens objects (nested objects are `j`
-cells), because both decisions need the whole dataset. Its output is valid
-LDF and decodes with the same decoder.
+Two encoders bound memory without changing the decoder.
+
+**Block encoder** (the reference implementation's streaming path, 1 000
+records per block). Records are buffered up to the block size, the block is
+planned with the rules of section 7, and written as: the root header
+(omitted only when the previous block ended on the same root header, since
+rows belong to the most recent header), the block's root rows, then each
+child table with its header and the block's child rows, recursively. Child
+tables always join by ordinal (`_:i`), numbered across the whole document,
+because a first column that is unique within one block need not be unique
+in the next. Since a decoder concatenates the rows of every table with the
+same name and attaches children by join value, a block-interleaved
+document decodes exactly like a batch one. On uniform flat data the output is
+the batch output; with child tables it is the batch output with ordinal
+joins and one root and one child header per block; when a block's plan
+differs (a type widens, a key appears, a sparse key crosses
+the threshold) the new root header applies from that block on.
+
+**Record encoder.** Emits a header when the next record's key set differs
+from the current header, then one row per record. It never creates child
+tables (arrays of objects are `j` cells) and never flattens objects (nested
+objects are `j` cells), because both decisions need more than one record.
+It exists for the case where even a block is too much state.
+
+Both produce valid LDF that decodes with the same decoder.
 
 ## 9. Example
 
@@ -162,7 +182,9 @@ ORD-000002,A1,1,2757.03
 
 ## 10. Open for v1
 
-Block-interleaved child tables for streaming; a tab delimiter variant;
-column statistics in headers; a decoder option to type `j` cells lazily;
+Whether child tables should always join by ordinal: on the nested_orders
+fixture the block encoder's ordinal joins are 11 percent smaller than the
+batch encoder's `order_id` joins, because an ordinal is shorter than most
+keys. A tab delimiter variant; column statistics in headers; a decoder option to type `j` cells lazily;
 whether a single-row parent should join its child table by ordinal rather
 than by its first column.

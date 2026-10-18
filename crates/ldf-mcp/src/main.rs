@@ -17,9 +17,10 @@ fn usage() -> ExitCode {
          \x20                    [--passthrough] [--min-bytes N] [--quiet]\n\
          \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
          \x20     rows come back as LDF; the password is read from CLICKHOUSE_PASSWORD, never from arguments\n\
-         \x20 ldf-mcp convert [FILE] [--sparse T]\n\
+         \x20 ldf-mcp convert [FILE] [--sparse T] [--block N]\n\
          \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF; --sparse T moves keys\n\
-         \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column\n\
+         \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
+         \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
          \x20 ldf-mcp fake-server\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
     );
@@ -129,6 +130,7 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
 fn convert(args: &[String]) -> ExitCode {
     let mut path: Option<&str> = None;
     let mut opts = ldf::plan::Options::default();
+    let mut block: Option<usize> = None;
     let mut it = args.iter();
     while let Some(a) = it.next() {
         match a.as_str() {
@@ -136,9 +138,16 @@ fn convert(args: &[String]) -> ExitCode {
                 Some(t) if (0.0..=1.0).contains(&t) => opts.sparse_threshold = t,
                 _ => return usage(),
             },
+            "--block" => match it.next().and_then(|v| v.parse::<usize>().ok()) {
+                Some(n) if n > 0 => block = Some(n),
+                _ => return usage(),
+            },
             _ if path.is_none() => path = Some(a.as_str()),
             _ => return usage(),
         }
+    }
+    if let Some(n) = block {
+        return convert_streaming(path, n, opts);
     }
     let records = match path {
         Some(p) => {
@@ -180,5 +189,56 @@ fn convert(args: &[String]) -> ExitCode {
         records.len(),
         out.len()
     );
+    ExitCode::SUCCESS
+}
+
+/// Streams a file through the block encoder: one block of records in
+/// memory at a time, output written as each block completes.
+fn convert_streaming(path: Option<&str>, block: usize, opts: ldf::plan::Options) -> ExitCode {
+    let Some(p) = path else {
+        eprintln!("ldf-mcp convert: --block needs a FILE (stdin is read whole)");
+        return ExitCode::from(2);
+    };
+    let stream = match ldf_data::input::open(Path::new(p), &ldf_data::input::ReadOptions::default())
+    {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("ldf-mcp convert: {e}");
+            return ExitCode::from(1);
+        }
+    };
+    let mut enc = ldf::BlockEncoder::with_options(block, opts);
+    let mut stdout = std::io::stdout().lock();
+    let mut buf = String::new();
+    let mut records = 0usize;
+    let mut bytes = 0usize;
+    for rec in stream {
+        let rec = match rec {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("ldf-mcp convert: {e}");
+                return ExitCode::from(1);
+            }
+        };
+        records += 1;
+        enc.record(rec, &mut buf);
+        if !buf.is_empty() {
+            bytes += buf.len();
+            if stdout.write_all(buf.as_bytes()).is_err() {
+                return ExitCode::from(1);
+            }
+            buf.clear();
+        }
+    }
+    enc.finish(&mut buf);
+    bytes += buf.len();
+    if stdout
+        .write_all(buf.as_bytes())
+        .and_then(|_| stdout.flush())
+        .is_err()
+    {
+        return ExitCode::from(1);
+    }
+    eprintln!("ldf-mcp convert: {records} records, {bytes} bytes of LDF, blocks of {block}");
     ExitCode::SUCCESS
 }

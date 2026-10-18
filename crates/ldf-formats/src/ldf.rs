@@ -35,6 +35,7 @@ impl LdfFormat {
             extension,
             options: ::ldf::Options {
                 sparse_threshold: threshold,
+                ..::ldf::Options::default()
             },
         }
     }
@@ -77,21 +78,28 @@ impl Format for LdfFormat {
     }
     fn stream_encoder(&self) -> Option<Box<dyn StreamEncoder>> {
         Some(Box::new(LdfStream {
-            inner: ::ldf::StreamEncoder::default(),
+            inner: ::ldf::BlockEncoder::with_options(LdfFormat::BLOCK, self.options),
             buf: String::new(),
         }))
     }
 }
 
+impl LdfFormat {
+    /// Records per block in the streaming encoder: bounded memory, and on
+    /// uniform data the same bytes as the batch encoder plus one child
+    /// header per block.
+    pub const BLOCK: usize = 1000;
+}
+
 struct LdfStream {
-    inner: ::ldf::StreamEncoder,
+    inner: ::ldf::BlockEncoder,
     buf: String,
 }
 
 impl StreamEncoder for LdfStream {
     fn record(&mut self, rec: &Value, out: &mut Vec<u8>) -> Result<(), EncodeError> {
         self.buf.clear();
-        self.inner.record(rec, &mut self.buf);
+        self.inner.record(rec.clone(), &mut self.buf);
         out.extend_from_slice(self.buf.as_bytes());
         Ok(())
     }

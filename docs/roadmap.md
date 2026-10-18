@@ -76,8 +76,10 @@ where not" with a cheap switch.
   results as LDF between any MCP server and the model, with a primer in the
   `initialize` instructions; quadratic column scans removed from the
   planner and the decoder (wide_table encode 55 to 28 ms, decode 50 to 18).
-- Next: block-interleaved child tables so the streaming encoder reaches the
-  batch encoder's size; Arrow RecordBatch fast path for Parquet input without
+- Done 2026-10-18: block-interleaved child tables (`ldf::BlockEncoder`,
+  spec section 8); the streaming path now reaches the batch encoder's size
+  on uniform data with bounded memory.
+- Next: Arrow RecordBatch fast path for Parquet input without
   materialising `Value`.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
