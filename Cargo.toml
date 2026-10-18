@@ -7,6 +7,7 @@ members = [
     "crates/ldf-bench",
     "crates/ldf-eval",
     "crates/ldf",
+    "crates/ldf-mcp",
 ]
 
 [workspace.package]

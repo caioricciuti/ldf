@@ -19,6 +19,7 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
 | `ldf` | LDF v0 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening and child tables, conformance fixtures under `tests/fixtures` | |
+| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double | `ldf-mcp` |
 
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
 spend-gated) and `count_tokens_claude.py` (Anthropic count_tokens).
@@ -45,6 +46,8 @@ cargo bench -p ldf-bench              # Criterion microbenchmarks
 ./target/release/ldf-eval build --input fixtures/small/flat_users.json --out eval/out/flat_users
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --model claude-opus-5-5 --dry-run
 eval/plan.sh                          # the agreed paid stages with prices and budget caps; `score` regrades everything
+./target/release/ldf-mcp proxy -- <mcp server command>   # LDF between a stdio MCP server and the model
+./target/release/ldf-mcp convert FILE  # json, jsonl, csv, tsv or parquet to LDF on stdout
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.anthropic.claude-opus-5-5.jsonl
 ```
 

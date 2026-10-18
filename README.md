@@ -23,6 +23,7 @@ measurements led to it, `docs/roadmap.md` for what comes next and
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, token counts, Criterion benches |
 | `crates/ldf-eval` | `ldf-eval`: tasks with ground truth, prompt bundles, scoring |
 | `crates/ldf` | LDF v0 encoder, decoder and conformance fixtures |
+| `crates/ldf-mcp` | `ldf-mcp`: MCP stdio proxy that re-encodes JSON tool results as LDF on their way to the model; also `convert` for files and a `fake-server` test double |
 | `eval/` | stdlib-only Python: `run_eval.py` (API calls, spend-gated), `count_tokens_claude.py` |
 | `fixtures/small` | committed correctness fixtures (regenerable) |
 | `docs/` | research notes, benchmark methodology, roadmap, measured reports |
@@ -67,6 +68,10 @@ python3 eval/run_eval.py --bundle eval/out/flat_users --provider anthropic --mod
 python3 eval/run_eval.py --bundle eval/out/flat_users --provider openai --model <gpt model id> --confirm-spend
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.openai.<model>.jsonl
 eval/plan.sh                 # the agreed paid stages, each with a price and a budget cap; `eval/plan.sh score` regrades all
+
+# MCP proxy: LDF between any stdio MCP server and the model
+./target/release/ldf-mcp proxy -- <server command> [args...]
+./target/release/ldf-mcp convert fixtures/small/nested_orders.json   # any supported input file to LDF on stdout
 ```
 
 `ldf-bench` writes `perf.md`/`perf.json` or `tokens.md`/`tokens.json` into the
@@ -77,6 +82,37 @@ API keys are read from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and
 `DEEPSEEK_API_KEY`, from the environment or from a gitignored `.env` at the
 repo root. Nothing is sent without `--confirm-spend`, and nothing in the Rust code touches the
 network.
+
+## MCP proxy
+
+`ldf-mcp proxy` launches a downstream MCP server (anything that speaks the
+stdio transport) and sits between it and the client. Every JSON-RPC message
+is forwarded as is, except three results on the way back:
+
+* `initialize`: a short description of LDF is appended to `instructions`,
+  so the model has read the format once before it sees any data;
+* `tools/list`: one sentence is appended to each tool description;
+* `tools/call`: a text content block that is a JSON array of objects, or an
+  object holding such an array, is re-encoded as LDF when that is shorter.
+  Blocks under 1 024 bytes (`--min-bytes`), error results, non-text blocks
+  and `structuredContent` are left alone.
+
+The model keeps calling the same tools with the same arguments; only the
+bytes it reads change. One stderr line per converted result reports the
+JSON and LDF sizes (`--quiet` turns it off). `--passthrough` forwards tool
+results unchanged and `--plain` skips the primer and the descriptions, so
+the same session can be compared with and without LDF.
+
+With Claude Code, register the proxy in place of the server it wraps:
+
+```bash
+claude mcp add clickhouse -- /abs/path/to/target/release/ldf-mcp proxy -- <clickhouse mcp command> [its args]
+```
+
+`ldf-mcp fake-server` is a stand-in downstream server with one tool,
+`query`, that returns generated rows; the integration tests drive the proxy
+against it, and `ldf-mcp proxy -- ldf-mcp fake-server` is a way to watch
+the rewrite without a database.
 
 ## Results so far
 

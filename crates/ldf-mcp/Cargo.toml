@@ -1,0 +1,16 @@
+[package]
+name = "ldf-mcp"
+description = "MCP stdio proxy that rewrites JSON tool results into LDF before they reach the model"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ldf-mcp"
+path = "src/main.rs"
+
+[dependencies]
+ldf = { workspace = true }
+ldf-data = { workspace = true }
+serde_json = { workspace = true }

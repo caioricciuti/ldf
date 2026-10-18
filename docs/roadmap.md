@@ -70,6 +70,10 @@ where not" with a cheap switch.
 - Done 2026-10-18: `ldf` crate with batch encoder (flattening, child tables),
   streaming encoder (flat rows, JSON cells), decoder, conformance fixtures;
   wired into every benchmark table as format `ldf`.
+- Done 2026-10-18: `ldf-mcp`, a stdio MCP proxy that re-encodes JSON tool
+  results as LDF between any MCP server and the model, with a primer in the
+  `initialize` instructions; quadratic column scans removed from the
+  planner and the decoder (wide_table encode 55 to 28 ms, decode 50 to 18).
 - Next: block-interleaved child tables so the streaming encoder reaches the
   batch encoder's size; Arrow RecordBatch fast path for Parquet input without
   materialising `Value`.
