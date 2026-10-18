@@ -100,6 +100,11 @@ pub trait StreamEncoder {
 
 pub trait Format: Send + Sync {
     fn name(&self) -> &'static str;
+    /// What a prompt calls the format. Variants of one format (encoder
+    /// options under test) share the display name so prompts stay equal.
+    fn display_name(&self) -> &'static str {
+        self.name()
+    }
     fn extension(&self) -> &'static str;
     fn capabilities(&self) -> Capabilities;
 
@@ -133,7 +138,8 @@ pub fn all_formats() -> Vec<Box<dyn Format>> {
         Box::new(toon::Toon::default()),
         Box::new(toon::Toon::tab()),
         Box::new(yaml::YamlFormat),
-        Box::new(ldf::LdfFormat),
+        Box::new(ldf::LdfFormat::current()),
+        Box::new(ldf::LdfFormat::v0()),
     ]
 }
 

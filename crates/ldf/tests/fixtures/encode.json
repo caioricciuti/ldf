@@ -1,7 +1,7 @@
 {
   "version": "0.1",
   "category": "encode",
-  "description": "LDF v0 encoder fixtures: input is a JSON array of records, expected is the exact document text.",
+  "description": "LDF v0.1 encoder fixtures: input is a JSON array of records, expected is the exact document text.",
   "tests": [
     {
       "name": "flat records with every scalar type",
@@ -24,7 +24,7 @@
     {
       "name": "missing versus null and the nullable marker",
       "input": [{"id": 1, "a": null, "b": "x"}, {"id": 2, "b": null}, {"id": 3}],
-      "expected": "@records id:i,a:j?,b:s?\n1,null,x\n2,,null\n3,,\n",
+      "expected": "@records id:i,~:j?\n1,{\"a\":null,\"b\":\"x\"}\n2,{\"b\":null}\n3,\n",
       "spec": "4"
     },
     {
@@ -72,7 +72,7 @@
     {
       "name": "absent and null arrays of objects",
       "input": [{"id": 1, "items": [{"v": 1}]}, {"id": 2}, {"id": 3, "items": null}],
-      "expected": "@records id:i,items:t?\n1,1\n2,\n3,null\n@records.items id:i,v:i\n1,1\n",
+      "expected": "@records id:i,~:j?\n1,{\"items\":[{\"v\":1}]}\n2,\n3,{\"items\":null}\n",
       "spec": "7.2"
     },
     {
@@ -104,6 +104,18 @@
       "input": [],
       "expected": "@records _:j\n",
       "spec": "7"
+    },
+    {
+      "name": "sparse keys move to the ~ object (default threshold 0.5)",
+      "input": [{"id": 1, "t": "a", "retries": 2, "country": "MX"}, {"id": 2, "t": "b"}, {"id": 3, "t": "c", "country": null}, {"id": 4, "t": "d", "note": "x"}],
+      "expected": "@records id:i,t:s,~:j?\n1,a,{\"retries\":2,\"country\":\"MX\"}\n2,b,\n3,c,{\"country\":null}\n4,d,{\"note\":\"x\"}\n",
+      "spec": "7.4"
+    },
+    {
+      "name": "a key filled in exactly half the rows keeps its column",
+      "input": [{"id": 1, "e": ""}, {"id": 2}],
+      "expected": "@records id:i,e:s?\n1,\"\"\n2,\n",
+      "spec": "7.4"
     }
   ]
 }

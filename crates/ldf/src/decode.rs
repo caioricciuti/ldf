@@ -35,6 +35,8 @@ fn err<T>(line: usize, message: impl Into<String>) -> Result<T> {
 struct HeaderCol {
     path: Vec<String>,
     ty: ColType,
+    /// The bare `~` column: a JSON object of extra keys merged into the row.
+    rest: bool,
 }
 
 #[derive(Debug)]
@@ -106,9 +108,14 @@ fn parse_header(rest: &str, line_no: usize) -> Result<(String, Vec<HeaderCol>)> 
                 );
             }
         };
+        let rest = path_text == "~";
+        if rest && ty != ColType::Json {
+            return err(line_no, "the ~ column must have type j");
+        }
         cols.push(HeaderCol {
             path: parse_path(path_text, line_no)?,
             ty,
+            rest,
         });
     }
     if cols.is_empty() {
@@ -374,6 +381,14 @@ fn assemble(tables: Vec<Table>) -> Result<Vec<Value>> {
             let mut pend = Vec::new();
             for ((col, cell), fresh) in data_cols.iter().zip(cells).zip(&new_top) {
                 let Some(v) = cell else { continue };
+                if col.rest {
+                    match v {
+                        Value::Object(pairs) => obj.extend(pairs.iter().cloned()),
+                        Value::Null => {}
+                        _ => return err(t.first_line, "~ cell is not a JSON object"),
+                    }
+                    continue;
+                }
                 if col.ty == ColType::Table && !v.is_null() {
                     let n = v.as_number().map(|n| n.as_f64() as u64).unwrap_or(0);
                     pend.push((col.path.clone(), n));

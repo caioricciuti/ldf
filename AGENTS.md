@@ -3,7 +3,7 @@
 Working notes for anyone (human or agent) touching this repository. The
 project is LDF, a research effort towards a lossless, token-efficient data
 format for LLM consumption. Phases 1 and 2 built the measurement foundation;
-Phase 3 produced LDF v0 (`docs/ldf-spec-v0.md`, `crates/ldf`) from those
+Phase 3 produced LDF v0, now v0.1 (`docs/ldf-spec-v0.md`, `crates/ldf`), from those
 measurements. Read `docs/roadmap.md` and `docs/design-candidates.md` before
 proposing syntax changes.
 
@@ -15,10 +15,10 @@ Cargo workspace, Rust stable, edition 2024.
 |---|---|---|
 | `ldf-data` | `Value` model (ordered keys, int/float kind kept), `Number` canonical text and JSON number grammar, `FlatSchema` inference, input readers for JSON (serde_json or simd-json), JSONL, CSV/TSV, Parquet (arrow-rs, feature `parquet`) | |
 | `ldf-fixtures` | frozen PRNG (xoshiro256** + splitmix64), dataset catalog, streaming writers for JSON/JSONL/CSV/Parquet | `ldf-gen` |
-| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter. TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
+| `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter (`ldf` current, `ldf-v0` old layout, same display name in prompts). TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth, prompt bundles, response scoring | `ldf-eval` |
-| `ldf` | LDF v0 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening and child tables, conformance fixtures under `tests/fixtures` | |
+| `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures` | |
 | `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP, rows returned as LDF | `ldf-mcp` |
 
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
@@ -115,10 +115,13 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   reasons longer over LDF's sparse rows (870 vs 342 output tokens on
   sparse_events_200 with a 4 096 cap) and still loses two questions that
   need counting to a column across 200 mostly-empty rows; CSV and TSV lose
-  the same question. Positional columns on sparse rows are the price of the
-  token saving there. Tabular formats (CSV, TOON, LDF) lost a key lookup on
+  the same question. Positional columns on sparse rows were the price of
+  the token saving there; the v0.1 sparse-key rule (keys filled in under
+  half the rows move into a per-row `~` object) brought Haiku to JSON's
+  score at 25 percent fewer tokens than JSON, dense data unchanged.
+  Tabular formats (CSV, TOON, LDF) lost a key lookup on
   Haiku to a one-row slide that JSON did not.
-- LDF v0 ties CSV on flat data and beats compact JSON by 20 to 64 percent on
+- LDF ties CSV on flat data and beats compact JSON by 20 to 64 percent on
   irregular data (tokens). Its codec is young: the decoder attaches child
   rows through a hash map keyed by the join value's canonical text, and the
   encoder uses positional key hints; before those two fixes nested decode

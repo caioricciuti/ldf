@@ -1,9 +1,12 @@
-# LDF v0 (draft, 2026-10-18)
+# LDF v0.1 (draft, 2026-10-18)
 
 Language Data Format: a lossless, line-oriented, token-efficient text
-encoding of JSON records for language-model consumption. Version 0 is the
-prototype that `crates/ldf` implements; every rule here is checked by that
-implementation's tests. Rationale and measurements: `docs/design-candidates.md`.
+encoding of JSON records for language-model consumption. Version 0.1 is
+the prototype that `crates/ldf` implements; every rule here is checked by
+that implementation's tests. Rationale and measurements:
+`docs/design-candidates.md`. Changes from v0: the `~` column and the
+sparse-key rule (sections 3, 4 and 7.4), adopted after the comprehension
+measurements in the baseline report.
 
 ## 1. Data model
 
@@ -47,6 +50,12 @@ matches `[A-Za-z_][A-Za-z0-9_]*`; otherwise it is a JSON string literal
 (`"dotted.key"`, `"with space"`, `""`). Decoders split paths on dots outside
 quotes.
 
+A column whose key is the bare character `~` (never a valid bare segment,
+so it cannot collide with a real key, which would be quoted as `"~"`) is
+the **rest column**: type `j`, at most one per table, by convention last.
+Its cell is a JSON object of keys that have no column of their own
+(section 7.4).
+
 A header for a table name that already appeared replaces the previous
 header for that name (schema change mid-stream). Rows always belong to the
 most recent header.
@@ -63,6 +72,10 @@ commas. Cell meaning:
 Cells of type `j` are parsed as one JSON value starting at the cell's first
 character; the comma that follows the value ends the cell. Cells of other
 types end at the first comma outside a JSON-quoted string.
+
+A `~` cell is either empty (no extra keys) or a JSON object; the decoder
+appends its members to the record, in the object's order, after the keys
+that came from columns. A value that is not an object is an error.
 
 A row whose table is a child table is attached to a parent row (section 7).
 
@@ -105,12 +118,27 @@ Flattening is decided per field over the whole dataset (batch encoder):
    means null.
 3. **Everything else** (arrays of scalars, mixed arrays, scalars that vary
    in type across records) is a `j` column.
+4. **Sparse keys.** Before rules 1 to 3, each top-level key of a table is
+   checked for fill: the share of the table's rows in which the key is
+   present with a non-null value. A key filled in fewer than the
+   threshold share of rows (default 0.5; `0` disables the rule) gets no
+   column; the table ends with `~:j?` and every row's rest cell holds the
+   sparse keys that row has, with their values as JSON, in record order.
+   This applies before flattening and child tables, so a sparse object or
+   a sparse array of objects travels inline as JSON inside the rest
+   object rather than as dotted columns or a child table. Dense keys are
+   unaffected, so a dataset without sparse keys encodes exactly as in v0.
+   Rationale: positional cells in mostly-empty rows cost weak models
+   accuracy; a key next to its value does not (baseline report, "The
+   sparse-key rule, measured").
 
 A record that is not an object is a row of the single column `_:j`.
 
-Decoders rebuild objects from dotted paths in header order and attach child
-rows by the join column, inserting the array at the position of the `t`
-column within the parent's key order.
+Decoders rebuild objects from dotted paths in header order, append the
+members of the `~` object, and attach child rows by the join column,
+inserting the array at the position of the `t` column within the parent's
+key order. Key order is therefore preserved exactly only when no key moved
+to the rest column; otherwise equality is semantic (key order may differ).
 
 ## 8. Streaming encoder
 
@@ -135,4 +163,6 @@ ORD-000002,A1,1,2757.03
 ## 10. Open for v1
 
 Block-interleaved child tables for streaming; a tab delimiter variant;
-column statistics in headers; a decoder option to type `j` cells lazily.
+column statistics in headers; a decoder option to type `j` cells lazily;
+whether a single-row parent should join its child table by ordinal rather
+than by its first column.

@@ -70,6 +70,8 @@ where not" with a cheap switch.
 - Done 2026-10-18: `ldf` crate with batch encoder (flattening, child tables),
   streaming encoder (flat rows, JSON cells), decoder, conformance fixtures;
   wired into every benchmark table as format `ldf`.
+- Done 2026-10-18: spec v0.1, the sparse-key `~` column (default threshold
+  0.5) after the Haiku measurement in the baseline report.
 - Done 2026-10-18: `ldf-mcp`, a stdio MCP proxy that re-encodes JSON tool
   results as LDF between any MCP server and the model, with a primer in the
   `initialize` instructions; quadratic column scans removed from the

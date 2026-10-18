@@ -76,6 +76,40 @@ pub struct TablePlan {
     pub columns: Vec<Column>,
     /// Records that are not objects make a single `_:j` column.
     pub scalar_rows: bool,
+    /// Top-level keys that are too sparse for a column of their own
+    /// (encoder option `sparse_threshold`). When non-empty the table ends
+    /// with a `~:j?` column whose cell is a JSON object of those keys
+    /// present in the row, in record order.
+    pub rest_keys: Vec<String>,
+}
+
+/// Planner knobs. `Default` is the v0.1 layout; [`Options::V0`] is the
+/// original layout without the sparse-key rule.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Options {
+    /// A top-level key whose share of rows with a non-null value is below
+    /// this moves from a positional column into the row's `~` object
+    /// (spec section 7, rule 4). `0.0` disables the rule.
+    pub sparse_threshold: f64,
+}
+
+impl Options {
+    /// The default threshold, chosen on 2026-10-18 from the Haiku runs in
+    /// `docs/design-candidates.md`: JSON's accuracy at 25 percent fewer
+    /// tokens on sparse data, dense data unchanged.
+    pub const DEFAULT_SPARSE_THRESHOLD: f64 = 0.5;
+    /// v0 layout: every key is a column.
+    pub const V0: Options = Options {
+        sparse_threshold: 0.0,
+    };
+}
+
+impl Default for Options {
+    fn default() -> Self {
+        Options {
+            sparse_threshold: Options::DEFAULT_SPARSE_THRESHOLD,
+        }
+    }
 }
 
 /// Looks a dotted path up in an object. `None` means absent at some step.
@@ -100,11 +134,18 @@ pub fn lookup_hint<'a>(obj: &'a Object, path: &[String], hint: usize) -> Option<
     }
 }
 
-/// Plans the root table for a dataset.
+/// Plans the root table for a dataset with the default options.
 pub fn plan(records: &[Value]) -> TablePlan {
+    plan_with(records, &Options::default())
+}
+
+/// Plans the root table for a dataset.
+pub fn plan_with(records: &[Value], opts: &Options) -> TablePlan {
     let objs: Option<Vec<&Object>> = records.iter().map(Value::as_object).collect();
     match objs {
-        Some(objs) if !records.is_empty() => plan_table(ROOT.to_string(), &objs, Join::None, None),
+        Some(objs) if !records.is_empty() => {
+            plan_table(ROOT.to_string(), &objs, Join::None, None, opts)
+        }
         _ => TablePlan {
             name: ROOT.to_string(),
             join: Join::None,
@@ -117,6 +158,7 @@ pub fn plan(records: &[Value]) -> TablePlan {
                 hint: 0,
             }],
             scalar_rows: true,
+            rest_keys: Vec::new(),
         },
     }
 }
@@ -126,6 +168,7 @@ fn plan_table(
     rows: &[&Object],
     join: Join,
     join_col: Option<(Vec<String>, ColType)>,
+    opts: &Options,
 ) -> TablePlan {
     let mut columns = Vec::new();
     // Top-level keys in first-seen order. Rows usually repeat the key list
@@ -143,6 +186,7 @@ fn plan_table(
             }
         }
     }
+    let mut rest_keys: Vec<String> = Vec::new();
     for (pos, key) in keys.iter().enumerate() {
         let values: Vec<Option<&Value>> = rows
             .iter()
@@ -151,8 +195,15 @@ fn plan_table(
                 _ => o.iter().find(|(k, _)| k == key).map(|(_, v)| v),
             })
             .collect();
+        if opts.sparse_threshold > 0.0 {
+            let filled = values.iter().filter(|v| v.is_some_and(|v| !v.is_null())).count();
+            if (filled as f64) < opts.sparse_threshold * rows.len() as f64 {
+                rest_keys.push(key.to_string());
+                continue;
+            }
+        }
         let before = columns.len();
-        plan_field(&name, vec![key.to_string()], &values, &mut columns);
+        plan_field(&name, vec![key.to_string()], &values, &mut columns, opts);
         for c in &mut columns[before..] {
             c.hint = pos;
         }
@@ -163,6 +214,7 @@ fn plan_table(
         join_col,
         columns,
         scalar_rows: false,
+        rest_keys,
     };
     // Child tables need to know how to join: decide now that the parent's
     // first column is known.
@@ -211,7 +263,13 @@ fn parent_join_key(plan: &TablePlan, rows: &[&Object]) -> Option<(Vec<String>, C
     Some((first.path.clone(), first.ty))
 }
 
-fn plan_field(table: &str, path: Vec<String>, values: &[Option<&Value>], out: &mut Vec<Column>) {
+fn plan_field(
+    table: &str,
+    path: Vec<String>,
+    values: &[Option<&Value>],
+    out: &mut Vec<Column>,
+    opts: &Options,
+) {
     let present: Vec<&Value> = values
         .iter()
         .flatten()
@@ -238,7 +296,7 @@ fn plan_field(table: &str, path: Vec<String>, values: &[Option<&Value>], out: &m
                 .collect();
             let mut p = path.clone();
             p.push(k.clone());
-            plan_field(table, p, &sub, out);
+            plan_field(table, p, &sub, out, opts);
         }
         return;
     }
@@ -260,7 +318,7 @@ fn plan_field(table: &str, path: Vec<String>, values: &[Option<&Value>], out: &m
             child_name.push('.');
             child_name.push_str(seg);
         }
-        let child = plan_table(child_name, &elements, Join::Ordinal, None);
+        let child = plan_table(child_name, &elements, Join::Ordinal, None, opts);
         out.push(Column {
             path,
             ty: ColType::Table,
@@ -351,6 +409,12 @@ impl TablePlan {
             if c.nullable {
                 s.push('?');
             }
+        }
+        if !self.rest_keys.is_empty() {
+            if !first {
+                s.push(',');
+            }
+            s.push_str("~:j?");
         }
         s
     }

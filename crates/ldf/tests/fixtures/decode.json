@@ -1,7 +1,7 @@
 {
   "version": "0.1",
   "category": "decode",
-  "description": "LDF v0 decoder fixtures: input is document text, expected is the JSON array of records, or shouldError.",
+  "description": "LDF v0.1 decoder fixtures: input is document text, expected is the JSON array of records, or shouldError.",
   "tests": [
     {
       "name": "typed cells",
@@ -126,6 +126,32 @@
       "input": "@records a:i\n1\n@other.x _:i,v:i\n1,1\n",
       "expected": null,
       "shouldError": true
+    },
+    {
+      "name": "~ object merges into the record after the columns",
+      "input": "@records id:i,~:j?\n1,{\"x\":1,\"y\":null}\n2,\n3,null\n",
+      "expected": [{"id": 1, "x": 1, "y": null}, {"id": 2}, {"id": 3}],
+      "spec": "3, 7.4"
+    },
+    {
+      "name": "a real key named ~ is quoted and is an ordinary column",
+      "input": "@records \"~\":s,n:i\nq,1\n",
+      "expected": [{"~": "q", "n": 1}],
+      "spec": "3"
+    },
+    {
+      "name": "~ must have type j",
+      "input": "@records id:i,~:s\n1,x\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3"
+    },
+    {
+      "name": "~ cell must be an object",
+      "input": "@records id:i,~:j?\n1,[1,2]\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3"
     }
   ]
 }

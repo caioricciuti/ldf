@@ -3,13 +3,18 @@
 use ldf_data::{Number, Object, Value};
 
 use crate::ROOT;
-use crate::plan::{ColType, Column, Join, TablePlan, lookup, lookup_hint, plan};
+use crate::plan::{ColType, Column, Join, Options, TablePlan, lookup, lookup_hint, plan_with};
 use crate::text::{push_float, push_int, push_json_value, push_path, push_string_cell};
 
 /// Encodes a whole dataset (spec section 7 flattening rules apply).
 pub fn encode(records: &[Value]) -> String {
+    encode_with(records, &Options::default())
+}
+
+/// Encodes a whole dataset with planner options.
+pub fn encode_with(records: &[Value], opts: &Options) -> String {
     let mut enc = Encoder::default();
-    enc.encode_dataset(records);
+    enc.encode_dataset_with(records, opts);
     enc.finish()
 }
 
@@ -24,7 +29,11 @@ impl Encoder {
     }
 
     pub fn encode_dataset(&mut self, records: &[Value]) {
-        let p = plan(records);
+        self.encode_dataset_with(records, &Options::default());
+    }
+
+    pub fn encode_dataset_with(&mut self, records: &[Value], opts: &Options) {
+        let p = plan_with(records, opts);
         self.write_table(&p, records);
     }
 
@@ -61,6 +70,19 @@ impl Encoder {
             }
             first = false;
             self.write_cell(c, lookup_hint(o, &c.path, c.hint));
+        }
+        if !p.rest_keys.is_empty() {
+            if !first {
+                self.out.push(',');
+            }
+            let rest: Object = o
+                .iter()
+                .filter(|(k, _)| p.rest_keys.iter().any(|r| r == k))
+                .cloned()
+                .collect();
+            if !rest.is_empty() {
+                push_json_value(&Value::Object(rest), &mut self.out);
+            }
         }
         self.out.push('\n');
     }
@@ -262,9 +284,40 @@ mod tests {
             obj! {"id" => 1, "s" => "a,b", "n" => Value::Null, "e" => ""},
             obj! {"id" => 2, "s" => "007", "k" => "true"},
         ];
+        // `n` is null in its only row (fill 0) and moves to the `~` object;
+        // `e` and `k` are filled in half the rows and stay columns.
         assert_eq!(
             encode(&recs),
+            "@records id:i,s:s,e:s?,k:s?,~:j?\n1,\"a,b\",\"\",,{\"n\":null}\n2,007,,\"true\",\n"
+        );
+        assert_eq!(
+            encode_with(&recs, &Options::V0),
             "@records id:i,s:s,n:j?,e:s?,k:s?\n1,\"a,b\",null,\"\",\n2,007,,,\"true\"\n"
+        );
+    }
+
+    #[test]
+    fn sparse_keys_move_to_the_rest_object() {
+        let recs = vec![
+            obj! {"id" => 1, "t" => "a", "retries" => 2, "country" => "MX"},
+            obj! {"id" => 2, "t" => "b"},
+            obj! {"id" => 3, "t" => "c", "country" => Value::Null},
+            obj! {"id" => 4, "t" => "d", "note" => "x"},
+        ];
+        let opts = Options {
+            sparse_threshold: 0.5,
+        };
+        let out = encode_with(&recs, &opts);
+        assert_eq!(
+            out,
+            "@records id:i,t:s,~:j?\n1,a,{\"retries\":2,\"country\":\"MX\"}\n2,b,\n3,c,{\"country\":null}\n4,d,{\"note\":\"x\"}\n"
+        );
+        assert_eq!(encode(&recs), out, "0.5 is the default");
+        assert_eq!(crate::decode(&out).unwrap(), recs);
+        // Threshold off: the v0 layout, byte for byte.
+        assert_eq!(
+            encode_with(&recs, &Options::V0),
+            "@records id:i,t:s,retries:i?,country:s?,note:s?\n1,a,2,MX,\n2,b,,,\n3,c,,null,\n4,d,,,x\n"
         );
     }
 

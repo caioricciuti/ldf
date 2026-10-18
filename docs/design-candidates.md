@@ -157,3 +157,50 @@ data, lossless, streamable.
   should start to lose alignment.
 - A conformance fixture set in the TOON style, written before the second
   implementation.
+
+## Sparse keys: the `~` rest column (2026-10-18, measured, not yet adopted)
+
+The size-step evaluation (baseline report, "Size step") found the one
+format effect against LDF: on sparse_events, where 12 of 15 columns are
+empty in most rows, Haiku 5.5 reasons two to three times longer than on
+JSON and still fails the questions that need counting to a column across
+200 mostly-empty rows. CSV and TSV fail the same questions; keyed forms
+(JSON, TOON list form) do not.
+
+The rule, `ldf::Options::sparse_threshold` (measured with the default off,
+so v0 output was unchanged during the sweep): a top-level key whose share of rows
+with a non-null value is below the threshold is not given a column. The
+table gets a trailing `~:j?` column whose cell is a JSON object of those
+keys present in the row, in record order; empty when none. Dense columns
+stay positional, sparse keys travel next to their names. Decoders merge
+the object into the record. The sweep used temporary formats `ldf-s25`, `ldf-s50`, `ldf-s75` (25, 50
+and 75 percent) sharing the display name `ldf` so evaluation prompts did
+not change; after adoption `ldf` is the 0.5 layout and `ldf-v0` the old one.
+
+Tokens (o200k_base) on the first 200 records of the medium fixtures,
+`ldf-mcp convert --sparse T` and `ldf-bench count`:
+
+| threshold | sparse_events | ratio to JSON (11 050) | flat_users | nested_orders |
+|---|---:|---:|---:|---:|
+| 0 (v0) | 7 047 | 0.64 | 5 702 | 12 888 |
+| 0.25 | 7 567 | 0.68 | 5 702 | 12 888 |
+| 0.5 | 8 578 | 0.78 | 5 702 | 12 888 |
+| 0.75 | 9 832 | 0.89 | 5 702 | 13 580 |
+
+Key fill rates in sparse_events: event_id, type, ts 100 percent; user_id
+60; session, latency_ms 50; device 41; country 40; referrer, flag 30;
+label 25; currency 21; amount 20; retries 15; error_code 10. The two
+questions Haiku never finished were on `retries` (moves at 0.25) and
+`latency_ms` (moves at 0.75). Dense datasets are untouched at 0.25 and 0.5.
+
+Comprehension, Haiku 5.5, same 18 questions and 4 096 cap as the baseline
+rerun (`eval/plan.sh haiku-sparse`, results in the baseline report under
+"The sparse-key rule, measured"): v0 13 of 18 with 870 mean output
+tokens; 0.25 gives 16; 0.5 gives 17 with 382 output tokens, JSON's score
+at 25 percent fewer input tokens than JSON; 0.75 gives 18, TOON's score at
+14 percent below JSON. Adopted 2026-10-18: 0.5 is the default
+(`ldf::Options::DEFAULT_SPARSE_THRESHOLD`), spec v0.1 section 7.4; the
+`ldf-v0` format keeps the old layout for comparisons. It removes the
+reasoning cost, keeps dense data untouched, and the one remaining miss is
+an answer-shape slip, not a misread.
+

@@ -4,14 +4,51 @@ use ldf_data::Value;
 
 use crate::{Capabilities, DecodeError, EncodeError, Format, StreamEncoder};
 
-pub struct LdfFormat;
+/// `ldf` is the current layout (v0.1: sparse-key rule at the default
+/// threshold). `ldf-v0` keeps every key as a column, for comparisons.
+/// Variants share the display name `ldf` so evaluation prompts do not
+/// change between them.
+pub struct LdfFormat {
+    name: &'static str,
+    extension: &'static str,
+    options: ::ldf::Options,
+}
+
+impl LdfFormat {
+    pub fn current() -> Self {
+        LdfFormat {
+            name: "ldf",
+            extension: "ldf",
+            options: ::ldf::Options::default(),
+        }
+    }
+    pub fn v0() -> Self {
+        LdfFormat {
+            name: "ldf-v0",
+            extension: "v0.ldf",
+            options: ::ldf::Options::V0,
+        }
+    }
+    pub fn sparse(name: &'static str, extension: &'static str, threshold: f64) -> Self {
+        LdfFormat {
+            name,
+            extension,
+            options: ::ldf::Options {
+                sparse_threshold: threshold,
+            },
+        }
+    }
+}
 
 impl Format for LdfFormat {
     fn name(&self) -> &'static str {
+        self.name
+    }
+    fn display_name(&self) -> &'static str {
         "ldf"
     }
     fn extension(&self) -> &'static str {
-        "ldf"
+        self.extension
     }
     fn capabilities(&self) -> Capabilities {
         Capabilities {
@@ -23,7 +60,7 @@ impl Format for LdfFormat {
         }
     }
     fn encode(&self, records: &[Value], out: &mut Vec<u8>) -> Result<(), EncodeError> {
-        out.extend_from_slice(::ldf::encode(records).as_bytes());
+        out.extend_from_slice(::ldf::encode_with(records, &self.options).as_bytes());
         Ok(())
     }
     fn decode(&self, bytes: &[u8]) -> Result<Vec<Value>, DecodeError> {
@@ -78,13 +115,13 @@ mod tests {
             obj! {"a" => 2, "n" => obj! {"x" => 2}, "items" => Vec::<Value>::new()},
         ];
         let mut streamed = Vec::new();
-        let mut enc = LdfFormat.stream_encoder().unwrap();
+        let mut enc = LdfFormat::v0().stream_encoder().unwrap();
         for r in &recs {
             enc.record(r, &mut streamed).unwrap();
         }
         enc.finish(&mut streamed).unwrap();
         assert_eq!(
-            LdfFormat.decode(&streamed).unwrap(),
+            LdfFormat::v0().decode(&streamed).unwrap(),
             recs,
             "{}",
             String::from_utf8_lossy(&streamed)

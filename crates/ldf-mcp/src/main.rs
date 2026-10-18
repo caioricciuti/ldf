@@ -17,8 +17,9 @@ fn usage() -> ExitCode {
          \x20                    [--passthrough] [--min-bytes N] [--quiet]\n\
          \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
          \x20     rows come back as LDF; the password is read from CLICKHOUSE_PASSWORD, never from arguments\n\
-         \x20 ldf-mcp convert [FILE]\n\
-         \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF\n\
+         \x20 ldf-mcp convert [FILE] [--sparse T]\n\
+         \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF; --sparse T moves keys\n\
+         \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column\n\
          \x20 ldf-mcp fake-server\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
     );
@@ -29,7 +30,7 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("proxy") => run_proxy(&args[1..]),
-        Some("convert") => convert(args.get(1).map(String::as_str)),
+        Some("convert") => convert(&args[1..]),
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("fake-server") => match ldf_mcp::fake::run() {
             Ok(()) => ExitCode::SUCCESS,
@@ -123,7 +124,20 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
     }
 }
 
-fn convert(path: Option<&str>) -> ExitCode {
+fn convert(args: &[String]) -> ExitCode {
+    let mut path: Option<&str> = None;
+    let mut opts = ldf::plan::Options::default();
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--sparse" => match it.next().and_then(|v| v.parse::<f64>().ok()) {
+                Some(t) if (0.0..=1.0).contains(&t) => opts.sparse_threshold = t,
+                _ => return usage(),
+            },
+            _ if path.is_none() => path = Some(a.as_str()),
+            _ => return usage(),
+        }
+    }
     let records = match path {
         Some(p) => ldf_data::input::read_all(Path::new(p), &ldf_data::input::ReadOptions::default())
             .map_err(|e| e.to_string()),
@@ -145,7 +159,7 @@ fn convert(path: Option<&str>) -> ExitCode {
             return ExitCode::from(1);
         }
     };
-    let out = ldf::encode(&records);
+    let out = ldf::encode_with(&records, &opts);
     let mut stdout = std::io::stdout().lock();
     if stdout.write_all(out.as_bytes()).and_then(|_| stdout.flush()).is_err() {
         return ExitCode::from(1);

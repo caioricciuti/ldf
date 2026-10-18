@@ -99,18 +99,23 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
     let mut data_tokens = Vec::new();
     let mut max_prompt_tokens: Option<u64> = None;
     let mut prompt_count = 0usize;
-    let mut renderings: Vec<(String, String, String)> = Vec::new();
+    let mut renderings: Vec<(String, String, String, String)> = Vec::new();
     for f in formats {
         match f.encode_to_string(records) {
-            Ok(t) => renderings.push((f.name().to_string(), f.extension().to_string(), t)),
+            Ok(t) => renderings.push((
+                f.name().to_string(),
+                f.display_name().to_string(),
+                f.extension().to_string(),
+                t,
+            )),
             Err(EncodeError::Unsupported(u)) => unsupported.push((f.name().to_string(), u.reason)),
             Err(e) => return Err(e.to_string()),
         }
     }
     for (name, text) in extra {
-        renderings.push((name.clone(), format!("{name}.txt"), text.clone()));
+        renderings.push((name.clone(), name.clone(), format!("{name}.txt"), text.clone()));
     }
-    for (name, ext, text) in &renderings {
+    for (name, display, ext, text) in &renderings {
         fs::write(data_dir.join(format!("{dataset}.{ext}")), text).map_err(|e| e.to_string())?;
         let dt = tokenizer.map(|t| t.count(text));
         if let Some(n) = dt {
@@ -120,7 +125,7 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
         for t in tasks {
             let user = USER_TEMPLATE
                 .replace("{record_count}", &records.len().to_string())
-                .replace("{format_name}", name)
+                .replace("{format_name}", display)
                 .replace("{data}", text)
                 .replace("{question}", &t.question);
             let pt = tokenizer.map(|tk| tk.count(SYSTEM_PROMPT) + tk.count(&user));

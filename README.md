@@ -8,7 +8,7 @@ are JSON, JSONL, CSV/TSV, Markdown tables and TOON.
 The repository holds the measurement apparatus that decided the syntax
 (deterministic datasets, faithful baseline implementations, a performance
 harness, exact token counting, an LLM comprehension evaluation) and the first
-version of the format itself: **LDF v0**, specified in `docs/ldf-spec-v0.md`
+version of the format itself: **LDF v0.1**, specified in `docs/ldf-spec-v0.md`
 and implemented in `crates/ldf`. See `docs/design-candidates.md` for how the
 measurements led to it, `docs/roadmap.md` for what comes next and
 `docs/research.md` for the state of the art.
@@ -22,7 +22,7 @@ measurements led to it, `docs/roadmap.md` for what comes next and
 | `crates/ldf-formats` | baselines: json, json-pretty, jsonl, csv, tsv, markdown, toon (spec v4.4, conformance tested), yaml, and the `ldf` adapter |
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, token counts, Criterion benches |
 | `crates/ldf-eval` | `ldf-eval`: tasks with ground truth, prompt bundles, scoring |
-| `crates/ldf` | LDF v0 encoder, decoder and conformance fixtures |
+| `crates/ldf` | LDF v0.1 encoder, decoder and conformance fixtures |
 | `crates/ldf-mcp` | `ldf-mcp`: MCP stdio proxy that re-encodes JSON tool results as LDF on their way to the model; `clickhouse` mode, an MCP server over ClickHouse HTTP returning LDF; `convert` for files; a `fake-server` test double |
 | `eval/` | stdlib-only Python: `run_eval.py` (API calls, spend-gated), `count_tokens_claude.py` |
 | `fixtures/small` | committed correctness fixtures (regenerable) |

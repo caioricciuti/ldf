@@ -241,6 +241,37 @@ reasoning and sometimes in answers. The wrapped answers are a separate,
 smaller effect: all three seen so far (Opus once, Haiku twice) were on LDF,
 whose header names the columns the model then echoes as keys.
 
+### The sparse-key rule, measured (Haiku 5.5, sparse_events_200, 4 096 cap)
+
+`docs/design-candidates.md` describes the candidate: a key filled in fewer
+than a threshold share of rows leaves its positional column and travels as
+`"key":value` inside a per-row `~` object. Same 18 questions, same model
+and cap as the rerun above, three thresholds, $0.02
+(`eval/sparse_events_200_sparse.*`; the variants share the prompt name
+`ldf`):
+
+| format | correct | truncated | wrong | mean output tokens | input tokens per prompt |
+|---|---:|---:|---:|---:|---:|
+| json | 17 | 0 | 1 | 342 | 15 317 |
+| toon | 18 | 0 | 0 | 387 | 16 245 |
+| csv | 16 | 1 | 1 | 563 | 9 383 |
+| ldf, v0 | 13 | 2 | 3 | 870 | 9 661 |
+| ldf, threshold 0.25 | 16 | 1 | 1 | 564 | 10 290 |
+| **ldf, threshold 0.5** | **17** | **0** | **1** | **382** | **11 443** |
+| ldf, threshold 0.75 | 18 | 0 | 0 | 407 | 13 138 |
+
+At 0.25 the `retries` filter is answered (the key moved next to its name)
+and the sum of `latency_ms` still fills the cap (that key stays a column
+until 0.75). At 0.5 the reasoning cost is gone: mean output 382 tokens
+against 342 for JSON, down from 870, and the only miss is the wrapped
+answer `{"event_id":94}` on the same compare question as before, the right
+record in the wrong shape. At 0.75 every answer is right, as with TOON,
+at 14 percent below JSON's input; 0.5 is 25 percent below JSON and 30
+percent below TOON with JSON's score. Flat and nested data are unchanged
+at either 0.25 or 0.5. One run of 18 questions per cell, so the ordering
+between 0.5 and 0.75 is one answer; the drop from 870 to 382 output tokens
+is not.
+
 ## Codec update, 2026-10-18: wide tables
 
 `perf-medium.md` recorded LDF at 56 ms encode and 50 ms decode on
@@ -280,7 +311,13 @@ with CSV. The other medium datasets were not re-run; their LDF numbers in
 
 ## Size and tokens (medium fixtures, first 1 000 records, from `tokens-medium.md`)
 
-Ratios to compact JSON. Bytes and o200k_base tokens.
+Ratios to compact JSON. Bytes and o200k_base tokens. The `ldf` column is
+the v0 layout. After the sparse-key rule became the default (v0.1,
+2026-10-18) the tables were re-run as `tokens-medium-2026-10-18.md`, which
+also lists the old layout as `ldf-v0`: ten datasets are byte-identical,
+sparse_events goes from 0.63 to 0.80 of JSON's tokens (43 943 against
+54 975; TOON is 1.22) and mixed_types from 0.68 to 0.73. That is the price
+of the accuracy measured above, paid only where keys are sparse.
 
 | dataset | csv bytes | csv tok | markdown bytes | markdown tok | toon bytes | toon tok | yaml bytes | yaml tok | json-pretty tok | **ldf bytes** | **ldf tok** |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
