@@ -67,6 +67,7 @@ export default defineConfig({
             { label: "Overview", slug: "docs" },
             { label: "The format in five minutes", slug: "docs/format" },
             { label: "ldf-mcp: LDF between a source and the model", slug: "docs/mcp" },
+            { label: "With Claude Code, Codex and OpenCode", slug: "docs/agents" },
           ],
         },
         {

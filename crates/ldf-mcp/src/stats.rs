@@ -6,8 +6,9 @@
 //! response body, tool arguments, environment values or anything else the
 //! data could leak through. Nothing is sent anywhere.
 //!
-//! Location: `LDF_STATS_FILE` when set, else `ldf/events.jsonl` under
-//! `XDG_STATE_HOME`, `~/.local/state` or, on Windows, `LOCALAPPDATA`.
+//! Location: `LDF_STATS_FILE` when set, else `events.jsonl` in
+//! [`ldf_state_dir`] (`ldf` under `XDG_STATE_HOME`, `~/.local/state` or, on
+//! Windows, `LOCALAPPDATA`).
 //! `LDF_STATS=0` or `--no-stats` turns recording off. At 16 MiB the file is
 //! renamed to `events.1.jsonl` (replacing the previous one) and a new one
 //! starts, so at most twice that is kept.
@@ -35,7 +36,17 @@ pub fn default_path() -> Option<PathBuf> {
     if let Some(p) = std::env::var_os("LDF_STATS_FILE").filter(|p| !p.is_empty()) {
         return Some(PathBuf::from(p));
     }
-    state_dir().map(|d| d.join("ldf").join("events.jsonl"))
+    ldf_state_dir().map(|d| d.join("events.jsonl"))
+}
+
+/// This tool's state directory: `LDF_STATE_DIR` when set, else `ldf` under
+/// `XDG_STATE_HOME`, `~/.local/state` or, on Windows, `LOCALAPPDATA`. It
+/// holds the statistics and the record of what `install` changed.
+pub fn ldf_state_dir() -> Option<PathBuf> {
+    if let Some(p) = std::env::var_os("LDF_STATE_DIR").filter(|p| !p.is_empty()) {
+        return Some(PathBuf::from(p));
+    }
+    state_dir().map(|d| d.join("ldf"))
 }
 
 fn state_dir() -> Option<PathBuf> {

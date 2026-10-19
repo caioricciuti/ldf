@@ -1,0 +1,101 @@
+"""Reproducible data-path demos for the agent integration, no model calls.
+
+A. An MCP server returning large JSON (`ldf-mcp fake-server`), behind
+   `ldf-mcp proxy` exactly as `ldf-mcp install claude-code --wrap` sets it
+   up, once with --passthrough and once converting.
+D. Local CSV and Parquet files through `ldf-mcp files`, JSON (--passthrough)
+   against LDF.
+
+Each case is driven over stdio the way an agent drives an MCP server
+(initialize, then tools/call), the replies are saved, and the table gives
+bytes and exact o200k_base tokens (`ldf-bench count`) for what the model
+would receive. These are serialization numbers: what a model is billed
+also depends on its own tokenizer and caching (docs/ldf-mcp.md,
+"Measuring"). The local statistics of both runs are summarised at the end.
+
+    cargo build --release
+    python3 -I eval/demo_agents.py --out results/demo-agents [--rows 500] [--root fixtures/small]
+"""
+import argparse, json, os, re, shutil, subprocess, sys, tempfile
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EXE = '.exe' if os.name == 'nt' else ''
+MCP = os.path.join(REPO, 'target', 'release', 'ldf-mcp' + EXE)
+BENCH = os.path.join(REPO, 'target', 'release', 'ldf-bench' + EXE)
+
+ap = argparse.ArgumentParser()
+ap.add_argument('--out', default=os.path.join(REPO, 'results', 'demo-agents'))
+ap.add_argument('--rows', type=int, default=500)
+ap.add_argument('--root', default=os.path.join(REPO, 'fixtures', 'small'))
+a = ap.parse_args()
+for b in (MCP, BENCH):
+    if not os.path.exists(b):
+        sys.exit(f'{b} missing: run cargo build --release')
+os.makedirs(a.out, exist_ok=True)
+stats_file = os.path.join(tempfile.mkdtemp(), 'events.jsonl')
+env = dict(os.environ, LDF_STATS_FILE=stats_file)
+
+
+def session(cmd, calls):
+    """initialize, then each tools/call; returns the text of each reply."""
+    init = {'jsonrpc': '2.0', 'id': 0, 'method': 'initialize',
+            'params': {'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'demo', 'version': '0'}}}
+    msgs = [init, {'jsonrpc': '2.0', 'method': 'notifications/initialized'}]
+    for i, (tool, args) in enumerate(calls, 1):
+        msgs.append({'jsonrpc': '2.0', 'id': i, 'method': 'tools/call', 'params': {'name': tool, 'arguments': args}})
+    p = subprocess.run(cmd, input=''.join(json.dumps(m) + '\n' for m in msgs), capture_output=True, text=True, env=env, check=True)
+    replies = {json.loads(l)['id']: json.loads(l) for l in p.stdout.splitlines() if l.strip()}
+    return [replies[i]['result']['content'][0]['text'] for i in range(1, len(calls) + 1)]
+
+
+def o200k(path):
+    out = subprocess.run([BENCH, 'count', '--input', path, '--tokenizers', 'o200k_base'],
+                         capture_output=True, text=True, check=True).stdout
+    name = os.path.basename(path)
+    row = [l for l in out.splitlines() if l.startswith(f'| {name} |')][0]
+    return int(row.split('|')[3].strip())
+
+
+rows = []
+
+
+def compare(case, label, json_text, ldf_text):
+    base = re.sub(r'[^a-z0-9]+', '_', f'{case}_{label}'.lower()).strip('_')
+    paths = {}
+    for kind, text in (('json', json_text), ('ldf', ldf_text)):
+        paths[kind] = os.path.join(a.out, f'{base}.{kind}.txt')
+        open(paths[kind], 'w', encoding='utf-8').write(text)
+    jb, lb = len(json_text.encode()), len(ldf_text.encode())
+    jt, lt = o200k(paths['json']), o200k(paths['ldf'])
+    rows.append(f'| {case} | {label} | {jb} | {lb} | {lb / jb:.2f} | {jt} | {lt} | {lt / jt:.2f} | '
+                f'{"LDF" if ldf_text.startswith("@") else "JSON (kept)"} |')
+
+
+# A. MCP server returning large JSON, behind the proxy.
+server = [MCP, 'fake-server']
+for nested in (False, True):
+    args = {'rows': a.rows, 'nested': nested}
+    j = session([MCP, 'proxy', '--quiet', '--passthrough', '--name', 'demo-json', '--'] + server, [('query', args)])[0]
+    l = session([MCP, 'proxy', '--quiet', '--name', 'demo-json', '--'] + server, [('query', args)])[0]
+    compare('A proxy', f'query rows={a.rows}' + (' nested' if nested else ''), j, l)
+
+# D. Local files through the files server.
+picked = [f for f in ('flat_users.csv', 'nested_orders.json', 'sparse_events.parquet', 'wide_table.parquet')
+          if os.path.exists(os.path.join(a.root, f))]
+for f in picked:
+    call = [('read_rows', {'path': f, 'limit': a.rows})]
+    j = session([MCP, 'files', '--root', a.root, '--quiet', '--passthrough'], call)[0]
+    l = session([MCP, 'files', '--root', a.root, '--quiet'], call)[0]
+    compare('D files', f, j, l)
+
+print('| demo | call | JSON bytes | LDF bytes | ratio | JSON o200k | LDF o200k | ratio | sent |')
+print('|---|---|---:|---:|---:|---:|---:|---:|---|')
+print('\n'.join(rows))
+print()
+print(subprocess.run([MCP, 'stats', '--file', stats_file], capture_output=True, text=True, check=True).stdout)
+open(os.path.join(a.out, 'README.md'), 'w').write(
+    '# Agent integration demos (generated by eval/demo_agents.py)\n\n'
+    f'rows per call: {a.rows}; files root: {os.path.relpath(a.root, REPO)}\n\n'
+    '| demo | call | JSON bytes | LDF bytes | ratio | JSON o200k | LDF o200k | ratio | sent |\n'
+    '|---|---|---:|---:|---:|---:|---:|---:|---|\n' + '\n'.join(rows) + '\n')
+shutil.rmtree(os.path.dirname(stats_file))

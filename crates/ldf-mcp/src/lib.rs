@@ -21,6 +21,7 @@
 pub mod clickhouse;
 pub mod fake;
 pub mod files;
+pub mod install;
 pub mod proxy;
 pub mod rewrite;
 pub mod rpc;

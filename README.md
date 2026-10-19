@@ -49,6 +49,9 @@ better than another, and the report says so.
 
 ## Use it
 
+With a coding agent (Claude Code: `ldf-mcp install claude-code`, then `ldf-mcp stats`), see
+[docs/agents.md](docs/agents.md): setup in five minutes, what is intercepted and what is not, Codex and OpenCode by hand.
+
 ### As a middle man: `ldf-mcp`
 
 The model never has to adopt a format. `ldf-mcp` is an MCP server over
