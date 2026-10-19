@@ -809,6 +809,7 @@ dependencies = [
  "ldf-bench",
  "ldf-data",
  "ldf-formats",
+ "ldf-select",
  "serde",
  "serde_json",
 ]
@@ -853,7 +854,18 @@ version = "0.1.0"
 dependencies = [
  "ldf",
  "ldf-data",
+ "ldf-select",
  "parquet",
+ "serde_json",
+]
+
+[[package]]
+name = "ldf-select"
+version = "0.1.0"
+dependencies = [
+ "ldf",
+ "ldf-data",
+ "serde",
  "serde_json",
 ]
 

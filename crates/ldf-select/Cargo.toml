@@ -1,0 +1,16 @@
+[package]
+name = "ldf-select"
+description = "Evidence-based format selector: JSON or LDF per model and data shape, from measured accuracy only"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage = "https://ldflabs.org"
+keywords = ["llm", "tokens", "serialization"]
+
+[dependencies]
+ldf = { workspace = true }
+ldf-data = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

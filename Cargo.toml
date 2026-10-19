@@ -9,6 +9,7 @@ members = [
     "crates/ldf",
     "crates/ldf-mcp",
     "crates/ldf-discover",
+    "crates/ldf-select",
 ]
 
 [workspace.package]
@@ -28,6 +29,7 @@ ldf-eval = { path = "crates/ldf-eval" }
 ldf-bench = { path = "crates/ldf-bench" }
 ldf-discover = { path = "crates/ldf-discover" }
 ldf = { path = "crates/ldf", version = "0.1.0" }
+ldf-select = { path = "crates/ldf-select", version = "0.1.0" }
 
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }

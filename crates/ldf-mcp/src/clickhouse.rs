@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use serde_json::{Value as Json, json};
 
-use crate::rewrite::{PRIMER, convert_text};
+use crate::rewrite::{PRIMER, Selector, convert};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -23,6 +23,8 @@ pub struct Config {
     pub passthrough: bool,
     /// Results whose JSON is shorter than this stay JSON.
     pub min_bytes: usize,
+    /// Pick JSON or LDF per result for one model (`--model`).
+    pub selector: Option<Selector>,
     /// `max_result_rows` with `result_overflow_mode=break`.
     pub max_rows: u64,
     pub log: bool,
@@ -177,8 +179,8 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<Reply, CallError> {
             note,
         });
     }
-    match convert_text(&json_text, cfg.min_bytes) {
-        Some(ldf) => {
+    match convert(&json_text, cfg.min_bytes, cfg.selector.as_ref()) {
+        Ok(ldf) => {
             if cfg.log {
                 eprintln!(
                     "ldf-mcp: {name} {} rows, json {} B -> ldf {} B ({:.0}%)",
@@ -190,10 +192,15 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<Reply, CallError> {
             }
             Ok(Reply { text: ldf, note })
         }
-        None => Ok(Reply {
-            text: json_text,
-            note,
-        }),
+        Err(why) => {
+            if let (true, Some(why)) = (cfg.log, why) {
+                eprintln!("ldf-mcp: {name} {why}");
+            }
+            Ok(Reply {
+                text: json_text,
+                note,
+            })
+        }
     }
 }
 
@@ -384,6 +391,7 @@ mod tests {
             password: None,
             passthrough: false,
             min_bytes: 0,
+            selector: None,
             max_rows: 10,
             log: false,
         }

@@ -183,3 +183,48 @@ fn min_bytes_zero_converts_small_results_too() {
     );
     s.finish();
 }
+
+#[test]
+fn model_without_evidence_gets_json_and_no_primer() {
+    let mut s = Session::start(&["--model", "no-such-model", "--quiet"]);
+    let init = s.handshake();
+    assert_eq!(init["instructions"], "Fake row server.");
+    let list = s.call(2, "tools/list", json!({}));
+    assert_eq!(
+        list["tools"][0]["description"],
+        "Returns rows as a JSON array."
+    );
+    let big = s.call(
+        3,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 100}}),
+    );
+    assert!(
+        big["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("[{")
+    );
+    s.finish();
+}
+
+#[test]
+fn measured_model_gets_ldf_on_flat_rows() {
+    // Built-in evidence: Haiku 5.5 is measured on flat data at 200 records
+    // with no loss against JSON.
+    let mut s = Session::start(&["--model", "claude-haiku-5-5", "--quiet"]);
+    let init = s.handshake();
+    assert!(init["instructions"].as_str().unwrap().contains("LDF"));
+    let big = s.call(
+        2,
+        "tools/call",
+        json!({"name": "query", "arguments": {"rows": 100}}),
+    );
+    assert!(
+        big["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("@records ")
+    );
+    s.finish();
+}

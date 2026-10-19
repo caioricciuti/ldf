@@ -4,20 +4,25 @@ use std::process::ExitCode;
 
 use ldf_mcp::clickhouse;
 use ldf_mcp::proxy::{self, Config};
+use ldf_mcp::rewrite::Selector;
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--quiet] -- COMMAND [ARGS...]\n\
+        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]] -- COMMAND [ARGS...]\n\
          \x20     run COMMAND as the MCP server and rewrite its JSON tool results into LDF\n\
          \x20     --passthrough  forward tool results unchanged (for A/B comparison)\n\
          \x20     --plain        leave initialize instructions and tool descriptions alone\n\
          \x20     --min-bytes N  never convert a text block shorter than N bytes (default 1024)\n\
          \x20     --quiet        no per-result stderr line\n\
+         \x20     --model ID     pick JSON or LDF per result for this model from measured accuracy (ldf-select);\n\
+         \x20                    a model without evidence gets JSON throughout and no LDF primer; without\n\
+         \x20                    --model, LDF whenever it is shorter. --model works in all three server modes\n\
+         \x20     --evidence FILE  evidence rows to use instead of the built-in copy (eval/analysis/evidence.py)\n\
          \x20 ldf-mcp clickhouse [--url http://127.0.0.1:8123] [--database default] [--user default] [--max-rows N]\n\
-         \x20                    [--passthrough] [--min-bytes N] [--quiet]\n\
+         \x20                    [--passthrough] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]]\n\
          \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
          \x20     rows come back as LDF; the password is read from CLICKHOUSE_PASSWORD, never from arguments\n\
-         \x20 ldf-mcp files --root DIR [--max-rows N] [--passthrough] [--min-bytes N] [--quiet]\n\
+         \x20 ldf-mcp files --root DIR [--max-rows N] [--passthrough] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]]\n\
          \x20     an MCP server over a directory of json, jsonl, csv, tsv and parquet files: list_files,\n\
          \x20     describe_file and read_rows (paged, streamed), rows as LDF, paths confined to DIR\n\
          \x20 ldf-mcp convert [FILE] [--sparse T] [--block N]\n\
@@ -55,12 +60,18 @@ fn run_proxy(args: &[String]) -> ExitCode {
         plain: false,
         min_bytes: 1024,
         log: true,
+        selector: None,
     };
+    let mut sel = SelectFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--plain" => cfg.plain = true,
+            "--model" | "--evidence" => match it.next() {
+                Some(v) => sel.set(a, v),
+                None => return usage(),
+            },
             "--quiet" => cfg.log = false,
             "--min-bytes" => match it.next().and_then(|v| v.parse().ok()) {
                 Some(n) => cfg.min_bytes = n,
@@ -76,6 +87,10 @@ fn run_proxy(args: &[String]) -> ExitCode {
     if cfg.command.is_empty() {
         return usage();
     }
+    cfg.selector = match sel.build() {
+        Ok(s) => s,
+        Err(e) => return fail("ldf-mcp", e),
+    };
     match proxy::run(cfg) {
         Ok(code) => ExitCode::from(code.clamp(0, 255) as u8),
         Err(e) => {
@@ -97,15 +112,19 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
         min_bytes: 1024,
         max_rows: 10_000,
         log: true,
+        selector: None,
     };
+    let mut sel = SelectFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--quiet" => cfg.log = false,
-            "--url" | "--database" | "--user" | "--max-rows" | "--min-bytes" => {
+            "--url" | "--database" | "--user" | "--max-rows" | "--min-bytes" | "--model"
+            | "--evidence" => {
                 let Some(v) = it.next() else { return usage() };
                 match a.as_str() {
+                    "--model" | "--evidence" => sel.set(a, v),
                     "--url" => cfg.url = v.clone(),
                     "--database" => cfg.database = v.clone(),
                     "--user" => cfg.user = v.clone(),
@@ -122,6 +141,10 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
             _ => return usage(),
         }
     }
+    cfg.selector = match sel.build() {
+        Ok(s) => s,
+        Err(e) => return fail("ldf-mcp clickhouse", e),
+    };
     match clickhouse::run(cfg) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
@@ -139,12 +162,18 @@ fn run_files(args: &[String]) -> ExitCode {
         passthrough: false,
         min_bytes: 1024,
         log: true,
+        selector: None,
     };
+    let mut sel = SelectFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--quiet" => cfg.log = false,
+            "--model" | "--evidence" => match it.next() {
+                Some(v) => sel.set(a, v),
+                None => return usage(),
+            },
             "--root" => match it.next() {
                 Some(v) => root = Some(v.clone()),
                 None => return usage(),
@@ -162,12 +191,63 @@ fn run_files(args: &[String]) -> ExitCode {
     }
     let Some(root) = root else { return usage() };
     cfg.root = std::path::PathBuf::from(root);
+    cfg.selector = match sel.build() {
+        Ok(s) => s,
+        Err(e) => return fail("ldf-mcp files", e),
+    };
     match ldf_mcp::files::run(cfg) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("ldf-mcp files: {e}");
             ExitCode::from(1)
         }
+    }
+}
+
+fn fail(who: &str, e: String) -> ExitCode {
+    eprintln!("{who}: {e}");
+    ExitCode::from(1)
+}
+
+/// `--model` and `--evidence`, shared by the three server modes.
+#[derive(Default)]
+struct SelectFlags {
+    model: Option<String>,
+    evidence: Option<String>,
+}
+
+impl SelectFlags {
+    fn set(&mut self, flag: &str, v: &str) {
+        match flag {
+            "--model" => self.model = Some(v.to_string()),
+            _ => self.evidence = Some(v.to_string()),
+        }
+    }
+
+    fn build(self) -> Result<Option<Selector>, String> {
+        let Some(model) = self.model else {
+            return match self.evidence {
+                Some(_) => Err("--evidence needs --model".into()),
+                None => Ok(None),
+            };
+        };
+        let evidence = match self.evidence {
+            Some(p) => Some(
+                std::fs::read(&p)
+                    .map_err(|e| e.to_string())
+                    .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
+                    .map_err(|e| format!("{p}: {e}"))?,
+            ),
+            None => None,
+        };
+        let sel = Selector::new(&model, evidence);
+        if !sel.knows_model() {
+            eprintln!(
+                "ldf-mcp: no evidence for model {model} with at least {} questions; every result stays JSON",
+                sel.policy.min_n
+            );
+        }
+        Ok(Some(sel))
     }
 }
 
