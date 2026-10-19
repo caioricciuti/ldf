@@ -25,9 +25,10 @@ fn usage() -> ExitCode {
          \x20 ldf-mcp files --root DIR [--max-rows N] [--passthrough] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]]\n\
          \x20     an MCP server over a directory of json, jsonl, csv, tsv and parquet files: list_files,\n\
          \x20     describe_file and read_rows (paged, streamed), rows as LDF, paths confined to DIR\n\
-         \x20 ldf-mcp convert [FILE] [--sparse T] [--block N]\n\
+         \x20 ldf-mcp convert [FILE] [--sparse T] [--hoist] [--block N]\n\
          \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF; --sparse T moves keys\n\
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
+         \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
          \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
          \x20 ldf-mcp fake-server\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
@@ -266,6 +267,7 @@ fn convert(args: &[String]) -> ExitCode {
                 Some(n) if n > 0 => block = Some(n),
                 _ => return usage(),
             },
+            "--hoist" => opts.hoist = true,
             _ if path.is_none() => path = Some(a.as_str()),
             _ => return usage(),
         }

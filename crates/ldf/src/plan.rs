@@ -18,6 +18,9 @@ pub enum ColType {
     Bool,
     Json,
     Table,
+    /// Array of objects with the column's `keys`, one JSON array of
+    /// positional value arrays per cell (spec section 7, rule 2a).
+    Hoisted,
 }
 
 impl ColType {
@@ -29,6 +32,8 @@ impl ColType {
             ColType::Bool => 'b',
             ColType::Json => 'j',
             ColType::Table => 't',
+            // Written as the key list `[k1,k2]`, never as a letter.
+            ColType::Hoisted => 'h',
         }
     }
 
@@ -55,6 +60,8 @@ pub struct Column {
     pub child: Option<Box<TablePlan>>,
     /// Position of the first path segment in the first row that had it.
     pub hint: usize,
+    /// Element keys of a `Hoisted` column, in order; empty otherwise.
+    pub keys: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -95,6 +102,11 @@ pub struct Options {
     /// is unique. The block encoder sets this: uniqueness within one block
     /// says nothing about the whole document.
     pub ordinal_joins: bool,
+    /// Write an array of objects whose elements all have the same keys in
+    /// the same order and only scalar values as one `[k1,k2]` column of
+    /// positional arrays instead of a child table (spec v0.2, section 7,
+    /// rule 2a). Off by default: a v0.1 decoder cannot read the column.
+    pub hoist: bool,
 }
 
 impl Options {
@@ -106,6 +118,7 @@ impl Options {
     pub const V0: Options = Options {
         sparse_threshold: 0.0,
         ordinal_joins: false,
+        hoist: false,
     };
 }
 
@@ -114,6 +127,7 @@ impl Default for Options {
         Options {
             sparse_threshold: Options::DEFAULT_SPARSE_THRESHOLD,
             ordinal_joins: false,
+            hoist: false,
         }
     }
 }
@@ -162,6 +176,7 @@ pub fn plan_with(records: &[Value], opts: &Options) -> TablePlan {
                 nullable: records.iter().any(Value::is_null),
                 child: None,
                 hint: 0,
+                keys: Vec::new(),
             }],
             scalar_rows: true,
             rest_keys: Vec::new(),
@@ -328,6 +343,18 @@ fn plan_field(
             .iter()
             .flat_map(|v| v.as_array().unwrap().iter().map(|x| x.as_object().unwrap()))
             .collect();
+        // 2a. Same keys in the same order and scalar values: hoisted.
+        if opts.hoist && hoistable(&elements) {
+            out.push(Column {
+                path,
+                ty: ColType::Hoisted,
+                nullable,
+                child: None,
+                hint: 0,
+                keys: elements[0].iter().map(|(k, _)| k.clone()).collect(),
+            });
+            return;
+        }
         let mut child_name = String::with_capacity(table.len() + 16);
         child_name.push_str(table);
         for seg in &path {
@@ -341,6 +368,7 @@ fn plan_field(
             nullable,
             child: Some(Box::new(child)),
             hint: 0,
+            keys: Vec::new(),
         });
         return;
     }
@@ -353,7 +381,24 @@ fn plan_field(
         nullable,
         child: None,
         hint: 0,
+        keys: Vec::new(),
     });
+}
+
+/// Every element has the first element's keys in its order, and every
+/// value is null, a boolean, a number or a string.
+fn hoistable(elements: &[&Object]) -> bool {
+    let first = elements[0];
+    elements.iter().all(|o| {
+        o.len() == first.len()
+            && o.iter().zip(first.iter()).all(|((k, v), (fk, _))| {
+                k == fk
+                    && matches!(
+                        v,
+                        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_)
+                    )
+            })
+    })
 }
 
 fn same_key_set(objs: &[&Value]) -> bool {
@@ -421,7 +466,18 @@ impl TablePlan {
             first = false;
             crate::text::push_path(&c.path, &mut s);
             s.push(':');
-            s.push(c.ty.code());
+            if c.ty == ColType::Hoisted {
+                s.push('[');
+                for (i, k) in c.keys.iter().enumerate() {
+                    if i > 0 {
+                        s.push(',');
+                    }
+                    crate::text::push_segment(k, &mut s);
+                }
+                s.push(']');
+            } else {
+                s.push(c.ty.code());
+            }
             if c.nullable {
                 s.push('?');
             }

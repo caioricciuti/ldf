@@ -37,6 +37,8 @@ struct HeaderCol {
     ty: ColType,
     /// The bare `~` column: a JSON object of extra keys merged into the row.
     rest: bool,
+    /// Element keys of a hoisted `[k1,k2]` column.
+    keys: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -98,14 +100,28 @@ fn parse_header(rest: &str, line_no: usize) -> Result<(String, Vec<HeaderCol>)> 
         })?;
         let (path_text, ty_text) = (&entry[..colon], &entry[colon + 1..]);
         let ty_text = ty_text.strip_suffix('?').unwrap_or(ty_text);
-        let mut chars = ty_text.chars();
-        let ty = match (chars.next().and_then(ColType::from_code), chars.next()) {
-            (Some(t), None) => t,
-            _ => {
-                return err(
-                    line_no,
-                    format!("unknown type {ty_text:?} in column {entry:?}"),
-                );
+        let mut keys = Vec::new();
+        let ty = if let Some(list) = ty_text.strip_prefix('[').and_then(|t| t.strip_suffix(']')) {
+            for k in split_header_entries(list) {
+                match parse_path(k, line_no)?.as_slice() {
+                    [seg] => keys.push(seg.clone()),
+                    _ => return err(line_no, format!("bad key {k:?} in column {entry:?}")),
+                }
+            }
+            if keys.is_empty() {
+                return err(line_no, format!("empty key list in column {entry:?}"));
+            }
+            ColType::Hoisted
+        } else {
+            let mut chars = ty_text.chars();
+            match (chars.next().and_then(ColType::from_code), chars.next()) {
+                (Some(t), None) => t,
+                _ => {
+                    return err(
+                        line_no,
+                        format!("unknown type {ty_text:?} in column {entry:?}"),
+                    );
+                }
             }
         };
         let rest = path_text == "~";
@@ -116,6 +132,7 @@ fn parse_header(rest: &str, line_no: usize) -> Result<(String, Vec<HeaderCol>)> 
             path: parse_path(path_text, line_no)?,
             ty,
             rest,
+            keys,
         });
     }
     if cols.is_empty() {
@@ -124,18 +141,28 @@ fn parse_header(rest: &str, line_no: usize) -> Result<(String, Vec<HeaderCol>)> 
     Ok((name.to_string(), cols))
 }
 
-/// Splits header entries on commas outside quotes.
+/// Splits header entries on commas outside quotes and outside the key
+/// list of a hoisted column.
 fn split_header_entries(s: &str) -> Vec<&str> {
     let mut out = Vec::new();
     let mut start = 0;
     let mut i = 0;
+    let mut depth = 0usize;
     let b = s.as_bytes();
     while i < b.len() {
         match b[i] {
             b'"' => {
                 i += json_string_end(&s[i..]).unwrap_or(1);
             }
-            b',' => {
+            b'[' => {
+                depth += 1;
+                i += 1;
+            }
+            b']' => {
+                depth = depth.saturating_sub(1);
+                i += 1;
+            }
+            b',' if depth == 0 => {
                 out.push(&s[start..i]);
                 start = i + 1;
                 i += 1;
@@ -212,7 +239,10 @@ fn parse_row(line: &str, cols: &[HeaderCol], line_no: usize) -> Result<Vec<Optio
         let rest = &line[cur..];
         let (cell, used) = if rest.is_empty() || rest.starts_with(',') {
             (None, 0)
-        } else if col.ty == ColType::Json && !rest.starts_with("null,") && rest != "null" {
+        } else if matches!(col.ty, ColType::Json | ColType::Hoisted)
+            && !rest.starts_with("null,")
+            && rest != "null"
+        {
             let mut it = serde_json::Deserializer::from_str(rest).into_iter::<Value>();
             let v = it
                 .next()
@@ -224,6 +254,11 @@ fn parse_row(line: &str, cols: &[HeaderCol], line_no: usize) -> Result<Vec<Optio
                     line: line_no,
                     message: format!("bad JSON cell: {e}"),
                 })?;
+            let v = if col.ty == ColType::Hoisted {
+                unhoist(v, &col.keys, line_no)?
+            } else {
+                v
+            };
             (Some(v), it.byte_offset())
         } else if rest.starts_with('"') {
             let end = json_string_end(rest).ok_or_else(|| DecodeError {
@@ -263,6 +298,32 @@ fn parse_row(line: &str, cols: &[HeaderCol], line_no: usize) -> Result<Vec<Optio
     Ok(out)
 }
 
+/// A hoisted cell back to an array of objects: each positional array
+/// zipped with the column's keys.
+fn unhoist(v: Value, keys: &[String], line_no: usize) -> Result<Value> {
+    let Value::Array(rows) = v else {
+        return err(line_no, "hoisted cell is not an array");
+    };
+    let mut out = Vec::with_capacity(rows.len());
+    for r in rows {
+        let Value::Array(vals) = r else {
+            return err(line_no, "hoisted element is not an array");
+        };
+        if vals.len() != keys.len() {
+            return err(
+                line_no,
+                format!(
+                    "hoisted element has {} values for {} keys",
+                    vals.len(),
+                    keys.len()
+                ),
+            );
+        }
+        out.push(Value::Object(keys.iter().cloned().zip(vals).collect()));
+    }
+    Ok(Value::Array(out))
+}
+
 fn typed(tok: &str, ty: ColType, line_no: usize) -> Result<Value> {
     if tok == "null" {
         return Ok(Value::Null);
@@ -289,7 +350,9 @@ fn typed(tok: &str, ty: ColType, line_no: usize) -> Result<Value> {
             Ok(n) => Value::from(n),
             Err(_) => return err(line_no, format!("bad child count {tok:?}")),
         },
-        ColType::Json => return err(line_no, "unreachable: json handled by caller"),
+        ColType::Json | ColType::Hoisted => {
+            return err(line_no, "unreachable: json handled by caller");
+        }
     })
 }
 

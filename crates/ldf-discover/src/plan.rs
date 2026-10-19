@@ -149,7 +149,8 @@ fn plan_table(name: String, rows: &[&Object], join: Join, cfg: &Config) -> Table
         rest_keys,
     };
     let parent_key = match cfg.arrays {
-        Arrays::ChildKey => parent_join_key(&plan, rows),
+        // A hoisted point falls back to v0.1 child tables (spec v0.2 rule 2a).
+        Arrays::ChildKey | Arrays::Hoisted => parent_join_key(&plan, rows),
         _ => None,
     };
     for col in plan.columns.iter_mut() {
@@ -246,29 +247,35 @@ fn plan_field(
                     .filter_map(Value::as_object)
             })
             .collect();
-        match cfg.arrays {
-            Arrays::ChildKey | Arrays::ChildOrdinal => {
-                let mut name = String::with_capacity(table.len() + 16);
-                name.push_str(table);
-                name.push('.');
-                crate::text::push_path(&path, &mut name);
-                let child = plan_table(name, &elements, Join::Ordinal, cfg);
-                out.push(col(Kind::Table(Box::new(child))));
+        if cfg.arrays == Arrays::Json {
+            out.push(col(Kind::Json));
+            return;
+        }
+        // Hoisted only when every element has the first one's keys in its
+        // order and only scalar values; anything else is a child table.
+        if cfg.arrays == Arrays::Hoisted {
+            let keys: Vec<&str> = elements[0].iter().map(|(k, _)| k.as_str()).collect();
+            if elements.iter().all(|o| {
+                o.len() == keys.len()
+                    && o.iter().zip(&keys).all(|((k, v), kk)| {
+                        k == kk
+                            && matches!(
+                                v,
+                                Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_)
+                            )
+                    })
+            }) {
+                let keys = keys.into_iter().map(str::to_string).collect();
+                out.push(col(Kind::Hoisted(keys)));
                 return;
             }
-            Arrays::Hoisted => {
-                let keys: Vec<&str> = elements[0].iter().map(|(k, _)| k.as_str()).collect();
-                if elements.iter().all(|o| {
-                    o.len() == keys.len() && o.iter().zip(&keys).all(|((k, _), kk)| k == kk)
-                }) {
-                    let keys = keys.into_iter().map(str::to_string).collect();
-                    out.push(col(Kind::Hoisted(keys)));
-                    return;
-                }
-            }
-            Arrays::Json => {}
         }
-        out.push(col(Kind::Json));
+        let mut name = String::with_capacity(table.len() + 16);
+        name.push_str(table);
+        name.push('.');
+        crate::text::push_path(&path, &mut name);
+        let child = plan_table(name, &elements, Join::Ordinal, cfg);
+        out.push(col(Kind::Table(Box::new(child))));
         return;
     }
 

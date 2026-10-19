@@ -1,5 +1,5 @@
-//! The selector over the full candidate set, JSON, TOON and LDF v0.1 at
-//! sparse threshold 0.5 and 0.75, measured in the caller's token count and
+//! The selector over the full candidate set, JSON, TOON and LDF at sparse
+//! threshold 0.5 and 0.75, with and without hoisted arrays, measured in the caller's token count and
 //! round-trip checked through `ldf-formats`. The decision rule lives in
 //! `ldf-select` (shared with `ldf-mcp`, which offers JSON and LDF only).
 
@@ -16,9 +16,18 @@ fn format_of(choice: Choice) -> Box<dyn Format> {
     match choice {
         Choice::Json => Box::new(ldf_formats::json::Json),
         Choice::Toon => Box::new(ldf_formats::toon::Toon::default()),
-        Choice::Ldf { sparse_threshold } => {
-            Box::new(LdfFormat::sparse("ldf", "ldf", sparse_threshold))
-        }
+        Choice::Ldf {
+            sparse_threshold,
+            hoist,
+        } => Box::new(LdfFormat::with_options(
+            "ldf",
+            "ldf",
+            ::ldf::Options {
+                sparse_threshold,
+                hoist,
+                ..::ldf::Options::default()
+            },
+        )),
     }
 }
 
@@ -76,6 +85,7 @@ mod tests {
             traits: vec![],
             family: family.into(),
             thresholds: vec![0.0, 0.25, 0.5, 0.75],
+            hoist_thresholds: vec![0.0, 0.25, 0.5, 0.75],
             format: family.into(),
             n: 100,
             k: 90,

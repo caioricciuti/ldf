@@ -30,13 +30,24 @@ impl LdfFormat {
         }
     }
     pub fn sparse(name: &'static str, extension: &'static str, threshold: f64) -> Self {
-        LdfFormat {
+        LdfFormat::with_options(
             name,
             extension,
-            options: ::ldf::Options {
+            ::ldf::Options {
                 sparse_threshold: threshold,
                 ..::ldf::Options::default()
             },
+        )
+    }
+    pub fn with_options(
+        name: &'static str,
+        extension: &'static str,
+        options: ::ldf::Options,
+    ) -> Self {
+        LdfFormat {
+            name,
+            extension,
+            options,
         }
     }
 }

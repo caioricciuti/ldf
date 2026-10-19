@@ -136,6 +136,10 @@ impl Encoder {
                 Value::Array(a) => self.out.push_str(&a.len().to_string()),
                 other => push_json_value(other, &mut self.out),
             },
+            ColType::Hoisted => match v {
+                Value::Array(a) => push_hoisted(a, &c.keys, &mut self.out),
+                other => push_json_value(other, &mut self.out),
+            },
         }
     }
 
@@ -165,6 +169,7 @@ impl Encoder {
                             nullable: false,
                             child: None,
                             hint: 0,
+                            keys: Vec::new(),
                         };
                         let mut tmp = Encoder::default();
                         tmp.write_cell(&col, Some(v));
@@ -183,6 +188,29 @@ impl Encoder {
             self.write_children(child, &elements, child_base);
         }
     }
+}
+
+/// A hoisted cell: `[[v1,v2],[v1,v2]]`, values in `keys` order. The
+/// planner only hoists elements that have exactly these keys in order.
+fn push_hoisted(items: &[Value], keys: &[String], out: &mut String) {
+    out.push('[');
+    for (i, item) in items.iter().enumerate() {
+        if i > 0 {
+            out.push(',');
+        }
+        out.push('[');
+        let o = item.as_object().expect("planned as objects");
+        for (j, k) in keys.iter().enumerate() {
+            if j > 0 {
+                out.push(',');
+            }
+            let (kk, v) = o.get(j).expect("planned with these keys");
+            debug_assert_eq!(kk, k);
+            push_json_value(v, out);
+        }
+        out.push(']');
+    }
+    out.push(']');
 }
 
 /// Spec 5: a bare first cell starting with `@` would read as a header line.
@@ -335,6 +363,7 @@ impl StreamEncoder {
                 nullable: true,
                 child: None,
                 hint: 0,
+                keys: Vec::new(),
             };
             tmp.write_cell(&col, Some(v));
             if i == 0 {
@@ -376,6 +405,16 @@ mod tests {
              ORD-000001,E5,3,28.78\n\
              ORD-000001,C3,4,157.4\n\
              ORD-000002,A1,1,2757.03\n"
+        );
+        let hoisted = Options {
+            hoist: true,
+            ..Options::default()
+        };
+        assert_eq!(
+            encode_with(&recs, &hoisted),
+            "@records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,items:[sku,qty,price],total:f,status:s,note:s?\n\
+             ORD-000001,4654,Val Thompson,São Paulo,[[\"E5\",3,28.78],[\"C3\",4,157.4]],715.94,shipped,context compare\n\
+             ORD-000002,50,Sol Ritchie,Buenos Aires,[[\"A1\",1,2757.03]],2757.03,cancelled,null\n"
         );
     }
 
@@ -462,6 +501,31 @@ mod tests {
             one,
             batch.replace("@records.items id:i", "@records.items _:i")
         );
+    }
+
+    #[test]
+    fn hoisted_arrays_are_opt_in_and_stream_in_blocks() {
+        let recs: Vec<Value> = (1..=5)
+            .map(|i| {
+                obj! {"id" => i, "items" => (0..i % 3).map(|k| obj! {"sku" => format!("S{i}{k}"), "qty" => k}).collect::<Vec<_>>()}
+            })
+            .collect();
+        let opts = Options {
+            hoist: true,
+            ..Options::default()
+        };
+        let text = encode_with(&recs, &opts);
+        assert!(text.starts_with("@records id:i,items:[sku,qty]\n1,[[\"S10\",0]]\n2,[[\"S20\",0],[\"S21\",1]]\n3,[]\n"), "{text}");
+        assert_eq!(crate::decode(&text).unwrap(), recs);
+        assert!(encode(&recs).contains("@records.items"), "off by default");
+        let mut out = String::new();
+        let mut enc = BlockEncoder::with_options(2, opts);
+        for r in &recs {
+            enc.record(r.clone(), &mut out);
+        }
+        enc.finish(&mut out);
+        // No child tables, so one root header for all three blocks.
+        assert_eq!(out, text);
     }
 
     #[test]
