@@ -18,9 +18,9 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter (`ldf` current, `ldf-v0` old layout, same display name in prompts). TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth (eleven kinds; new kinds are appended to `TaskKind::all` and a golden test pins the original stream, so old bundles regenerate as an exact prefix; the manifest reports per-kind counts, short where a dataset runs out of distinct questions), prompt bundles (`--candidate name=ID` adds an `ldf-discover` configuration, shown to the model as `ldf`), response scoring | `ldf-eval` |
-| `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures` | |
+| `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures`; feature `arrow` adds `ldf::arrow`, a direct RecordBatch encoder (batch and block form) byte-identical to the Value path, which refuses lists of structs (child tables) so the caller falls back | |
 | `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop | `ldf-mcp` |
-| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01` and `LDF_V0` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1 | `ldf-discover` |
+| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01` and `LDF_V0` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1; `select.rs` is the first adaptive selector (JSON, TOON or LDF v0.1 at sparse threshold 0.5 or 0.75 per model and data shape, from `docs/reports/evidence/evidence.json`, JSON whenever evidence is missing) | `ldf-discover` |
 
 `site/` is the website (ldflabs.org): Astro with Starlight, the docs pages
 mirrored from `docs/` and this file by `site/scripts/sync-docs.mjs` at build
@@ -29,7 +29,10 @@ time, deployed by Cloudflare from the repository (root directory `/site`,
 `bun install --frozen-lockfile`, never a bare install.
 
 Python under `eval/` is standard library only: `run_eval.py` (API calls,
-spend-gated) and `count_tokens_claude.py` (Anthropic count_tokens).
+spend-gated), `count_tokens_claude.py` (Anthropic count_tokens),
+`bench_mcp.py` (end-to-end MCP tool-call timing, LDF vs `--passthrough`) and
+`analysis/evidence.py` (regrades every run into the selector's evidence
+table, identifying each bundle's real LDF layout by re-encoding).
 
 Data flow: `ldf-gen` writes fixtures to `fixtures/<scale>/`; `ldf-bench`
 reads them through `ldf-data::input`, encodes with `ldf-formats`, and writes
@@ -63,6 +66,10 @@ eval/plan.sh stage-b-build            # Stage B bundles, free and deterministic;
 ./target/release/ldf-discover space   # knob list and size
 ./target/release/ldf-discover stage-a --scale medium --sample 200 --recheck 1000 --out results/discovery/<name>   # about a minute, no API calls
 ./target/release/ldf-discover show --id v0.1 --input fixtures/small/nested_orders.json   # one candidate's output; --id takes any id from a report
+./target/release/ldf-bench arrow fixtures/medium/*.parquet --iters 5 --out results/arrow   # Parquet to LDF, Value path vs direct Arrow path, output hashes compared
+python3 -I eval/analysis/evidence.py eval/out docs/reports/evidence   # rebuild the selector evidence after any graded run
+./target/release/ldf-discover select --model claude-haiku-5-5 --input F --sample 200   # selector decision with its reasons
+python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files   # MCP end to end; --mode clickhouse needs CLICKHOUSE_PASSWORD
 ```
 
 Benchmarks only count in release builds. Perf runs should happen on a quiet
@@ -154,3 +161,10 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   object null in some row decoded as absent, and a string starting with
   `@` as the first cell of a row read as a header. Output on all twelve
   medium fixtures is unchanged by the fix.
+- 2026-10-19 (`docs/reports/2026-10-19-engine/`): the direct Arrow path is
+  1.9x to 3.2x faster than the Value path in block form at 1M rows (2.8x to
+  4.8x for a whole document, 1.4x to 4.3x less memory), same bytes. The
+  selector gives JSON to Opus and GPT for now: their runs have 15 to 20
+  questions per cell, under the 50 the policy needs. LDF at sparse
+  threshold 0.5 changes object member order on rows where some keys move to
+  `~` (`semantic-unordered`, documented in spec section 7).

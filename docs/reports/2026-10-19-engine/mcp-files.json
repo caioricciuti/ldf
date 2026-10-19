@@ -1,0 +1,548 @@
+{
+ "mode": "files",
+ "repeats": 20,
+ "warmup": 3,
+ "queries": {
+  "list_files": {
+   "tool": "list_files",
+   "arguments": {},
+   "ldf": {
+    "bytes": 1371,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 0.133,
+    "p95_ms": 0.14,
+    "min_ms": 0.127
+   },
+   "json": {
+    "bytes": 2489,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 0.119,
+    "p95_ms": 0.136,
+    "min_ms": 0.11
+   },
+   "rows": 41,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 705,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 472,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 444,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 444,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "describe_orders": {
+   "tool": "describe_file",
+   "arguments": {
+    "path": "nested_orders.json"
+   },
+   "ldf": {
+    "bytes": 245,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 12.25,
+    "p95_ms": 12.403,
+    "min_ms": 12.026
+   },
+   "json": {
+    "bytes": 245,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 12.281,
+    "p95_ms": 12.445,
+    "min_ms": 12.04
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "error": "ldf-discover: json: trailing characters at line 1 column 5"
+    },
+    "deepseek-chat": {
+     "error": "ldf-discover: json: trailing characters at line 1 column 5"
+    },
+    "claude-opus-5-5": {
+     "error": "ldf-discover: json: trailing characters at line 1 column 5"
+    },
+    "gpt-6.1-sol": {
+     "error": "ldf-discover: json: trailing characters at line 1 column 5"
+    }
+   }
+  },
+  "users_50": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "flat_users.parquet",
+    "limit": 50
+   },
+   "ldf": {
+    "bytes": 3134,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 1.052,
+    "p95_ms": 1.242,
+    "min_ms": 0.997
+   },
+   "json": {
+    "bytes": 6909,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 0.983,
+    "p95_ms": 1.034,
+    "min_ms": 0.96
+   },
+   "rows": 50,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 2346,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 1535,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 1492,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 1492,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "events_200": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "sparse_events.jsonl",
+    "limit": 200
+   },
+   "ldf": {
+    "bytes": 20976,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 0.607,
+    "p95_ms": 0.637,
+    "min_ms": 0.578
+   },
+   "json": {
+    "bytes": 30631,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 0.298,
+    "p95_ms": 0.316,
+    "min_ms": 0.288
+   },
+   "rows": 200,
+   "traits": [
+    "sparse"
+   ],
+   "o200k": {
+    "json": {
+     "tokens": 11050,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 13503,
+     "round_trip": "semantic"
+    },
+    "ldf@0.5": {
+     "tokens": 8578,
+     "round_trip": "semantic-unordered"
+    },
+    "ldf@0.75": {
+     "tokens": 9832,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.75
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.75
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "orders_100": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "nested_orders.json",
+    "limit": 100
+   },
+   "ldf": {
+    "bytes": 13686,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 12.498,
+    "p95_ms": 13.145,
+    "min_ms": 12.303
+   },
+   "json": {
+    "bytes": 29475,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 12.298,
+    "p95_ms": 12.488,
+    "min_ms": 12.088
+   },
+   "rows": 100,
+   "traits": [
+    "child_tables",
+    "sparse"
+   ],
+   "o200k": {
+    "json": {
+     "tokens": 9914,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 10741,
+     "round_trip": "semantic"
+    },
+    "ldf@0.5": {
+     "tokens": 6404,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 6752,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "logs_500": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "repetitive_logs.parquet",
+    "limit": 500
+   },
+   "ldf": {
+    "bytes": 34685,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 1.173,
+    "p95_ms": 1.207,
+    "min_ms": 1.157
+   },
+   "json": {
+    "bytes": 72613,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 0.898,
+    "p95_ms": 0.937,
+    "min_ms": 0.878
+   },
+   "rows": 500,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 23052,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 15887,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 14891,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 14891,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "wide_1000": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "wide_table.parquet",
+    "limit": 1000
+   },
+   "ldf": {
+    "bytes": 274554,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 8.535,
+    "p95_ms": 8.724,
+    "min_ms": 8.458
+   },
+   "json": {
+    "bytes": 539993,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 5.446,
+    "p95_ms": 5.576,
+    "min_ms": 5.333
+   },
+   "rows": 1000,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 234202,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 102483,
+     "round_trip": "semantic"
+    },
+    "ldf@0.5": {
+     "tokens": 101540,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 101540,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "logs_10000": {
+   "tool": "read_rows",
+   "arguments": {
+    "path": "repetitive_logs.parquet",
+    "limit": 10000
+   },
+   "ldf": {
+    "bytes": 693012,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 13.69,
+    "p95_ms": 14.706,
+    "min_ms": 13.411
+   },
+   "json": {
+    "bytes": 1452940,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 8.089,
+    "p95_ms": 8.176,
+    "min_ms": 7.942
+   },
+   "rows": 10000,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 460419,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 317328,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 297331,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 297331,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  }
+ }
+}
