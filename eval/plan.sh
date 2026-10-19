@@ -17,6 +17,8 @@
 #   eval/plan.sh sparse-sweep-deepseek  deepseek-chat on it (~$0.04, cap $0.10)
 #   eval/plan.sh stage-c-build          Stage C bundles on held-out data (free)
 #   eval/plan.sh stage-c-opus           Opus 5.5 on them, distinct renderings only (~$9-17, cap $17)
+#   eval/plan.sh stage-c10-build        Stage C at 10 questions per kind (free)
+#   eval/plan.sh stage-c10-opus         Opus 5.5 on it, JSON and LDF variants only (~$5.00-6.60, cap $7)
 #   eval/plan.sh stage-c-sonnet         Sonnet 5.5 on them (~$7.50-11.50, cap $12)
 #   eval/plan.sh stage-c-gpt            GPT on them; needs GPT_MODEL and GPT_PRICE_IN/CACHED/OUT set (cap $GPT_BUDGET)
 #   eval/plan.sh all           the first four stages above, in that order
@@ -91,13 +93,14 @@ stage_sparse_sweep_deepseek() {
 # nor the questions were seen when the finalists were picked.
 STAGE_C_DATASETS=(flat_users nested_orders sparse_events mixed_types)
 stage_c_build() {
+  local per_kind=${1:-15} dir=${2:-eval/out/stage-c}
   local s75='d=comma h=typed q?=1 o=dotted a=child-key sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
   local h='d=comma h=typed q?=1 o=dotted a=hoisted sp=50 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
   local hs75='d=comma h=typed q?=1 o=dotted a=hoisted sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
   for b in "${STAGE_C_DATASETS[@]}"; do
-    ./target/release/ldf-eval build --input "fixtures/holdout/medium/$b.json" --records 200 --per-kind 15 --seed 2 \
+    ./target/release/ldf-eval build --input "fixtures/holdout/medium/$b.json" --records 200 --per-kind "$per_kind" --seed 2 \
       --formats json,toon,ldf --candidate "ldf-s75=$s75" --candidate "ldf-hoisted=$h" --candidate "ldf-hs75=$hs75" \
-      --out "eval/out/stage-c/$b"
+      --out "$dir/$b"
   done
 }
 # Stage C runs: only renderings that differ are sent (ldf-s75 equals ldf on
@@ -114,7 +117,7 @@ STAGE_C=(
 )
 SONNET=(--provider anthropic --model claude-sonnet-5-5 --effort low --price-input 2 --price-cached 0.20 --price-output 10)
 stage_c() {
-  local total=$1; shift
+  local dir=$1 total=$2; shift 2
   for entry in "${STAGE_C[@]}"; do
     read -r b formats <<< "$entry"
     # Budget split in proportion to the bundle's share of input tokens.
@@ -122,16 +125,36 @@ stage_c() {
     case "$b" in
       flat_users) share=0.10 ;; nested_orders) share=0.60 ;; sparse_events) share=0.24 ;; mixed_types) share=0.06 ;;
     esac
-    run --bundle "eval/out/stage-c/$b" "$@" --formats "$formats" --max-tokens 4096 \
+    run --bundle "$dir/$b" "$@" --formats "$formats" --max-tokens 4096 \
       --budget "$(python3 -c "print(round($total * $share, 2))")"
   done
 }
-stage_stage_c_opus() { stage_c 17 "${OPUS[@]}"; }
-stage_stage_c_sonnet() { stage_c 12 "${SONNET[@]}"; }
+stage_stage_c_opus() { stage_c eval/out/stage-c 17 "${OPUS[@]}"; }
+# Stage C as run (agreed 2026-10-19): Opus on eval/out/stage-c10, 10
+# questions per kind (8 left mixed_types at 47, under the selector minimum of
+# 50 paired questions). Only what the selector and the v0.2 question need:
+# no TOON (ldf-mcp never sends it), hoisted at 0.5 on nested_orders only.
+# 864 prompts, about $5.00-6.60 at 80-170 output tokens per answer; cap $7,
+# split by each bundle's share of the estimate.
+STAGE_C10=(
+  "flat_users json,ldf 0.13"
+  "nested_orders json,ldf,ldf-s75,ldf-hoisted 0.50"
+  "sparse_events json,ldf,ldf-s75 0.27"
+  "mixed_types json,ldf 0.10"
+)
+stage_stage_c10_opus() {
+  local total=7
+  for entry in "${STAGE_C10[@]}"; do
+    read -r b formats share <<< "$entry"
+    run --bundle "eval/out/stage-c10/$b" "${OPUS[@]}" --formats "$formats" --max-tokens 4096 \
+      --budget "$(python3 -c "print(round($total * $share, 2))")"
+  done
+}
+stage_stage_c_sonnet() { stage_c eval/out/stage-c 12 "${SONNET[@]}"; }
 stage_stage_c_gpt() {
   : "${GPT_MODEL:?set GPT_MODEL}" "${GPT_PRICE_IN:?set GPT_PRICE_IN (USD per M input)}" \
     "${GPT_PRICE_CACHED:?set GPT_PRICE_CACHED}" "${GPT_PRICE_OUT:?set GPT_PRICE_OUT}" "${GPT_BUDGET:?set GPT_BUDGET (USD, whole stage)}"
-  stage_c "$GPT_BUDGET" --provider openai --model "$GPT_MODEL" --reasoning-effort low \
+  stage_c eval/out/stage-c "$GPT_BUDGET" --provider openai --model "$GPT_MODEL" --reasoning-effort low \
     --price-input "$GPT_PRICE_IN" --price-cached "$GPT_PRICE_CACHED" --price-output "$GPT_PRICE_OUT"
 }
 stage_b() {
@@ -149,7 +172,7 @@ stage_deepseek() {
   done
 }
 stage_score() {
-  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl; do
+  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl eval/out/stage-c10/*/responses.*.jsonl; do
     [ -e "$r" ] || continue
     bundle=$(dirname "$r")
     model=$(basename "$r" .jsonl | cut -d. -f3-)
@@ -157,7 +180,7 @@ stage_score() {
   done
 }
 
-[ $# -gt 0 ] || { sed -n '2,23p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,25p' "$0"; exit 1; }
 for stage in "$@"; do
   case "$stage" in
     opus-ldf) stage_opus_ldf ;;
@@ -170,6 +193,8 @@ for stage in "$@"; do
     sparse-sweep-build) sparse_sweep_build ;;
     stage-c-build) stage_c_build ;;
     stage-c-opus) stage_stage_c_opus ;;
+    stage-c10-build) stage_c_build 10 eval/out/stage-c10 ;;
+    stage-c10-opus) stage_stage_c10_opus ;;
     stage-c-sonnet) stage_stage_c_sonnet ;;
     stage-c-gpt) stage_stage_c_gpt ;;
     sparse-sweep-deepseek) stage_sparse_sweep_deepseek ;;
