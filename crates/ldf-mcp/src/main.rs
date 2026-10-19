@@ -5,6 +5,8 @@ use std::process::ExitCode;
 use ldf_mcp::clickhouse;
 use ldf_mcp::proxy::{self, Config};
 use ldf_mcp::rewrite::Selector;
+use ldf_mcp::stats::{self, Recorder};
+use std::sync::Arc;
 
 fn usage() -> ExitCode {
     eprintln!(
@@ -18,6 +20,8 @@ fn usage() -> ExitCode {
          \x20                    a model without evidence gets JSON throughout and no LDF primer; without\n\
          \x20                    --model, LDF whenever it is shorter. --model works in all three server modes\n\
          \x20     --evidence FILE  evidence rows to use instead of the built-in copy (eval/analysis/evidence.py)\n\
+         \x20     --name NAME    label for this server in the statistics (default: the command's file name)\n\
+         \x20     --no-stats     record nothing (also LDF_STATS=0); --name and --no-stats work in all three modes\n\
          \x20 ldf-mcp clickhouse [--url http://127.0.0.1:8123] [--database default] [--user default] [--max-rows N]\n\
          \x20                    [--passthrough] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]]\n\
          \x20     an MCP server with list_tables, describe_table and run_select (read-only) over ClickHouse HTTP;\n\
@@ -30,6 +34,9 @@ fn usage() -> ExitCode {
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
          \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
          \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
+         \x20 ldf-mcp stats [--days N] [--json] [--file PATH]\n\
+         \x20     summarize the local statistics: responses, LDF or JSON and why, bytes, conversion time;\n\
+         \x20     the file is LDF_STATS_FILE or ldf/events.jsonl under XDG_STATE_HOME, ~/.local/state or LOCALAPPDATA\n\
          \x20 ldf-mcp fake-server [--ignore-eof]\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
     );
@@ -43,6 +50,7 @@ fn main() -> ExitCode {
         Some("convert") => convert(&args[1..]),
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("files") => run_files(&args[1..]),
+        Some("stats") => run_stats(&args[1..]),
         Some("fake-server") => {
             match ldf_mcp::fake::run(args[1..].iter().any(|a| a == "--ignore-eof")) {
                 Ok(()) => ExitCode::SUCCESS,
@@ -64,10 +72,15 @@ fn run_proxy(args: &[String]) -> ExitCode {
         min_bytes: 1024,
         log: true,
         selector: None,
+        stats: Arc::new(Recorder::off()),
     };
     let mut sel = SelectFlags::default();
+    let mut st = StatsFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
+        if st.take(a, &mut it) {
+            continue;
+        }
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--plain" => cfg.plain = true,
@@ -87,9 +100,14 @@ fn run_proxy(args: &[String]) -> ExitCode {
             _ => return usage(),
         }
     }
-    if cfg.command.is_empty() {
+    if cfg.command.is_empty() || st.bad {
         return usage();
     }
+    let label = std::path::Path::new(&cfg.command[0])
+        .file_stem()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    cfg.stats = st.recorder("proxy", &label, sel.model.as_deref());
     cfg.selector = match sel.build() {
         Ok(s) => s,
         Err(e) => return fail("ldf-mcp", e),
@@ -116,10 +134,15 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
         max_rows: 10_000,
         log: true,
         selector: None,
+        stats: Arc::new(Recorder::off()),
     };
     let mut sel = SelectFlags::default();
+    let mut st = StatsFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
+        if st.take(a, &mut it) {
+            continue;
+        }
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--quiet" => cfg.log = false,
@@ -144,6 +167,10 @@ fn run_clickhouse(args: &[String]) -> ExitCode {
             _ => return usage(),
         }
     }
+    if st.bad {
+        return usage();
+    }
+    cfg.stats = st.recorder("clickhouse", "clickhouse", sel.model.as_deref());
     cfg.selector = match sel.build() {
         Ok(s) => s,
         Err(e) => return fail("ldf-mcp clickhouse", e),
@@ -166,10 +193,15 @@ fn run_files(args: &[String]) -> ExitCode {
         min_bytes: 1024,
         log: true,
         selector: None,
+        stats: Arc::new(Recorder::off()),
     };
     let mut sel = SelectFlags::default();
+    let mut st = StatsFlags::default();
     let mut it = args.iter();
     while let Some(a) = it.next() {
+        if st.take(a, &mut it) {
+            continue;
+        }
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--quiet" => cfg.log = false,
@@ -193,6 +225,10 @@ fn run_files(args: &[String]) -> ExitCode {
         }
     }
     let Some(root) = root else { return usage() };
+    if st.bad {
+        return usage();
+    }
+    cfg.stats = st.recorder("files", "files", sel.model.as_deref());
     cfg.root = std::path::PathBuf::from(root);
     cfg.selector = match sel.build() {
         Ok(s) => s,
@@ -204,6 +240,89 @@ fn run_files(args: &[String]) -> ExitCode {
             eprintln!("ldf-mcp files: {e}");
             ExitCode::from(1)
         }
+    }
+}
+
+/// `--no-stats` and `--name NAME`, shared by the three server modes.
+#[derive(Default)]
+struct StatsFlags {
+    off: bool,
+    name: Option<String>,
+    bad: bool,
+}
+
+impl StatsFlags {
+    /// Consumes `a` (and its value) when it is one of these flags.
+    fn take<'a>(&mut self, a: &str, it: &mut impl Iterator<Item = &'a String>) -> bool {
+        match a {
+            "--no-stats" => self.off = true,
+            "--name" => match it.next() {
+                Some(v) => self.name = Some(v.clone()),
+                None => self.bad = true,
+            },
+            _ => return false,
+        }
+        true
+    }
+
+    fn recorder(
+        &self,
+        mode: &'static str,
+        default_name: &str,
+        model: Option<&str>,
+    ) -> Arc<Recorder> {
+        let path = if self.off {
+            None
+        } else {
+            stats::default_path()
+        };
+        let name = self.name.as_deref().unwrap_or(default_name);
+        Arc::new(Recorder::new(path, mode, name, model))
+    }
+}
+
+fn run_stats(args: &[String]) -> ExitCode {
+    let mut as_json = false;
+    let mut days: Option<u64> = None;
+    let mut file: Option<std::path::PathBuf> = None;
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--json" => as_json = true,
+            "--days" => match it.next().and_then(|v| v.parse().ok()) {
+                Some(n) => days = Some(n),
+                None => return usage(),
+            },
+            "--file" => match it.next() {
+                Some(v) => file = Some(v.into()),
+                None => return usage(),
+            },
+            _ => return usage(),
+        }
+    }
+    let Some(path) = file.or_else(stats::default_path) else {
+        return fail(
+            "ldf-mcp stats",
+            "no statistics file: LDF_STATS=0, or no HOME / LOCALAPPDATA; pass --file".into(),
+        );
+    };
+    let since = days.map(|d| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|n| n.as_secs())
+            .unwrap_or(0)
+            .saturating_sub(d * 86_400)
+    });
+    match stats::summarize(&path, since) {
+        Ok(s) if as_json => {
+            println!("{}", stats::to_json(&s));
+            ExitCode::SUCCESS
+        }
+        Ok(s) => {
+            print!("{}", stats::render(&s, &path));
+            ExitCode::SUCCESS
+        }
+        Err(e) => fail("ldf-mcp stats", format!("{}: {e}", path.display())),
     }
 }
 

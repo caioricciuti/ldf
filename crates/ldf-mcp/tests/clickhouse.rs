@@ -21,6 +21,7 @@ fn clickhouse_mode_end_to_end() {
             "--user",
             &std::env::var("LDF_CLICKHOUSE_USER").unwrap_or_else(|_| "default".into()),
         ])
+        .env("LDF_STATS", "0")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit())

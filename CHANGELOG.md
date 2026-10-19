@@ -7,7 +7,23 @@ stated in `docs/ldf-spec-v0.md`.
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- Local statistics: every `ldf-mcp` mode appends one line per tool response
+  (outcome, reason code, bytes, timings; never content) to
+  `ldf/events.jsonl` under the user's state directory, and `ldf-mcp stats`
+  summarises it (`--days`, `--json`, `--file`). `--name NAME` labels a
+  server, `--no-stats` or `LDF_STATS=0` turns recording off.
+
+### Fixed
+
+- `ldf-mcp proxy` no longer panics on a `tools/list` entry or `initialize`
+  result that is not an object, no longer mistakes a server-to-client
+  request reusing a client id for that client's reply, forgets cancelled
+  requests, forwards invalid UTF-8 untouched instead of exiting, and stops
+  a child that does not exit within 5 s of end of input.
+- The `files` and `clickhouse` servers answer a line that is not JSON with a
+  `-32700` parse error instead of ignoring it (or exiting on invalid UTF-8).
 
 ## 0.3.0 (2026-10-19)
 

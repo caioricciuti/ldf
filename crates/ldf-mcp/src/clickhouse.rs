@@ -28,6 +28,8 @@ pub struct Config {
     /// `max_result_rows` with `result_overflow_mode=break`.
     pub max_rows: u64,
     pub log: bool,
+    /// Local statistics, one line per tool response.
+    pub stats: std::sync::Arc<crate::stats::Recorder>,
 }
 
 pub fn run(cfg: Config) -> Result<(), String> {
@@ -174,12 +176,26 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<Reply, CallError> {
     });
     let json_text = format!("[{}]", rows.join(","));
     if cfg.passthrough {
+        cfg.stats
+            .record_text(name, json_text.len(), json_text.len(), None, 0, true);
         return Ok(Reply {
             text: json_text,
             note,
         });
     }
-    match convert(&json_text, cfg.min_bytes, cfg.selector.as_ref()) {
+    let start = std::time::Instant::now();
+    let converted = convert(&json_text, cfg.min_bytes, cfg.selector.as_ref());
+    let micros = start.elapsed().as_micros() as u64;
+    let out_len = converted.as_ref().map_or(json_text.len(), String::len);
+    cfg.stats.record_text(
+        name,
+        json_text.len(),
+        out_len,
+        converted.as_ref().err().cloned(),
+        micros,
+        false,
+    );
+    match converted {
         Ok(ldf) => {
             if cfg.log {
                 eprintln!(
@@ -193,7 +209,7 @@ fn call(cfg: &Config, name: &str, args: &Json) -> Result<Reply, CallError> {
             Ok(Reply { text: ldf, note })
         }
         Err(why) => {
-            if let (true, Some(why)) = (cfg.log, why) {
+            if let (true, crate::rewrite::Kept::Selector(why)) = (cfg.log, why) {
                 eprintln!("ldf-mcp: {name} {why}");
             }
             Ok(Reply {
@@ -394,6 +410,7 @@ mod tests {
             selector: None,
             max_rows: 10,
             log: false,
+            stats: std::sync::Arc::new(crate::stats::Recorder::off()),
         }
     }
 

@@ -141,3 +141,58 @@ claude mcp add ldf-clickhouse -- "$PWD/target/release/ldf-mcp" clickhouse --url 
 For an A/B of the same questions on JSON, register a second server with
 `--passthrough` added after `clickhouse`. Remove with `claude mcp remove
 ldf-clickhouse`.
+
+## Local statistics
+
+Every mode (`proxy`, `files`, `clickhouse`) appends one line per tool
+response to a file on this machine, and `ldf-mcp stats` summarises it:
+
+```text
+tool responses     3
+  sent as LDF      2 (67%)
+  left as JSON     1
+         1  under --min-bytes
+
+bytes              141.6 KB in, 78.2 KB out, 63.4 KB saved (45%)
+  converted only   141.1 KB -> 77.7 KB (55% of the JSON)
+tokens saved       about 16224 (estimate: bytes / 4, not a tokenizer)
+conversion time    p50 2.1 ms, p95 6.4 ms, max 6.4 ms per response
+```
+
+A line holds the time, mode, server label (`--name NAME`, default the
+downstream command's file name), tool name, outcome (`ldf` or `json`), the
+reason code when it stayed JSON (`small`, `not_json`, `not_dataset`,
+`not_shorter`, `selector`, `is_error`, `passthrough`, `no_text`), bytes in
+and out, conversion time and, in proxy mode, request-to-reply time and the
+`--model` given. It never holds response content, tool arguments or
+environment values, and nothing is sent anywhere.
+
+The file is `LDF_STATS_FILE` when set, otherwise `ldf/events.jsonl` under
+`XDG_STATE_HOME`, `~/.local/state` or (Windows) `LOCALAPPDATA`. At 16 MiB it
+moves to `events.1.jsonl`, replacing the previous one. `--no-stats` or
+`LDF_STATS=0` records nothing. `ldf-mcp stats --days 7` limits the window,
+`--json` prints the totals for scripts, `--file PATH` reads another file.
+With `--passthrough` the responses are recorded as `passthrough` with their
+real sizes, so an A/B run shows both sides.
+
+## Measuring
+
+The statistics count serialization savings: bytes that did not go into the
+model's context. Three things sit between that and what a model is billed.
+
+1. Tokens are not bytes. `bytes / 4` is a rule of thumb; for the measured
+   o200k token ratios of LDF against JSON per dataset see
+   `docs/reports/`, and for Claude the ratio is measured with Anthropic's
+   count_tokens (`eval/count_tokens_claude.py`), not estimated.
+2. Agents truncate or spill large tool results before the model sees them
+   (Claude Code saves results over 25 000 tokens or 50 000 characters to a
+   file; Codex truncates to its per-model limit; OpenCode at 2 000 lines or
+   50 KB). A result that LDF brings under such a limit can mean the model
+   sees all of it instead of a preview, which no byte count captures.
+3. Prompt caching changes what repeated context costs.
+
+For real usage, compare the same task with and without LDF using the agent's
+own counters: Claude Code's OpenTelemetry metric `claude_code.token.usage`
+(`CLAUDE_CODE_ENABLE_TELEMETRY=1`, console or Prometheus exporter) or the
+status line's `context_window` fields; Codex's `TokenCount` events in
+`~/.codex/sessions/`; OpenCode's `opencode stats`.

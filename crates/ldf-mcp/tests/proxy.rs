@@ -20,6 +20,7 @@ impl Session {
             .arg("--")
             .arg(exe)
             .arg("fake-server")
+            .env("LDF_STATS", "0")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
