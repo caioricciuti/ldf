@@ -1,0 +1,1064 @@
+{
+  "batch": 1024,
+  "block": 1024,
+  "command": [
+    "./target/release/ldf-bench",
+    "arrow",
+    "fixtures/medium/deep_nesting.parquet",
+    "fixtures/medium/flat_users.parquet",
+    "fixtures/medium/high_card_strings.parquet",
+    "fixtures/medium/long_text.parquet",
+    "fixtures/medium/nested_orders.parquet",
+    "fixtures/medium/numeric_mix.parquet",
+    "fixtures/medium/repetitive_logs.parquet",
+    "fixtures/medium/sparse_events.parquet",
+    "fixtures/medium/unicode_strings.parquet",
+    "fixtures/medium/wide_table.parquet",
+    "--iters",
+    "5",
+    "--out",
+    "results/arrow-medium"
+  ],
+  "datasets": [
+    {
+      "name": "deep_nesting",
+      "paths": [
+        {
+          "bytes_out": 663762,
+          "error": null,
+          "output_hash": "6987892edc66d15a",
+          "path": "value-batch",
+          "rows": 2000,
+          "secs": [
+            0.011559375,
+            0.007519042,
+            0.006661375,
+            0.006383208,
+            0.006666083
+          ],
+          "usage_after": {
+            "max_rss_bytes": 25116672,
+            "system_cpu_secs": 0.004889999999999999,
+            "user_cpu_secs": 0.036173
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009599999999999999,
+            "user_cpu_secs": 0.001945
+          }
+        },
+        {
+          "bytes_out": 663762,
+          "error": null,
+          "output_hash": "6987892edc66d15a",
+          "path": "direct-batch",
+          "rows": 2000,
+          "secs": [
+            0.005778417,
+            0.005080417,
+            0.00483775,
+            0.004594292,
+            0.004549375
+          ],
+          "usage_after": {
+            "max_rss_bytes": 20250624,
+            "system_cpu_secs": 0.003152,
+            "user_cpu_secs": 0.024588
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.00107,
+            "user_cpu_secs": 0.0018419999999999999
+          }
+        },
+        {
+          "bytes_out": 663762,
+          "error": null,
+          "output_hash": "6987892edc66d15a",
+          "path": "value-block",
+          "rows": 2000,
+          "secs": [
+            0.007572334,
+            0.006638459,
+            0.006358666,
+            0.006458167,
+            0.006467208
+          ],
+          "usage_after": {
+            "max_rss_bytes": 20889600,
+            "system_cpu_secs": 0.0028309999999999997,
+            "user_cpu_secs": 0.033347999999999996
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000971,
+            "user_cpu_secs": 0.001712
+          }
+        },
+        {
+          "bytes_out": 663762,
+          "error": null,
+          "output_hash": "6987892edc66d15a",
+          "path": "direct-block",
+          "rows": 2000,
+          "secs": [
+            0.0053535,
+            0.004633708,
+            0.00441175,
+            0.004561416,
+            0.004879041
+          ],
+          "usage_after": {
+            "max_rss_bytes": 16318464,
+            "system_cpu_secs": 0.002482,
+            "user_cpu_secs": 0.023927
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000932,
+            "user_cpu_secs": 0.0016699999999999998
+          }
+        }
+      ]
+    },
+    {
+      "name": "flat_users",
+      "paths": [
+        {
+          "bytes_out": 647457,
+          "error": null,
+          "output_hash": "d986421666a0e2b6",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.009660459,
+            0.007076667,
+            0.00685375,
+            0.006915542,
+            0.006869791
+          ],
+          "usage_after": {
+            "max_rss_bytes": 17809408,
+            "system_cpu_secs": 0.002644,
+            "user_cpu_secs": 0.036299
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009809999999999999,
+            "user_cpu_secs": 0.001674
+          }
+        },
+        {
+          "bytes_out": 647457,
+          "error": null,
+          "output_hash": "d986421666a0e2b6",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.00299025,
+            0.002697709,
+            0.002563459,
+            0.00254825,
+            0.002557208
+          ],
+          "usage_after": {
+            "max_rss_bytes": 12304384,
+            "system_cpu_secs": 0.001679,
+            "user_cpu_secs": 0.014326
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000985,
+            "user_cpu_secs": 0.0016589999999999999
+          }
+        },
+        {
+          "bytes_out": 647457,
+          "error": null,
+          "output_hash": "d986421666a0e2b6",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.007440917,
+            0.006934,
+            0.006891958,
+            0.006865125,
+            0.006770667
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11780096,
+            "system_cpu_secs": 0.001867,
+            "user_cpu_secs": 0.035398
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008349999999999999,
+            "user_cpu_secs": 0.001524
+          }
+        },
+        {
+          "bytes_out": 647457,
+          "error": null,
+          "output_hash": "d986421666a0e2b6",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.002875208,
+            0.002766625,
+            0.002853917,
+            0.002591958,
+            0.002572875
+          ],
+          "usage_after": {
+            "max_rss_bytes": 12140544,
+            "system_cpu_secs": 0.001805,
+            "user_cpu_secs": 0.014386
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009509999999999999,
+            "user_cpu_secs": 0.001598
+          }
+        }
+      ]
+    },
+    {
+      "name": "high_card_strings",
+      "paths": [
+        {
+          "bytes_out": 1842891,
+          "error": null,
+          "output_hash": "a7f2ad94790816ed",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.012629417,
+            0.008964958,
+            0.008805417,
+            0.00908625,
+            0.009134625
+          ],
+          "usage_after": {
+            "max_rss_bytes": 26181632,
+            "system_cpu_secs": 0.003313,
+            "user_cpu_secs": 0.045924
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008889999999999999,
+            "user_cpu_secs": 0.001545
+          }
+        },
+        {
+          "bytes_out": 1842891,
+          "error": null,
+          "output_hash": "a7f2ad94790816ed",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.005729125,
+            0.005142625,
+            0.004917583,
+            0.004879458,
+            0.004775833
+          ],
+          "usage_after": {
+            "max_rss_bytes": 19873792,
+            "system_cpu_secs": 0.002924,
+            "user_cpu_secs": 0.025401999999999997
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0010819999999999998,
+            "user_cpu_secs": 0.0018169999999999998
+          }
+        },
+        {
+          "bytes_out": 1842891,
+          "error": null,
+          "output_hash": "a7f2ad94790816ed",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.009305666,
+            0.008557833,
+            0.008695167,
+            0.008556417,
+            0.008481833
+          ],
+          "usage_after": {
+            "max_rss_bytes": 14123008,
+            "system_cpu_secs": 0.002682,
+            "user_cpu_secs": 0.043785
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001075,
+            "user_cpu_secs": 0.001838
+          }
+        },
+        {
+          "bytes_out": 1842891,
+          "error": null,
+          "output_hash": "a7f2ad94790816ed",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.00523425,
+            0.004764542,
+            0.004691083,
+            0.004724583,
+            0.00479925
+          ],
+          "usage_after": {
+            "max_rss_bytes": 12746752,
+            "system_cpu_secs": 0.002159,
+            "user_cpu_secs": 0.024738
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000975,
+            "user_cpu_secs": 0.001707
+          }
+        }
+      ]
+    },
+    {
+      "name": "long_text",
+      "paths": [
+        {
+          "bytes_out": 2368047,
+          "error": null,
+          "output_hash": "0a537332180219a7",
+          "path": "value-batch",
+          "rows": 2000,
+          "secs": [
+            0.007322166,
+            0.004794375,
+            0.004851708,
+            0.004443459,
+            0.00446975
+          ],
+          "usage_after": {
+            "max_rss_bytes": 20119552,
+            "system_cpu_secs": 0.002374,
+            "user_cpu_secs": 0.024333
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000855,
+            "user_cpu_secs": 0.001594
+          }
+        },
+        {
+          "bytes_out": 2368047,
+          "error": null,
+          "output_hash": "0a537332180219a7",
+          "path": "direct-batch",
+          "rows": 2000,
+          "secs": [
+            0.00454675,
+            0.004067833,
+            0.004161667,
+            0.003924083,
+            0.003883541
+          ],
+          "usage_after": {
+            "max_rss_bytes": 18677760,
+            "system_cpu_secs": 0.0023309999999999997,
+            "user_cpu_secs": 0.021091
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0010819999999999998,
+            "user_cpu_secs": 0.001779
+          }
+        },
+        {
+          "bytes_out": 2368047,
+          "error": null,
+          "output_hash": "0a537332180219a7",
+          "path": "value-block",
+          "rows": 2000,
+          "secs": [
+            0.00520075,
+            0.004414583,
+            0.004509708,
+            0.004413666,
+            0.004366417
+          ],
+          "usage_after": {
+            "max_rss_bytes": 17432576,
+            "system_cpu_secs": 0.001939,
+            "user_cpu_secs": 0.02379
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001071,
+            "user_cpu_secs": 0.0017519999999999999
+          }
+        },
+        {
+          "bytes_out": 2368047,
+          "error": null,
+          "output_hash": "0a537332180219a7",
+          "path": "direct-block",
+          "rows": 2000,
+          "secs": [
+            0.004454042,
+            0.004198833,
+            0.003940833,
+            0.003723667,
+            0.003729416
+          ],
+          "usage_after": {
+            "max_rss_bytes": 17104896,
+            "system_cpu_secs": 0.002064,
+            "user_cpu_secs": 0.02062
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000946,
+            "user_cpu_secs": 0.001741
+          }
+        }
+      ]
+    },
+    {
+      "name": "nested_orders",
+      "paths": [
+        {
+          "bytes_out": 1204376,
+          "error": null,
+          "output_hash": "cab6e07c65d8f4bf",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.024755958,
+            0.020910125,
+            0.019314334,
+            0.01984775,
+            0.019455084
+          ],
+          "usage_after": {
+            "max_rss_bytes": 33652736,
+            "system_cpu_secs": 0.0058119999999999995,
+            "user_cpu_secs": 0.09972299999999999
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001018,
+            "user_cpu_secs": 0.001689
+          }
+        },
+        {
+          "bytes_out": 0,
+          "error": "not supported by the direct Arrow path: `items` is a list of structs (a child table)",
+          "output_hash": "",
+          "path": "direct-batch",
+          "rows": 0,
+          "secs": [],
+          "usage_after": {
+            "max_rss_bytes": 13058048,
+            "system_cpu_secs": 0.0017029999999999999,
+            "user_cpu_secs": 0.004124
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001201,
+            "user_cpu_secs": 0.001973
+          }
+        },
+        {
+          "bytes_out": 1206230,
+          "error": null,
+          "output_hash": "a159f23c6f2407d5",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.019654417,
+            0.018899084,
+            0.018576667,
+            0.01886375,
+            0.018754042
+          ],
+          "usage_after": {
+            "max_rss_bytes": 14925824,
+            "system_cpu_secs": 0.00279,
+            "user_cpu_secs": 0.094467
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009149999999999999,
+            "user_cpu_secs": 0.0016129999999999999
+          }
+        },
+        {
+          "bytes_out": 0,
+          "error": "not supported by the direct Arrow path: `items` is a list of structs (a child table)",
+          "output_hash": "",
+          "path": "direct-block",
+          "rows": 0,
+          "secs": [],
+          "usage_after": {
+            "max_rss_bytes": 10829824,
+            "system_cpu_secs": 0.001274,
+            "user_cpu_secs": 0.0026409999999999997
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000945,
+            "user_cpu_secs": 0.0017009999999999998
+          }
+        }
+      ]
+    },
+    {
+      "name": "numeric_mix",
+      "paths": [
+        {
+          "bytes_out": 1374691,
+          "error": null,
+          "output_hash": "40c79a51dd71068e",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.0148685,
+            0.01140575,
+            0.011650292,
+            0.011423542,
+            0.011720708
+          ],
+          "usage_after": {
+            "max_rss_bytes": 22773760,
+            "system_cpu_secs": 0.003156,
+            "user_cpu_secs": 0.058831999999999995
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008219999999999999,
+            "user_cpu_secs": 0.001557
+          }
+        },
+        {
+          "bytes_out": 1374691,
+          "error": null,
+          "output_hash": "40c79a51dd71068e",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.006066042,
+            0.005765542,
+            0.005734416,
+            0.005679834,
+            0.005586334
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11681792,
+            "system_cpu_secs": 0.0021639999999999997,
+            "user_cpu_secs": 0.029505
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001023,
+            "user_cpu_secs": 0.00181
+          }
+        },
+        {
+          "bytes_out": 1374691,
+          "error": null,
+          "output_hash": "40c79a51dd71068e",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.0112455,
+            0.010751125,
+            0.010688625,
+            0.010724083,
+            0.010813791
+          ],
+          "usage_after": {
+            "max_rss_bytes": 12550144,
+            "system_cpu_secs": 0.00211,
+            "user_cpu_secs": 0.054523999999999996
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000841,
+            "user_cpu_secs": 0.0015739999999999999
+          }
+        },
+        {
+          "bytes_out": 1374691,
+          "error": null,
+          "output_hash": "40c79a51dd71068e",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.006050625,
+            0.005651459,
+            0.005679,
+            0.005659167,
+            0.005608291
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11157504,
+            "system_cpu_secs": 0.001895,
+            "user_cpu_secs": 0.029339999999999998
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000922,
+            "user_cpu_secs": 0.00166
+          }
+        }
+      ]
+    },
+    {
+      "name": "repetitive_logs",
+      "paths": [
+        {
+          "bytes_out": 693012,
+          "error": null,
+          "output_hash": "582dc67b7858cacd",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.008896,
+            0.006411667,
+            0.006394125,
+            0.006273209,
+            0.00646525
+          ],
+          "usage_after": {
+            "max_rss_bytes": 18546688,
+            "system_cpu_secs": 0.002067,
+            "user_cpu_secs": 0.033378
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000797,
+            "user_cpu_secs": 0.001575
+          }
+        },
+        {
+          "bytes_out": 693012,
+          "error": null,
+          "output_hash": "582dc67b7858cacd",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.002471417,
+            0.002208584,
+            0.00213975,
+            0.0021185,
+            0.002088875
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11796480,
+            "system_cpu_secs": 0.001614,
+            "user_cpu_secs": 0.012131
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000988,
+            "user_cpu_secs": 0.001728
+          }
+        },
+        {
+          "bytes_out": 693012,
+          "error": null,
+          "output_hash": "582dc67b7858cacd",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.00678375,
+            0.006272125,
+            0.006249666,
+            0.006225333,
+            0.006386917
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11304960,
+            "system_cpu_secs": 0.001441,
+            "user_cpu_secs": 0.032885
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008439999999999999,
+            "user_cpu_secs": 0.00156
+          }
+        },
+        {
+          "bytes_out": 693012,
+          "error": null,
+          "output_hash": "582dc67b7858cacd",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.002355791,
+            0.002128208,
+            0.002129083,
+            0.002109209,
+            0.002089125
+          ],
+          "usage_after": {
+            "max_rss_bytes": 10289152,
+            "system_cpu_secs": 0.001253,
+            "user_cpu_secs": 0.011947
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000825,
+            "user_cpu_secs": 0.00156
+          }
+        }
+      ]
+    },
+    {
+      "name": "sparse_events",
+      "paths": [
+        {
+          "bytes_out": 2066153,
+          "error": null,
+          "output_hash": "287050a448a23ddc",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.020456667,
+            0.016322583,
+            0.015671459,
+            0.015634417,
+            0.015919833
+          ],
+          "usage_after": {
+            "max_rss_bytes": 27688960,
+            "system_cpu_secs": 0.0035099999999999997,
+            "user_cpu_secs": 0.081304
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0007779999999999999,
+            "user_cpu_secs": 0.001519
+          }
+        },
+        {
+          "bytes_out": 2066153,
+          "error": null,
+          "output_hash": "287050a448a23ddc",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.008200875,
+            0.007060542,
+            0.006936,
+            0.007111,
+            0.007148792
+          ],
+          "usage_after": {
+            "max_rss_bytes": 15106048,
+            "system_cpu_secs": 0.002379,
+            "user_cpu_secs": 0.037057
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001085,
+            "user_cpu_secs": 0.001898
+          }
+        },
+        {
+          "bytes_out": 2098186,
+          "error": null,
+          "output_hash": "68ecf2bd2dc268f1",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.016412125,
+            0.015374042,
+            0.015456708,
+            0.01527775,
+            0.015137041
+          ],
+          "usage_after": {
+            "max_rss_bytes": 13385728,
+            "system_cpu_secs": 0.002332,
+            "user_cpu_secs": 0.077941
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.000908,
+            "user_cpu_secs": 0.0017059999999999998
+          }
+        },
+        {
+          "bytes_out": 2098186,
+          "error": null,
+          "output_hash": "68ecf2bd2dc268f1",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.007868375,
+            0.007107833,
+            0.006967541,
+            0.00702975,
+            0.007253208
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11730944,
+            "system_cpu_secs": 0.0016179999999999999,
+            "user_cpu_secs": 0.037056
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008169999999999999,
+            "user_cpu_secs": 0.001625
+          }
+        }
+      ]
+    },
+    {
+      "name": "unicode_strings",
+      "paths": [
+        {
+          "bytes_out": 652013,
+          "error": null,
+          "output_hash": "be8101bf54b050c7",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.009424791,
+            0.00717275,
+            0.007248083,
+            0.007322584,
+            0.007176
+          ],
+          "usage_after": {
+            "max_rss_bytes": 17530880,
+            "system_cpu_secs": 0.002107,
+            "user_cpu_secs": 0.037619
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0008259999999999999,
+            "user_cpu_secs": 0.001601
+          }
+        },
+        {
+          "bytes_out": 652013,
+          "error": null,
+          "output_hash": "be8101bf54b050c7",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.003546042,
+            0.003046167,
+            0.003061,
+            0.003093959,
+            0.003061417
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11173888,
+            "system_cpu_secs": 0.0016519999999999998,
+            "user_cpu_secs": 0.016856
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009519999999999999,
+            "user_cpu_secs": 0.001749
+          }
+        },
+        {
+          "bytes_out": 652013,
+          "error": null,
+          "output_hash": "be8101bf54b050c7",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.007669708,
+            0.007299375,
+            0.007097083,
+            0.007202041,
+            0.007291167
+          ],
+          "usage_after": {
+            "max_rss_bytes": 11239424,
+            "system_cpu_secs": 0.001718,
+            "user_cpu_secs": 0.037182
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0007999999999999999,
+            "user_cpu_secs": 0.0015559999999999999
+          }
+        },
+        {
+          "bytes_out": 652013,
+          "error": null,
+          "output_hash": "be8101bf54b050c7",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.003444458,
+            0.003135458,
+            0.003075916,
+            0.003144917,
+            0.003020708
+          ],
+          "usage_after": {
+            "max_rss_bytes": 10272768,
+            "system_cpu_secs": 0.001601,
+            "user_cpu_secs": 0.016772
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009159999999999999,
+            "user_cpu_secs": 0.0016339999999999998
+          }
+        }
+      ]
+    },
+    {
+      "name": "wide_table",
+      "paths": [
+        {
+          "bytes_out": 2753140,
+          "error": null,
+          "output_hash": "247d00b487a532e4",
+          "path": "value-batch",
+          "rows": 10000,
+          "secs": [
+            0.04707825,
+            0.04329,
+            0.042715333,
+            0.040854125,
+            0.040897875
+          ],
+          "usage_after": {
+            "max_rss_bytes": 57327616,
+            "system_cpu_secs": 0.011571,
+            "user_cpu_secs": 0.20388599999999998
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009149999999999999,
+            "user_cpu_secs": 0.001555
+          }
+        },
+        {
+          "bytes_out": 2753140,
+          "error": null,
+          "output_hash": "247d00b487a532e4",
+          "path": "direct-batch",
+          "rows": 10000,
+          "secs": [
+            0.014942167,
+            0.014209375,
+            0.014271958,
+            0.013855459,
+            0.013826917
+          ],
+          "usage_after": {
+            "max_rss_bytes": 24690688,
+            "system_cpu_secs": 0.0037819999999999998,
+            "user_cpu_secs": 0.070495
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001193,
+            "user_cpu_secs": 0.001977
+          }
+        },
+        {
+          "bytes_out": 2753140,
+          "error": null,
+          "output_hash": "247d00b487a532e4",
+          "path": "value-block",
+          "rows": 10000,
+          "secs": [
+            0.033774833,
+            0.033319958,
+            0.033144875,
+            0.033309333,
+            0.033822042
+          ],
+          "usage_after": {
+            "max_rss_bytes": 22691840,
+            "system_cpu_secs": 0.004992,
+            "user_cpu_secs": 0.165133
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.0009729999999999999,
+            "user_cpu_secs": 0.001782
+          }
+        },
+        {
+          "bytes_out": 2753140,
+          "error": null,
+          "output_hash": "247d00b487a532e4",
+          "path": "direct-block",
+          "rows": 10000,
+          "secs": [
+            0.014789833,
+            0.014178917,
+            0.013924917,
+            0.0139075,
+            0.014014459
+          ],
+          "usage_after": {
+            "max_rss_bytes": 19054592,
+            "system_cpu_secs": 0.0035359999999999996,
+            "user_cpu_secs": 0.070134
+          },
+          "usage_before": {
+            "max_rss_bytes": 6127616,
+            "system_cpu_secs": 0.001,
+            "user_cpu_secs": 0.001856
+          }
+        }
+      ]
+    }
+  ],
+  "iters": 5,
+  "sysinfo": {
+    "arch": "aarch64",
+    "cargo_profile": "release",
+    "cpu": "Apple M2 Pro",
+    "crate_versions": [
+      [
+        "arrow",
+        "60.0.0"
+      ],
+      [
+        "criterion",
+        "0.8.2"
+      ],
+      [
+        "csv",
+        "1.4.0"
+      ],
+      [
+        "parquet",
+        "60.0.0"
+      ],
+      [
+        "serde_json",
+        "1.0.151"
+      ],
+      [
+        "simd-json",
+        "0.18.1"
+      ],
+      [
+        "tiktoken-rs",
+        "0.12.1"
+      ]
+    ],
+    "git_commit": "2291f06",
+    "logical_cpus": 10,
+    "memory_bytes": 17179869184,
+    "os": "Darwin 27.0.0",
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+  },
+  "tool": "ldf-bench arrow"
+}

@@ -79,8 +79,11 @@ where not" with a cheap switch.
 - Done 2026-10-18: block-interleaved child tables (`ldf::BlockEncoder`,
   spec section 8); the streaming path now reaches the batch encoder's size
   on uniform data with bounded memory.
-- Next: Arrow RecordBatch fast path for Parquet input without
-  materialising `Value`.
+- Done 2026-10-19: Arrow RecordBatch fast path (`ldf::arrow`, feature
+  `arrow`), used by `ldf-mcp convert` for Parquet; 1.9x to 4.8x faster than
+  the Value path at 1M rows, same bytes (`docs/reports/2026-10-19-engine`).
+- Next: child tables (lists of structs) on the Arrow path; the selector
+  inside `ldf-mcp`; Stage C on held-out data (priced, waiting for approval).
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
 - Round-trip and conformance fixtures for LDF itself, in the same style as
