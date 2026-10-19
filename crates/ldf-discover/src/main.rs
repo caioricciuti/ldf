@@ -5,6 +5,10 @@
 //! ldf-discover show --id ID --input F [--sample N]   one candidate's output
 //! ldf-discover stage-a [--scale medium] [--sample 200] [--recheck 1000]
 //!                      [--dataset a,b] [--max-ratio 0.9] [--top 10] [--out DIR]
+//! ldf-discover profile --input F [--sample N]          structural traits, JSON
+//! ldf-discover select --model M --input F [--sample N] [--evidence FILE]
+//!                     [--min-n 50] [--max-drop 3] [--extrapolate-rows]
+//!                     [--require-key-order] [--json]
 //! ```
 
 use std::fs;
@@ -45,7 +49,12 @@ fn main() -> ExitCode {
         Some("space") => cmd_space(),
         Some("show") => cmd_show(&args),
         Some("stage-a") => cmd_stage_a(&args),
-        _ => Err("usage: ldf-discover space | show --id ID --input F | stage-a [...]".into()),
+        Some("profile") => cmd_profile(&args),
+        Some("select") => cmd_select(&args),
+        _ => Err(
+            "usage: ldf-discover space | show --id ID --input F | stage-a [...] | profile --input F | select --model M --input F"
+                .into(),
+        ),
     };
     match res {
         Ok(()) => ExitCode::SUCCESS,
@@ -54,6 +63,72 @@ fn main() -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+fn sample_flag(args: &[String]) -> usize {
+    flag(args, "--sample")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(usize::MAX)
+}
+
+fn cmd_profile(args: &[String]) -> Result<(), String> {
+    let input = flag(args, "--input").ok_or("--input required")?;
+    let recs = load(Path::new(input), sample_flag(args))?;
+    let p = ldf_discover::select::profile(&recs);
+    println!("{}", serde_json::to_string(&p).map_err(|e| e.to_string())?);
+    Ok(())
+}
+
+fn cmd_select(args: &[String]) -> Result<(), String> {
+    use ldf_discover::select::{Evidence, Policy, select};
+    let model = flag(args, "--model").ok_or("--model required")?;
+    let input = flag(args, "--input").ok_or("--input required")?;
+    let ev_path = flag(args, "--evidence").unwrap_or("docs/reports/evidence/evidence.json");
+    let evidence: Vec<Evidence> =
+        serde_json::from_slice(&fs::read(ev_path).map_err(|e| format!("{ev_path}: {e}"))?)
+            .map_err(|e| format!("{ev_path}: {e}"))?;
+    let mut policy = Policy::default();
+    if let Some(v) = flag(args, "--min-n").and_then(|s| s.parse().ok()) {
+        policy.min_n = v;
+    }
+    if let Some(v) = flag(args, "--max-drop").and_then(|s| s.parse().ok()) {
+        policy.max_drop_pp = v;
+    }
+    policy.extrapolate_rows = args.iter().any(|a| a == "--extrapolate-rows");
+    policy.require_key_order = args.iter().any(|a| a == "--require-key-order");
+    let recs = load(Path::new(input), sample_flag(args))?;
+    let tk = ldf_bench::tokens::Tokenizers::new(&["o200k_base"])?;
+    let count = |s: &str| tk.count(s)[0].tokens;
+    let d = select(&recs, model, &evidence, &policy, &count);
+    if args.iter().any(|a| a == "--json") {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&d).map_err(|e| e.to_string())?
+        );
+        return Ok(());
+    }
+    println!(
+        "model {model}, {} rows, traits {:?} (min fill {:.2})",
+        d.profile.rows,
+        d.profile.traits.names(),
+        d.profile.min_fill
+    );
+    for v in &d.verdicts {
+        println!(
+            "  {:<32} {:>8} o200k  {:<9} round trip {}",
+            v.choice.name(),
+            v.tokens
+                .map(|t| t.to_string())
+                .unwrap_or_else(|| "-".into()),
+            if v.accepted { "accepted" } else { "rejected" },
+            v.round_trip
+        );
+        for n in &v.notes {
+            println!("      {n}");
+        }
+    }
+    println!("choice: {}", d.choice.name());
+    Ok(())
 }
 
 fn cmd_space() -> Result<(), String> {
