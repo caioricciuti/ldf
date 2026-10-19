@@ -16,6 +16,9 @@
 #   eval/plan.sh sparse-sweep-build     sparse_events at threshold 0.75 (free)
 #   eval/plan.sh sparse-sweep-deepseek  deepseek-chat on it (~$0.04, cap $0.10)
 #   eval/plan.sh stage-c-build          Stage C bundles on held-out data (free)
+#   eval/plan.sh stage-c-opus           Opus 5.5 on them, distinct renderings only (~$9-17, cap $17)
+#   eval/plan.sh stage-c-sonnet         Sonnet 5.5 on them (~$7.50-11.50, cap $12)
+#   eval/plan.sh stage-c-gpt            GPT on them; needs GPT_MODEL and GPT_PRICE_IN/CACHED/OUT set (cap $GPT_BUDGET)
 #   eval/plan.sh all           the first four stages above, in that order
 #   eval/plan.sh score         regrade every responses file into results.<model>.md
 set -euo pipefail
@@ -97,6 +100,40 @@ stage_c_build() {
       --out "eval/out/stage-c/$b"
   done
 }
+# Stage C runs: only renderings that differ are sent (ldf-s75 equals ldf on
+# flat_users and mixed_types; ldf-hoisted equals ldf and ldf-hs75 equals
+# ldf-s75 on sparse_events). 1 789 prompts, 20.6M o200k input tokens, about
+# 27.6M Claude tokens (1.34x o200k, measured on the Opus responses), almost
+# all prompt-cache reads. The cap is per bundle; the four caps sum to the
+# stage total in the header.
+STAGE_C=(
+  "flat_users json,toon,ldf"
+  "nested_orders json,toon,ldf,ldf-s75,ldf-hoisted,ldf-hs75"
+  "sparse_events json,toon,ldf,ldf-s75"
+  "mixed_types json,toon,ldf"
+)
+SONNET=(--provider anthropic --model claude-sonnet-5-5 --effort low --price-input 2 --price-cached 0.20 --price-output 10)
+stage_c() {
+  local total=$1; shift
+  for entry in "${STAGE_C[@]}"; do
+    read -r b formats <<< "$entry"
+    # Budget split in proportion to the bundle's share of input tokens.
+    local share
+    case "$b" in
+      flat_users) share=0.10 ;; nested_orders) share=0.60 ;; sparse_events) share=0.24 ;; mixed_types) share=0.06 ;;
+    esac
+    run --bundle "eval/out/stage-c/$b" "$@" --formats "$formats" --max-tokens 4096 \
+      --budget "$(python3 -c "print(round($total * $share, 2))")"
+  done
+}
+stage_stage_c_opus() { stage_c 17 "${OPUS[@]}"; }
+stage_stage_c_sonnet() { stage_c 12 "${SONNET[@]}"; }
+stage_stage_c_gpt() {
+  : "${GPT_MODEL:?set GPT_MODEL}" "${GPT_PRICE_IN:?set GPT_PRICE_IN (USD per M input)}" \
+    "${GPT_PRICE_CACHED:?set GPT_PRICE_CACHED}" "${GPT_PRICE_OUT:?set GPT_PRICE_OUT}" "${GPT_BUDGET:?set GPT_BUDGET (USD, whole stage)}"
+  stage_c "$GPT_BUDGET" --provider openai --model "$GPT_MODEL" --reasoning-effort low \
+    --price-input "$GPT_PRICE_IN" --price-cached "$GPT_PRICE_CACHED" --price-output "$GPT_PRICE_OUT"
+}
 stage_b() {
   local cap=$1; shift
   for entry in "${STAGE_B[@]}"; do
@@ -120,7 +157,7 @@ stage_score() {
   done
 }
 
-[ $# -gt 0 ] || { sed -n '2,20p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,23p' "$0"; exit 1; }
 for stage in "$@"; do
   case "$stage" in
     opus-ldf) stage_opus_ldf ;;
@@ -132,6 +169,9 @@ for stage in "$@"; do
     stage-b-build) stage_b_build ;;
     sparse-sweep-build) sparse_sweep_build ;;
     stage-c-build) stage_c_build ;;
+    stage-c-opus) stage_stage_c_opus ;;
+    stage-c-sonnet) stage_stage_c_sonnet ;;
+    stage-c-gpt) stage_stage_c_gpt ;;
     sparse-sweep-deepseek) stage_sparse_sweep_deepseek ;;
     stage-b-haiku) stage_stage_b_haiku ;;
     stage-b-deepseek) stage_stage_b_deepseek ;;
