@@ -3,27 +3,43 @@
 # attaches them to a GitHub release whose notes are the matching CHANGELOG
 # section. The only external action is actions/checkout, pinned to a
 # commit hash; uploads go through the gh CLI that the runners ship with.
+#
+# Run by hand (workflow_dispatch) it builds an existing tag into its
+# existing release, for one target or all, without recreating the release.
+# Intel macOS is cross-compiled on Apple Silicon: the macos-13 runner is
+# retired and a job asking for it stays queued forever.
 name: release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build, e.g. v0.2.0"
+        required: true
+      target:
+        description: "Only this target triple (empty: all four)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
 
 env:
   CARGO_TERM_COLOR: always
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   create:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Release notes from CHANGELOG.md
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           awk -v v="$version" '
             /^## / { on = ($2 == v) ; next }
             on { print }
@@ -33,17 +49,19 @@ jobs:
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+        run: gh release create "$TAG" --title "$TAG" --notes-file notes.md --verify-tag
 
   build:
     needs: create
+    # Runs after create, or without it when started by hand.
+    if: ${{ !failure() && !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-14
             target: aarch64-apple-darwin
-          - os: macos-13
+          - os: macos-14
             target: x86_64-apple-darwin
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
@@ -51,20 +69,32 @@ jobs:
             target: aarch64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
+    env:
+      RUN: ${{ github.event_name == 'push' || inputs.target == '' || inputs.target == matrix.target }}
     steps:
+      - name: Check the tag
+        if: env.RUN == 'true'
+        run: '[[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release tag: $TAG"; exit 1; }'
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.RUN == 'true'
+        with:
+          ref: refs/tags/${{ env.TAG }}
       - name: Toolchain
+        if: env.RUN == 'true'
         run: rustup target add ${{ matrix.target }} && cargo --version
       - name: Build
+        if: env.RUN == 'true'
         run: cargo build --release --locked -p ldf-mcp --target ${{ matrix.target }}
       - name: Package
+        if: env.RUN == 'true'
         run: |
-          name="ldf-mcp-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          name="ldf-mcp-${TAG}-${{ matrix.target }}"
           mkdir -p "dist/$name"
           cp "target/${{ matrix.target }}/release/ldf-mcp" README.md LICENSE-MIT LICENSE-APACHE CHANGELOG.md "dist/$name/"
           tar -C dist -czf "dist/$name.tar.gz" "$name"
           cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256" && cat "$name.tar.gz.sha256"
       - name: Upload
+        if: env.RUN == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.sha256 --clobber
+        run: gh release upload "$TAG" dist/*.tar.gz dist/*.sha256 --clobber
