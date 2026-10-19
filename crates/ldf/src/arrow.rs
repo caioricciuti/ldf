@@ -285,6 +285,7 @@ fn plan_field(
         nullable,
         child: None,
         hint: 0,
+        keys: Vec::new(),
     });
     leaves.push(Leaf { indexes, source });
 }

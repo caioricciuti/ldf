@@ -1,7 +1,7 @@
 {
-  "version": "0.1",
+  "version": "0.2",
   "category": "decode",
-  "description": "LDF v0.1 decoder fixtures: input is document text, expected is the JSON array of records, or shouldError.",
+  "description": "LDF v0.2 decoder fixtures: input is document text, expected is the JSON array of records, or shouldError.",
   "tests": [
     {
       "name": "typed cells",
@@ -164,6 +164,52 @@
       "input": "@records s:s,n:i\n\"@x\",1\n",
       "expected": [{"s": "@x", "n": 1}],
       "spec": "5"
+    },
+    {
+      "name": "hoisted cell",
+      "input": "@records id:i,items:[sku,qty]\n1,[[\"E5\",3],[\"C3\",4]]\n",
+      "expected": [{"id": 1, "items": [{"sku": "E5", "qty": 3}, {"sku": "C3", "qty": 4}]}],
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "hoisted cells: empty array, null, absent, nullable marker",
+      "input": "@records id:i,items:[k]?,n:i\n1,[],1\n2,null,2\n3,,3\n",
+      "expected": [{"id": 1, "items": [], "n": 1}, {"id": 2, "items": null, "n": 2}, {"id": 3, "n": 3}],
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "hoisted keys quoted in the key list",
+      "input": "@records items:[\"a,b\",\"]\",c]\n[[1,2.0,\"x\"]]\n",
+      "expected": [{"items": [{"a,b": 1, "]": 2.0, "c": "x"}]}],
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "hoisted element with the wrong number of values is an error",
+      "input": "@records items:[a,b]\n[[1]]\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "hoisted cell that is not an array is an error",
+      "input": "@records items:[a]\n{\"a\":1}\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "hoisted element that is not an array is an error",
+      "input": "@records items:[a]\n[{\"a\":1}]\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3, 7.2a"
+    },
+    {
+      "name": "empty key list is an error",
+      "input": "@records items:[]\n[]\n",
+      "expected": null,
+      "shouldError": true,
+      "spec": "3, 7.2a"
     }
   ]
 }

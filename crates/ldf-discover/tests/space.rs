@@ -1,5 +1,5 @@
 //! Every configuration must decode back to its input; the v0.1 point must
-//! be LDF v0.1 byte for byte.
+//! be LDF v0.1 byte for byte, the hoisted point `crates/ldf` with `hoist`.
 
 use std::path::Path;
 
@@ -60,8 +60,19 @@ fn v01_point_is_ldf_v01() {
             ldf::encode_with(&recs, &ldf::Options::V0),
             "{name}"
         );
+        assert_eq!(
+            encode(&recs, &Config::LDF_HOISTED),
+            ldf::encode_with(&recs, &HOIST),
+            "{name}"
+        );
     }
 }
+
+const HOIST: ldf::Options = ldf::Options {
+    sparse_threshold: ldf::Options::DEFAULT_SPARSE_THRESHOLD,
+    ordinal_joins: false,
+    hoist: true,
+};
 
 /// A deterministic slice of the space on every fixture. `ldf-discover
 /// stage-a` runs all of it and reports any lossy output.
@@ -127,9 +138,43 @@ fn edge_cases_are_lossless() {
             "scalar records",
             vec![Value::from(1), Value::from("x"), Value::Null],
         ),
+        (
+            "hoistable arrays with null, empty and absent cells",
+            vec![
+                obj! {"id" => 1, "items" => vec![obj! {"k" => "a", "n" => 1}, obj! {"k" => Value::Null, "n" => 2.0}]},
+                obj! {"id" => 2, "items" => Vec::<Value>::new()},
+                obj! {"id" => 3, "items" => Value::Null},
+                obj! {"id" => 4},
+            ],
+        ),
+        (
+            "key order differs, so a child table",
+            vec![
+                obj! {"id" => 1, "items" => vec![obj! {"k" => "a", "n" => 1}]},
+                obj! {"id" => 2, "items" => vec![obj! {"n" => 2, "k" => "b"}]},
+            ],
+        ),
+        (
+            "nested element value, so a child table with a hoisted grandchild",
+            vec![
+                obj! {"id" => 1, "items" => vec![obj! {"k" => "a", "tags" => vec![Value::from("x")], "parts" => vec![obj! {"p" => 1, "q" => "@x,y"}]}]},
+                obj! {"id" => 2, "items" => vec![obj! {"k" => "b", "tags" => Vec::<Value>::new(), "parts" => vec![obj! {"p" => 2, "q" => "z"}]}]},
+            ],
+        ),
+        (
+            "keys that need quotes in the key list",
+            vec![
+                obj! {"id" => 1, "items" => vec![obj! {"a,b" => 1, "x y" => true, "]" => "c", "d.e" => -0.0}]},
+            ],
+        ),
     ];
     for (what, recs) in &cases {
         assert_eq!(encode(recs, &Config::LDF_V01), ldf::encode(recs), "{what}");
+        assert_eq!(
+            encode(recs, &Config::LDF_HOISTED),
+            ldf::encode_with(recs, &HOIST),
+            "{what}"
+        );
         for cfg in space() {
             assert_lossless(cfg, recs, what);
         }

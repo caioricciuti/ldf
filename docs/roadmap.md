@@ -87,10 +87,15 @@ where not" with a cheap switch.
 - Done 2026-10-19: Stage C, Opus 5.5 on held-out data
   (`docs/reports/2026-10-19-stage-c`): LDF v0.1 ties JSON (294 of 297) at
   57 to 77 percent of its tokens; the selector now picks LDF for Opus.
-  Hoisted arrays: no significant loss on any of three models, the lead
+  Hoisted arrays: no significant loss on Opus or DeepSeek, the lead
   v0.2 candidate.
-- Next: hoisted arrays as a selector candidate and a v0.2 spec draft;
-  child tables (lists of structs) on the Arrow path.
+- Done 2026-10-19: spec v0.2, hoisted arrays (`items:[sku,qty]`) as an
+  opt-in column type (`ldf::Options::hoist`, `ldf-mcp convert --hoist`),
+  and as selector candidates at both sparse thresholds. Regraded strictly,
+  Haiku on hoisted nested_orders is 120 of 135 against JSON's 130 (+2 / -12,
+  p=0.01; the Stage B tie counted bare answers), so the selector keeps
+  Haiku on JSON there; Opus and DeepSeek get the hoisted form.
+- Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
 - Round-trip and conformance fixtures for LDF itself, in the same style as

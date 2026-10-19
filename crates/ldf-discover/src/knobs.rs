@@ -180,6 +180,11 @@ impl Config {
         sparse: 0,
         ..Config::LDF_V01
     };
+    /// LDF v0.2 with `ldf::Options::hoist` on: v0.1 plus hoisted arrays.
+    pub const LDF_HOISTED: Config = Config {
+        arrays: Arrays::Hoisted,
+        ..Config::LDF_V01
+    };
 
     /// Combinations the decoder could not tell apart, or that duplicate
     /// another point, are not part of the space.
@@ -373,6 +378,7 @@ mod tests {
         let s = space();
         assert_eq!(s.iter().filter(|c| **c == Config::LDF_V01).count(), 1);
         assert_eq!(s.iter().filter(|c| **c == Config::LDF_V0).count(), 1);
+        assert_eq!(s.iter().filter(|c| **c == Config::LDF_HOISTED).count(), 1);
         let ids: std::collections::HashSet<String> = s.iter().map(Config::id).collect();
         assert_eq!(ids.len(), s.len());
     }

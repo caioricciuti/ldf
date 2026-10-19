@@ -18,8 +18,10 @@ are bare unless they contain a comma, quote, backslash or newline, are empty, or
 those are JSON string literals. Column names are dotted paths into nested objects: `customer.name` is \
 field `name` of object `customer`. An array of objects becomes a child table named `parent.field`; each \
 child row starts with a join column holding the parent's first column value (or `_`, the parent's 1-based \
-row number), followed by the element's fields. Example, two orders with a customer object and an items \
-array:\n\
+row number), followed by the element's fields. A column typed with a key list, `items:[sku,qty]`, holds \
+the whole array in its cell as a JSON array with one array of values per element, in key order: \
+`[[\"E5\",3],[\"C3\",4]]` is two elements, `{\"sku\":\"E5\",\"qty\":3}` and `{\"sku\":\"C3\",\"qty\":4}`. Example, two \
+orders with a customer object and an items array:\n\
 @records order_id:s,customer.name:s,items:t,total:f,note:s?\n\
 ORD-1,Val Thompson,2,715.94,context compare\n\
 ORD-2,Sol Ritchie,1,2757.03,null\n\
@@ -334,6 +336,7 @@ mod tests {
             traits: vec![],
             family: "ldf".into(),
             thresholds: vec![0.5, 0.75],
+            hoist_thresholds: vec![0.5, 0.75],
             format: "ldf".into(),
             n: 80,
             k: 70,

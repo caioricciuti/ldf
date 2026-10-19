@@ -7,7 +7,37 @@ stated in `docs/ldf-spec-v0.md`.
 
 ## Unreleased
 
-Nothing yet.
+Specification v0.2: hoisted arrays, an additive and opt-in column type.
+
+### Added
+
+- Spec v0.2 (`docs/ldf-spec-v0.md`, section 7, rule 2a): with hoisting on,
+  an array of objects whose elements all have the same keys in the same
+  order and only scalar values is one column `items:[sku,qty,price]` whose
+  cell is `[["E5",3,28.78],["C3",4,157.4]]`, instead of a `t` column and a
+  child table. Every v0.1 document is a valid v0.2 document; a v0.1
+  decoder cannot read a hoisted column.
+- `ldf::Options::hoist` (default false, so default output is unchanged)
+  and `ldf-mcp convert --hoist`. The decoder reads hoisted columns always.
+- `ldf-select`: LDF candidates with and without hoisting at both sparse
+  thresholds; evidence rows carry `hoist_thresholds`. With the built-in
+  evidence, `--model claude-opus-5-5` and `--model deepseek-chat` get the
+  hoisted form on nested orders; Haiku stays on JSON there.
+- The `ldf-mcp` primer explains hoisted columns in one sentence and an
+  example.
+- Conformance fixtures for hoisted columns (encode cases carry
+  `"options": {"hoist": true}`); fixture files are version 0.2.
+
+### Changed
+
+- `ldf-select::Choice::Ldf` has a `hoist` field and `measure_ldf` a `hoist`
+  argument (breaking for direct users of the crate).
+- `ldf-discover`: the hoisted knob now follows spec v0.2 (scalar values
+  only, a child table otherwise, where it used to fall back to a JSON
+  cell), so `Config::LDF_HOISTED` is byte-identical to `crates/ldf` with
+  hoisting on. No committed Stage A output changes: of the twelve
+  fixtures only nested_orders has arrays of objects, and they hoist under
+  both rules.
 
 ## 0.2.0 (2026-10-19)
 

@@ -3,7 +3,7 @@
 Working notes for anyone (human or agent) touching this repository. The
 project is LDF, a research effort towards a lossless, token-efficient data
 format for LLM consumption. Phases 1 and 2 built the measurement foundation;
-Phase 3 produced LDF v0, now v0.1 (`docs/ldf-spec-v0.md`, `crates/ldf`), from those
+Phase 3 produced LDF v0, now v0.2 (`docs/ldf-spec-v0.md`, `crates/ldf`), from those
 measurements. Read `docs/roadmap.md` and `docs/design-candidates.md` before
 proposing syntax changes.
 
@@ -18,10 +18,10 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter (`ldf` current, `ldf-v0` old layout, same display name in prompts). TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth (eleven kinds; new kinds are appended to `TaskKind::all` and a golden test pins the original stream, so old bundles regenerate as an exact prefix; the manifest reports per-kind counts, short where a dataset runs out of distinct questions), prompt bundles (`--candidate name=ID` adds an `ldf-discover` configuration, shown to the model as `ldf`), response scoring | `ldf-eval` |
-| `ldf` | LDF v0.1 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures`; feature `arrow` adds `ldf::arrow`, a direct RecordBatch encoder (batch and block form) byte-identical to the Value path, which refuses lists of structs (child tables) so the caller falls back | |
-| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop; `--model ID` in every server mode picks JSON or LDF per result through `ldf-select` (JSON and no primer for a model without evidence, LDF-when-shorter without the flag) | `ldf-mcp` |
-| `ldf-select` | the selector's decision rule, shared by `ldf-discover select` and `ldf-mcp --model`: dataset profile and traits, evidence rows, policy (n >= 50, drop <= 3 points, sign test, rows <= measured, saving >= 5 percent), `select_ldf` for JSON-or-LDF in bytes; `evidence.json` is a built-in copy of `docs/reports/evidence/evidence.json` (a test fails when they differ; `evidence.py` writes both) | |
-| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01` and `LDF_V0` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1; `select.rs` runs the `ldf-select` rule over JSON, TOON and LDF v0.1 at sparse threshold 0.5 or 0.75 in o200k tokens, from `docs/reports/evidence/evidence.json`, JSON whenever evidence is missing | `ldf-discover` |
+| `ldf` | LDF v0.2 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables, hoisted arrays (`Options::hoist`, off by default, so default output is v0.1) and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures`; feature `arrow` adds `ldf::arrow`, a direct RecordBatch encoder (batch and block form) byte-identical to the Value path, which refuses lists of structs (child tables) so the caller falls back | |
+| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop; `--model ID` in every server mode picks JSON or LDF per result through `ldf-select` (JSON and no primer for a model without evidence, LDF-when-shorter without the flag); `convert --hoist` writes hoisted arrays | `ldf-mcp` |
+| `ldf-select` | the selector's decision rule, shared by `ldf-discover select` and `ldf-mcp --model`: dataset profile and traits, evidence rows, policy (n >= 50, drop <= 3 points, sign test, rows <= measured, saving >= 5 percent), candidates are LDF at sparse 0.5 and 0.75, each with and without hoisting (evidence field `hoist_thresholds`); `select_ldf` for JSON-or-LDF in bytes; `evidence.json` is a built-in copy of `docs/reports/evidence/evidence.json` (a test fails when they differ; `evidence.py` writes both) | |
+| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01`, `LDF_V0` and `LDF_HOISTED` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1; `select.rs` runs the `ldf-select` rule over JSON, TOON and LDF at sparse threshold 0.5 or 0.75, hoisted or not, in o200k tokens, from `docs/reports/evidence/evidence.json`, JSON whenever evidence is missing | `ldf-discover` |
 
 `site/` is the website (ldflabs.org): Astro with Starlight, the docs pages
 mirrored from `docs/` and this file by `site/scripts/sync-docs.mjs` at build
@@ -168,7 +168,7 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   297) at 57 to 77 percent of JSON's Claude input tokens, so the selector
   now gives Opus LDF. Threshold 0.75 adds tokens and nothing on Opus (it
   helps DeepSeek); hoisted arrays save 17 percent on nested_orders for
-  +1 / -2 (n.s.), no significant loss on any model so far. $5.96.
+  +1 / -2 (n.s.), no significant loss on Opus or DeepSeek (Haiku: below). $5.96.
 - 2026-10-19 (`docs/reports/2026-10-19-engine/`): the direct Arrow path is
   1.9x to 3.2x faster than the Value path in block form at 1M rows (2.8x to
   4.8x for a whole document, 1.4x to 4.3x less memory), same bytes. The
@@ -176,3 +176,12 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   under the 50 the policy needs (Opus had the same gap until Stage C). LDF at sparse
   threshold 0.5 changes object member order on rows where some keys move to
   `~` (`semantic-unordered`, documented in spec section 7).
+- 2026-10-19: spec v0.2 adds hoisted arrays, `items:[sku,qty,price]` with
+  `[["E5",3,28.78],...]` cells, only for elements with one key order and
+  scalar values (anything else stays a child table). `ldf-mcp convert
+  --hoist` reproduces every hoisted Stage B and Stage C data block byte for
+  byte, so those answers are selector evidence. Strict grading (bare
+  answers wrong): Opus 93 / 95 vs JSON 94, DeepSeek 81 / 135 vs 84 (both
+  pass), Haiku 120 / 135 vs 130 (+2 / -12, p=0.01, fails). The selector
+  gives Opus and DeepSeek hoisted LDF on nested orders (11 076 o200k
+  against v0.1's 12 989 and JSON's 20 069 on 200 held-out records).

@@ -1,4 +1,4 @@
-//! LDF v0 conformance fixtures, in the same JSON shape as the TOON suite so
+//! LDF v0.2 conformance fixtures, in the same JSON shape as the TOON suite so
 //! a second implementation can reuse them. Encode cases compare exact text;
 //! decode cases compare records with strict structural equality (number
 //! kinds included) or expect an error.
@@ -20,6 +20,15 @@ struct Case {
     expected: Value,
     #[serde(default, rename = "shouldError")]
     should_error: bool,
+    /// Encoder options other than the defaults.
+    #[serde(default)]
+    options: CaseOptions,
+}
+
+#[derive(serde::Deserialize, Default)]
+struct CaseOptions {
+    #[serde(default)]
+    hoist: bool,
 }
 
 fn run(file: &str) {
@@ -34,7 +43,11 @@ fn run(file: &str) {
         match f.category.as_str() {
             "encode" => {
                 let input = case.input.as_array().expect("encode input is an array");
-                let got = ldf::encode(input);
+                let opts = ldf::Options {
+                    hoist: case.options.hoist,
+                    ..ldf::Options::default()
+                };
+                let got = ldf::encode_with(input, &opts);
                 let want = case.expected.as_str().unwrap();
                 if got != want {
                     failures.push(format!("{tag}\n  want: {want:?}\n  got:  {got:?}"));

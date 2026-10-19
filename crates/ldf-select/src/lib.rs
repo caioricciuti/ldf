@@ -1,6 +1,7 @@
-//! Adaptive format selector: picks JSON, TOON or LDF v0.1 (sparse
-//! threshold 0.5 or 0.75, both valid v0.1 documents) for one dataset and
-//! one model, from measured evidence only.
+//! Adaptive format selector: picks JSON, TOON or LDF (sparse threshold 0.5
+//! or 0.75, with or without hoisted arrays; without hoisting the document
+//! is valid v0.1) for one dataset and one model, from measured evidence
+//! only.
 //!
 //! A candidate other than JSON is accepted when all of these hold:
 //! 1. it round-trips this dataset: byte or semantic level, or
@@ -123,6 +124,11 @@ pub struct Evidence {
     /// For `ldf`: every sparse threshold that gives this exact document.
     #[serde(default)]
     pub thresholds: Vec<f64>,
+    /// For `ldf`: every sparse threshold that gives this exact document
+    /// with hoisted arrays (`ldf::Options::hoist`). Equal to `thresholds`
+    /// when the dataset has nothing to hoist.
+    #[serde(default)]
+    pub hoist_thresholds: Vec<f64>,
     pub format: String,
     pub n: usize,
     pub k: usize,
@@ -168,7 +174,7 @@ impl Default for Policy {
 pub enum Choice {
     Json,
     Toon,
-    Ldf { sparse_threshold: f64 },
+    Ldf { sparse_threshold: f64, hoist: bool },
 }
 
 impl Choice {
@@ -176,9 +182,14 @@ impl Choice {
         match self {
             Choice::Json => "json".into(),
             Choice::Toon => "toon".into(),
-            Choice::Ldf { sparse_threshold } => {
-                format!("ldf (sparse threshold {sparse_threshold})")
-            }
+            Choice::Ldf {
+                sparse_threshold,
+                hoist: false,
+            } => format!("ldf (sparse threshold {sparse_threshold})"),
+            Choice::Ldf {
+                sparse_threshold,
+                hoist: true,
+            } => format!("ldf (sparse threshold {sparse_threshold}, hoisted)"),
         }
     }
 
@@ -187,26 +198,37 @@ impl Choice {
         match self {
             Choice::Json => e.family == "json",
             Choice::Toon => e.family == "toon",
-            Choice::Ldf { sparse_threshold } => {
-                e.family == "ldf"
-                    && e.thresholds
-                        .iter()
-                        .any(|t| (t - sparse_threshold).abs() < 1e-9)
+            Choice::Ldf {
+                sparse_threshold,
+                hoist,
+            } => {
+                let ts = if *hoist {
+                    &e.hoist_thresholds
+                } else {
+                    &e.thresholds
+                };
+                e.family == "ldf" && ts.iter().any(|t| (t - sparse_threshold).abs() < 1e-9)
             }
         }
     }
 }
 
-/// The candidates, JSON first.
-pub const CANDIDATES: [Choice; 4] = [
+const fn ldf_at(sparse_threshold: f64, hoist: bool) -> Choice {
+    Choice::Ldf {
+        sparse_threshold,
+        hoist,
+    }
+}
+
+/// The candidates, JSON first. Unhoisted before hoisted: on data with
+/// nothing to hoist both give the same text, and the v0.1 point wins the tie.
+pub const CANDIDATES: [Choice; 6] = [
     Choice::Json,
     Choice::Toon,
-    Choice::Ldf {
-        sparse_threshold: 0.5,
-    },
-    Choice::Ldf {
-        sparse_threshold: 0.75,
-    },
+    ldf_at(0.5, false),
+    ldf_at(0.75, false),
+    ldf_at(0.5, true),
+    ldf_at(0.75, true),
 ];
 
 #[derive(Debug, Clone, Serialize)]
@@ -288,16 +310,18 @@ pub struct Measured {
     pub note: Option<String>,
 }
 
-/// Encodes `records` as LDF at `sparse_threshold`, decodes it back and
-/// measures it in bytes. Returns the text with the measurement; the text is
-/// `None` when the round trip is not accepted under `policy`.
+/// Encodes `records` as LDF at `sparse_threshold`, hoisted or not, decodes
+/// it back and measures it in bytes. Returns the text with the measurement;
+/// the text is `None` when the round trip is not accepted under `policy`.
 pub fn measure_ldf(
     records: &[Value],
     sparse_threshold: f64,
+    hoist: bool,
     policy: &Policy,
 ) -> (Option<String>, Measured) {
     let opts = ldf::Options {
         sparse_threshold,
+        hoist,
         ..ldf::Options::default()
     };
     let text = ldf::encode_with(records, &opts);
@@ -347,14 +371,12 @@ pub fn knows_model(model: &str, evidence: &[Evidence], policy: &Policy) -> bool 
 }
 
 /// The candidates a reader primed for LDF only can take, JSON first.
-pub const LDF_CANDIDATES: [Choice; 3] = [
+pub const LDF_CANDIDATES: [Choice; 5] = [
     Choice::Json,
-    Choice::Ldf {
-        sparse_threshold: 0.5,
-    },
-    Choice::Ldf {
-        sparse_threshold: 0.75,
-    },
+    ldf_at(0.5, false),
+    ldf_at(0.75, false),
+    ldf_at(0.5, true),
+    ldf_at(0.75, true),
 ];
 
 /// JSON or LDF ([`LDF_CANDIDATES`]), measured in bytes. `json_bytes` is the
@@ -375,8 +397,11 @@ pub fn select_ldf(
         policy,
         &LDF_CANDIDATES,
         &mut |c| match c {
-            Choice::Ldf { sparse_threshold } => {
-                let (text, m) = measure_ldf(records, sparse_threshold, policy);
+            Choice::Ldf {
+                sparse_threshold,
+                hoist,
+            } => {
+                let (text, m) = measure_ldf(records, sparse_threshold, hoist, policy);
                 if let Some(t) = text {
                     texts.push((c, t));
                 }
@@ -575,6 +600,7 @@ mod tests {
             traits: traits.iter().map(|s| s.to_string()).collect(),
             family: family.into(),
             thresholds: vec![0.0, 0.25, 0.5, 0.75],
+            hoist_thresholds: vec![0.0, 0.25, 0.5, 0.75],
             format: family.into(),
             n: 100,
             k,
@@ -679,6 +705,7 @@ mod builtin_tests {
             traits: vec![],
             family: "ldf".into(),
             thresholds: vec![0.5, 0.75],
+            hoist_thresholds: vec![0.5, 0.75],
             format: "ldf".into(),
             n: 60,
             k: 50,

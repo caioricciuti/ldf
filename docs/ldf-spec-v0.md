@@ -1,12 +1,23 @@
-# LDF v0.1 (draft, 2026-10-18)
+# LDF v0.2 (draft, 2026-10-19)
 
 Language Data Format: a lossless, line-oriented, token-efficient text
-encoding of JSON records for language-model consumption. Version 0.1 is
+encoding of JSON records for language-model consumption. Version 0.2 is
 the prototype that `crates/ldf` implements; every rule here is checked by
 that implementation's tests. Rationale and measurements:
-`docs/design-candidates.md`. Changes from v0: the `~` column and the
-sparse-key rule (sections 3, 4 and 7.4), adopted after the comprehension
-measurements in the baseline report.
+`docs/design-candidates.md`.
+
+Changes from v0.1: the hoisted column type `[k1,k2,...]` (sections 3, 4
+and 7, rule 2a), measured in Stage B and Stage C
+(`docs/reports/2026-10-18-stage-b`, `docs/reports/2026-10-19-stage-c`).
+The change is additive. Every v0.1 document is a valid v0.2 document with
+the same meaning, and an encoder writes a hoisted column only when asked
+to (`Options::hoist`, off by default), so default output is v0.1. A v0.1
+decoder cannot read a hoisted column: it rejects the header as an unknown
+type.
+
+Changes from v0 to v0.1: the `~` column and the sparse-key rule (sections
+3, 4 and 7.4), adopted after the comprehension measurements in the
+baseline report.
 
 ## 1. Data model
 
@@ -41,6 +52,13 @@ the child table of field `items`, recursively. Each `col` is
 | `b` | `true` or `false` |
 | `j` | any JSON value as a compact JSON literal |
 | `t` | child table reference: the number of child rows for this record |
+| `[k1,k2,...]` | hoisted array of objects (v0.2): a JSON array with one array of values per element, in key order |
+
+A hoisted type is a key list in brackets instead of a letter, for example
+`items:[sku,qty,price]` or `items:[sku,qty]?`. Each key is one segment,
+bare or a JSON string literal under the rules for path segments below
+(`["a,b","x y"]`); the list is never empty. Commas inside the brackets
+separate keys, not columns.
 
 `?` marks a column that may hold `null` or be absent in some rows. It is
 informative; decoders accept `null` and empty cells in any column.
@@ -69,9 +87,18 @@ commas. Cell meaning:
 * `null`: the key is present with value null;
 * otherwise the value according to the column type.
 
-Cells of type `j` are parsed as one JSON value starting at the cell's first
-character; the comma that follows the value ends the cell. Cells of other
-types end at the first comma outside a JSON-quoted string.
+Cells of type `j` and hoisted cells are parsed as one JSON value starting
+at the cell's first character; the comma that follows the value ends the
+cell. Cells of other types end at the first comma outside a JSON-quoted
+string.
+
+A hoisted cell is either empty (absent), `null`, or a JSON array whose
+items are arrays with exactly as many values as the column has keys. The
+decoder turns each item into an object with the column's keys in order:
+under `items:[sku,qty]` the cell `[["E5",3],["C3",4]]` is
+`[{"sku":"E5","qty":3},{"sku":"C3","qty":4}]`, and `[]` is an empty
+array. An item that is not an array, or has the wrong number of values,
+is an error.
 
 A `~` cell is either empty (no extra keys) or a JSON object; the decoder
 appends its members to the record, in the object's order, after the keys
@@ -119,6 +146,19 @@ Flattening is decided per field over the whole dataset (batch encoder):
    Child rows appear in parent order, then element order. A parent whose
    `t` cell is `0` has an empty array; empty cell means absent; `null`
    means null.
+
+   2a. **Hoisted arrays (v0.2, opt-in).** With hoisting on, a field that
+   rule 2 would make a child table is instead one hoisted column
+   `field:[k1,k2,...]` when every element of every present array has the
+   same keys in the same order, `k1,k2,...`, and every value in every
+   element is null, a boolean, a number or a string. The cell holds the
+   whole array (section 4). Any other shape (key lists that differ in set
+   or order, a nested object or array in some element) stays a child
+   table. That is the only shape models were measured on (nested_orders).
+   Inside a child table the rule applies again, so a child table can have
+   hoisted columns of its own. The block encoder applies the rule per
+   block; the record encoder never hoists, since it never creates child
+   tables either (section 8).
 3. **Everything else** (arrays of scalars, mixed arrays, scalars that vary
    in type across records) is a `j` column.
 4. **Sparse keys.** Before rules 1 to 3, each top-level key of a table is
@@ -181,6 +221,16 @@ ORD-000002,50,Sol Ritchie,Buenos Aires,1,2757.03,cancelled,null
 ORD-000001,E5,3,28.78
 ORD-000001,C3,4,157.4
 ORD-000002,A1,1,2757.03
+```
+
+The same records with hoisting on. On 200 held-out nested_orders records
+this form is 15 percent smaller than the child-table form in o200k tokens
+(11 076 against 12 989):
+
+```text
+@records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,items:[sku,qty,price],total:f,status:s,note:s?
+ORD-000001,4654,Val Thompson,São Paulo,[["E5",3,28.78],["C3",4,157.4]],715.94,shipped,context compare
+ORD-000002,50,Sol Ritchie,Buenos Aires,[["A1",1,2757.03]],2757.03,cancelled,null
 ```
 
 ## 10. Open for v1
