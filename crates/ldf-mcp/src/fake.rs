@@ -1,15 +1,26 @@
 //! A minimal downstream MCP server with one tool, `query`, that returns a
 //! generated JSON row set. Used by the integration tests and handy for
 //! trying the proxy without a real database server behind it.
+//!
+//! Test behaviours, all off by default, as `query` arguments: `delay_ms`
+//! answers from a thread after a pause (so replies can overtake each other),
+//! `structured` adds `structuredContent`, `server_request` first sends a
+//! server-to-client request under the same id, `garbage` first writes a
+//! non-JSON line and a line of invalid UTF-8, `crash` exits with code 3
+//! without answering. `ignore_eof` (the `fake-server --ignore-eof` flag)
+//! keeps the process alive for a minute after stdin closes.
 
 use std::io::{BufRead, Write};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
 use serde_json::{Value as Json, json};
 
-pub fn run() -> Result<(), String> {
+pub fn run(ignore_eof: bool) -> Result<(), String> {
     let stdin = std::io::stdin();
-    let stdout = std::io::stdout();
-    let mut out = stdout.lock();
+    let out = Arc::new(Mutex::new(std::io::stdout()));
+    let mut workers = Vec::new();
     for line in stdin.lock().lines() {
         let line = line.map_err(|e| e.to_string())?;
         if line.trim().is_empty() {
@@ -40,6 +51,10 @@ pub fn run() -> Result<(), String> {
                 }}
             }]}}),
             "tools/call" => {
+                let arg = |k: &str| msg.pointer(&format!("/params/arguments/{k}")).cloned();
+                if arg("crash").and_then(|v| v.as_bool()) == Some(true) {
+                    std::process::exit(3);
+                }
                 let n = msg
                     .pointer("/params/arguments/rows")
                     .and_then(Json::as_u64)
@@ -66,16 +81,59 @@ pub fn run() -> Result<(), String> {
                     Json::Array(rows)
                 };
                 let text = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
-                json!({"jsonrpc": "2.0", "id": id, "result": {"content": [{"type": "text", "text": text}]}})
+                let mut result = json!({"content": [{"type": "text", "text": text}]});
+                if arg("structured").and_then(|v| v.as_bool()) == Some(true) {
+                    result["structuredContent"] = json!({"rows": payload});
+                }
+                let reply = json!({"jsonrpc": "2.0", "id": id, "result": result});
+                let mut before = Vec::new();
+                if arg("server_request").and_then(|v| v.as_bool()) == Some(true) {
+                    before.push(
+                        json!({"jsonrpc": "2.0", "id": id, "method": "roots/list"})
+                            .to_string()
+                            .into_bytes(),
+                    );
+                }
+                if arg("garbage").and_then(|v| v.as_bool()) == Some(true) {
+                    before.push(b"not json at all".to_vec());
+                    before.push(vec![0xff, 0xfe, b'{', b'}']);
+                }
+                let delay = arg("delay_ms").and_then(|v| v.as_u64()).unwrap_or(0);
+                let out = Arc::clone(&out);
+                let send = move || {
+                    thread::sleep(Duration::from_millis(delay));
+                    let mut lines = before;
+                    lines.push(reply.to_string().into_bytes());
+                    write_lines(&out, &lines)
+                };
+                if delay > 0 {
+                    workers.push(thread::spawn(send));
+                } else {
+                    send()?;
+                }
+                continue;
             }
             _ => {
                 json!({"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": format!("Method not found: {method}")}})
             }
         };
-        let s = serde_json::to_string(&reply).map_err(|e| e.to_string())?;
-        out.write_all(s.as_bytes()).map_err(|e| e.to_string())?;
-        out.write_all(b"\n").map_err(|e| e.to_string())?;
-        out.flush().map_err(|e| e.to_string())?;
+        write_lines(&out, &[reply.to_string().into_bytes()])?;
+    }
+    for w in workers {
+        let _ = w.join();
+    }
+    if ignore_eof {
+        thread::sleep(Duration::from_secs(60));
     }
     Ok(())
+}
+
+fn write_lines(out: &Mutex<std::io::Stdout>, lines: &[Vec<u8>]) -> Result<(), String> {
+    let out = out.lock().map_err(|_| "stdout poisoned")?;
+    let mut out = out.lock();
+    for l in lines {
+        out.write_all(l).map_err(|e| e.to_string())?;
+        out.write_all(b"\n").map_err(|e| e.to_string())?;
+    }
+    out.flush().map_err(|e| e.to_string())
 }

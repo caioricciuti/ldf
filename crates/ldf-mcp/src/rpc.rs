@@ -1,6 +1,7 @@
 //! The stdio loop shared by the servers in this crate: one JSON-RPC message
 //! per line in, at most one per line out, notifications answered with
-//! nothing. Logging goes to stderr only, as the transport requires.
+//! nothing, a line that is not JSON (or not UTF-8) answered with a parse
+//! error. Logging goes to stderr only, as the transport requires.
 
 use std::io::{BufRead, Write};
 
@@ -15,16 +16,26 @@ where
     let stdin = std::io::stdin();
     let stdout = std::io::stdout();
     let mut out = stdout.lock();
-    for line in stdin.lock().lines() {
-        let line = line.map_err(|e| e.to_string())?;
-        if line.trim().is_empty() {
+    let mut input = stdin.lock();
+    let mut line = Vec::new();
+    loop {
+        line.clear();
+        if input
+            .read_until(b'\n', &mut line)
+            .map_err(|e| e.to_string())?
+            == 0
+        {
+            break;
+        }
+        if line.trim_ascii().is_empty() {
             continue;
         }
-        let msg: Json = match serde_json::from_str(&line) {
-            Ok(m) => m,
-            Err(_) => continue,
+        // JSON-RPC: a line that is not JSON gets a parse error with a null id.
+        let reply = match serde_json::from_slice::<Json>(line.trim_ascii()) {
+            Ok(msg) => handle(&msg),
+            Err(_) => Some(error(&Json::Null, -32700, "Parse error")),
         };
-        let Some(reply) = handle(&msg) else {
+        let Some(reply) = reply else {
             continue;
         };
         let s = serde_json::to_string(&reply).map_err(|e| e.to_string())?;
