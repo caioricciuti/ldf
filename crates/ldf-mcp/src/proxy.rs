@@ -70,7 +70,7 @@ pub fn run(cfg: Config) -> Result<i32, String> {
         .command
         .split_first()
         .ok_or("proxy needs a downstream command after --")?;
-    let mut child = Command::new(prog)
+    let mut child = Command::new(resolve(prog))
         .args(args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -109,6 +109,22 @@ pub fn run(cfg: Config) -> Result<i32, String> {
     drop(upstream);
     status?;
     exit
+}
+
+/// On Windows `npx` is `npx.cmd`, and `Command` only tries `.exe` when it
+/// searches PATH, so a bare name is looked up with PATHEXT first. The
+/// standard library runs a `.cmd` or `.bat` path found this way through
+/// cmd.exe with its own argument escaping. Elsewhere the name is used as is.
+fn resolve(prog: &str) -> std::path::PathBuf {
+    let p = std::path::Path::new(prog);
+    if cfg!(windows)
+        && p.extension().is_none()
+        && p.components().count() == 1
+        && let Some(found) = crate::install::which(prog)
+    {
+        return found;
+    }
+    p.to_path_buf()
 }
 
 /// Waits for the child without holding its lock, so the upstream thread can

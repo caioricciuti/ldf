@@ -197,3 +197,44 @@ fn the_servers_answer_bad_lines_with_parse_errors_and_keep_going() {
     assert_eq!(lines[2]["id"], 1);
     assert!(out.status.success());
 }
+
+/// Most Node MCP servers start through a `.cmd` launcher on Windows.
+#[cfg(windows)]
+#[test]
+fn a_cmd_launcher_on_path_is_found_and_run() {
+    let dir = std::env::temp_dir().join(format!("ldf-cmd-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(
+        dir.join("rows-launcher.cmd"),
+        format!(
+            "@echo off\r\n\"{}\" fake-server %*\r\n",
+            env!("CARGO_BIN_EXE_ldf-mcp")
+        ),
+    )
+    .unwrap();
+    let path = format!(
+        "{};{}",
+        dir.display(),
+        std::env::var("PATH").unwrap_or_default()
+    );
+    let mut child = Command::new(env!("CARGO_BIN_EXE_ldf-mcp"))
+        .args(["proxy", "--quiet", "--", "rows-launcher"])
+        .env("PATH", path)
+        .env("LDF_STATS", "0")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut stdin = child.stdin.take().unwrap();
+    let mut out = BufReader::new(child.stdout.take().unwrap());
+    let call = json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "query", "arguments": {"rows": 100}}});
+    writeln!(stdin, "{call}").unwrap();
+    let mut line = String::new();
+    out.read_line(&mut line).unwrap();
+    drop(stdin);
+    child.wait().unwrap();
+    let reply: Json = serde_json::from_str(&line).unwrap();
+    assert!(text(&reply).starts_with("@records "), "{reply}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
