@@ -766,7 +766,9 @@ dependencies = [
 name = "ldf"
 version = "0.1.0"
 dependencies = [
+ "arrow",
  "ldf-data",
+ "parquet",
  "serde",
  "serde_json",
 ]
@@ -775,10 +777,13 @@ dependencies = [
 name = "ldf-bench"
 version = "0.1.0"
 dependencies = [
+ "arrow",
  "criterion",
+ "ldf",
  "ldf-data",
  "ldf-fixtures",
  "ldf-formats",
+ "parquet",
  "serde",
  "serde_json",
  "tiktoken-rs",
@@ -848,6 +853,7 @@ version = "0.1.0"
 dependencies = [
  "ldf",
  "ldf-data",
+ "parquet",
  "serde_json",
 ]
 

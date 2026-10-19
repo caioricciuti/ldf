@@ -16,6 +16,7 @@ name = "ldf-mcp"
 path = "src/main.rs"
 
 [dependencies]
-ldf = { workspace = true }
+ldf = { workspace = true, features = ["arrow"] }
+parquet = { workspace = true }
 ldf-data = { workspace = true }
 serde_json = { workspace = true }

@@ -12,6 +12,8 @@
 //! ORD-000001,C3,4,157.4
 //! ```
 
+#[cfg(feature = "arrow")]
+pub mod arrow;
 pub mod decode;
 pub mod encode;
 pub mod plan;

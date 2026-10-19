@@ -8,6 +8,8 @@
 //! ldf-bench tokens     --input F... | --scale S [--dataset a,b] [--formats all]
 //!                      [--tokenizers o200k_base,cl100k_base] [--sample N] [--out results/<ts>]
 //! ldf-bench count      [--tokenizers o200k_base,cl100k_base] FILE...   (tokens of any text files)
+//! ldf-bench arrow      --input F.parquet... | --scale S [--dataset a,b] [--iters 7]
+//!                      [--batch 1024] [--block 1024] [--out results/<ts>]
 //! ldf-bench sysinfo
 //! ldf-bench child ...  (internal: one measurement in a fresh process)
 //! ```
@@ -16,6 +18,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode, Stdio};
 
+use ldf_bench::arrow::{ArrowMeasurement, ArrowPath};
 use ldf_bench::measure::{Measurement, Op, Plan, run_decode, run_encode, run_io, run_parse};
 use ldf_bench::report::{DatasetResult, FormatTokens, Run, render_markdown};
 use ldf_bench::roundtrip;
@@ -98,6 +101,14 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         "child" => child(&args),
+        "arrow-child" => arrow_child(&args),
+        "arrow" => match arrow_bench(&args) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("error: {e}");
+                ExitCode::FAILURE
+            }
+        },
         "count" => match count(&args) {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
@@ -300,6 +311,150 @@ fn spawn_child(
         return Err(format!("child exited with {}", out.status));
     }
     serde_json::from_slice(&out.stdout).map_err(|e| format!("bad child output: {e}"))
+}
+
+// ---- Parquet to LDF: Value path vs direct Arrow path -----------------------------
+
+fn arrow_child(args: &Args) -> ExitCode {
+    let (Some(input), Some(which)) = (
+        args.get("input"),
+        args.get("path").and_then(ArrowPath::parse),
+    ) else {
+        return usage();
+    };
+    let m = ldf_bench::arrow::run(
+        Path::new(input),
+        which,
+        args.num("iters", 1usize),
+        args.num("batch", 1024usize),
+        args.num("block", 1024usize),
+    );
+    println!("{}", serde_json::to_string(&m).unwrap());
+    ExitCode::SUCCESS
+}
+
+fn arrow_bench(args: &Args) -> Result<(), String> {
+    let inputs: Vec<Input> = select_inputs(args)?
+        .into_iter()
+        .filter(|i| kind_name(i.kind) == "parquet")
+        .collect();
+    if inputs.is_empty() {
+        return Err("no parquet inputs".into());
+    }
+    let iters: usize = args.num("iters", 7usize).max(1);
+    let batch: usize = args.num("batch", 1024usize);
+    let block: usize = args.num("block", 1024usize);
+    let out_dir = PathBuf::from(
+        args.get("out")
+            .map(String::from)
+            .unwrap_or_else(|| format!("results/{}", timestamp_compact())),
+    );
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let mut all: Vec<(String, Vec<ArrowMeasurement>)> = Vec::new();
+    for input in &inputs {
+        let mut ms = Vec::new();
+        for which in ArrowPath::ALL {
+            eprintln!("{} {}", input.name, which.name());
+            let out = Command::new(&exe)
+                .args(["arrow-child", "--path", which.name(), "--iters"])
+                .arg(iters.to_string())
+                .arg("--batch")
+                .arg(batch.to_string())
+                .arg("--block")
+                .arg(block.to_string())
+                .arg("--input")
+                .arg(&input.path)
+                .stderr(Stdio::inherit())
+                .output()
+                .map_err(|e| e.to_string())?;
+            let m: ArrowMeasurement = serde_json::from_slice(&out.stdout)
+                .map_err(|e| format!("bad child output: {e}"))?;
+            ms.push(m);
+        }
+        all.push((input.name.clone(), ms));
+    }
+    fs::create_dir_all(&out_dir).map_err(|e| e.to_string())?;
+    let json = serde_json::json!({
+        "tool": "ldf-bench arrow",
+        "command": std::env::args().collect::<Vec<_>>(),
+        "iters": iters,
+        "batch": batch,
+        "block": block,
+        "sysinfo": ldf_bench::sys::sysinfo(),
+        "datasets": all.iter().map(|(n, ms)| serde_json::json!({"name": n, "paths": ms})).collect::<Vec<_>>(),
+    });
+    fs::write(
+        out_dir.join("arrow.json"),
+        serde_json::to_string_pretty(&json).unwrap(),
+    )
+    .map_err(|e| e.to_string())?;
+    let md = arrow_markdown(&all, iters, batch, block);
+    fs::write(out_dir.join("arrow.md"), &md).map_err(|e| e.to_string())?;
+    println!("{md}");
+    Ok(())
+}
+
+fn arrow_markdown(
+    all: &[(String, Vec<ArrowMeasurement>)],
+    iters: usize,
+    batch: usize,
+    block: usize,
+) -> String {
+    use ldf_bench::stats::{fmt_bytes, summarize};
+    let sys = ldf_bench::sys::sysinfo();
+    let mut s = format!(
+        "# Parquet to LDF: Value path vs direct Arrow path\n\n{} ({} logical CPUs), {}, profile {}, commit {}. {iters} iterations per path, each in a fresh \
+         process; the time is the median, file on disk to LDF text in memory, page cache warm after \
+         the first run. Reader batch {batch} rows, block {block} rows. `same` compares an FNV-1a hash \
+         of the output with the Value path of the same form (batch or block).\n\n| dataset | rows | LDF | path | median | rows/s | LDF MB/s | peak RSS | vs Value | same |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---|\n",
+        sys.cpu, sys.logical_cpus, sys.os, sys.cargo_profile, sys.git_commit
+    );
+    for (name, ms) in all {
+        let base = |p: ArrowPath| -> Option<&ArrowMeasurement> {
+            let want = match p {
+                ArrowPath::DirectBatch | ArrowPath::ValueBatch => ArrowPath::ValueBatch,
+                _ => ArrowPath::ValueBlock,
+            };
+            ms.iter().find(|m| m.path == want && m.error.is_none())
+        };
+        for m in ms {
+            if let Some(e) = &m.error {
+                s.push_str(&format!(
+                    "| {name} | | | {} | | | | | | {} |\n",
+                    m.path.name(),
+                    e.replace('|', "/")
+                ));
+                continue;
+            }
+            let med = summarize(&m.secs).median;
+            let b = base(m.path);
+            let speed = b
+                .map(|b| summarize(&b.secs).median / med)
+                .map(|x| format!("{x:.2}x"))
+                .unwrap_or_default();
+            let same = match b {
+                Some(b) if b.path == m.path => "base".to_string(),
+                Some(b) => (if b.output_hash == m.output_hash {
+                    "yes"
+                } else {
+                    "NO"
+                })
+                .to_string(),
+                None => String::new(),
+            };
+            s.push_str(&format!(
+                "| {name} | {} | {} | {} | {:.1} ms | {:.2} M | {:.0} | {} | {speed} | {same} |\n",
+                m.rows,
+                fmt_bytes(m.bytes_out),
+                m.path.name(),
+                med * 1e3,
+                m.rows as f64 / med / 1e6,
+                m.bytes_out as f64 / med / 1e6,
+                fmt_bytes(m.usage_after.max_rss_bytes),
+            ));
+        }
+    }
+    s
 }
 
 // ---- orchestrator ----------------------------------------------------------------
