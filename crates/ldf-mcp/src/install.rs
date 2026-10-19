@@ -114,6 +114,39 @@ pub fn which(name: &str) -> Option<PathBuf> {
     })
 }
 
+/// `canonicalize` on Windows returns `\\?\C:\...`; configs and humans use
+/// `C:\...`. Strips that prefix when a drive letter follows.
+pub fn plain(p: &Path) -> PathBuf {
+    let s = p.to_string_lossy();
+    match s.strip_prefix(r"\\?\") {
+        Some(rest) if rest.as_bytes().get(1) == Some(&b':') => PathBuf::from(rest),
+        _ => p.to_path_buf(),
+    }
+}
+
+/// A project path as compared with the keys of `projects`: no verbatim
+/// prefix and no trailing separator; on Windows also `/` for `\\` and no
+/// case.
+fn project_key(p: &str) -> String {
+    let s = plain(Path::new(p)).to_string_lossy().into_owned();
+    if cfg!(windows) {
+        s.replace('\\', "/").trim_end_matches('/').to_lowercase()
+    } else {
+        s.trim_end_matches('/').to_string()
+    }
+}
+
+/// The key under `projects` that names `project`, if any.
+fn find_project<'a>(config: &'a Json, project: &Path) -> Option<&'a str> {
+    let want = project_key(&project.to_string_lossy());
+    config
+        .get("projects")?
+        .as_object()?
+        .keys()
+        .find(|k| project_key(k) == want)
+        .map(String::as_str)
+}
+
 /// Servers in user scope and in local scope for `project`, from the parsed
 /// `~/.claude.json`.
 pub fn servers(config: &Json, project: &Path) -> Vec<Server> {
@@ -132,7 +165,7 @@ pub fn servers(config: &Json, project: &Path) -> Vec<Server> {
     take(
         config
             .get("projects")
-            .and_then(|p| p.get(project.to_string_lossy().as_ref()))
+            .and_then(|p| p.get(find_project(config, project)?))
             .and_then(|p| p.get("mcpServers")),
         Scope::Local,
     );
@@ -392,6 +425,7 @@ impl Env {
     pub fn detect() -> Result<Env, String> {
         let exe = std::env::current_exe()
             .and_then(|p| p.canonicalize())
+            .map(|p| plain(&p))
             .map_err(|e| format!("cannot locate this binary: {e}"))?;
         let project = std::env::current_dir().map_err(|e| e.to_string())?;
         Ok(Env {
@@ -484,6 +518,7 @@ pub fn install(env: &Env, a: &InstallArgs) -> Result<String, String> {
     if let Some(dir) = &a.add_files {
         let root = dir
             .canonicalize()
+            .map(|p| plain(&p))
             .map_err(|e| format!("{}: {e}", dir.display()))?;
         let name = a.files_name.clone().unwrap_or_else(|| "ldf-files".into());
         let scope = a.scope.unwrap_or(Scope::Local);
@@ -772,6 +807,9 @@ pub fn fake_claude(args: &[String]) -> Result<(), String> {
         Err(_) => json!({}),
     };
     let project = std::env::current_dir().map_err(|e| e.to_string())?;
+    let key = find_project(&cfg, &project)
+        .map(str::to_string)
+        .unwrap_or_else(|| project.to_string_lossy().into_owned());
     let a: Vec<&str> = args.iter().map(String::as_str).collect();
     let (op, name, entry, scope) = match a.as_slice() {
         ["mcp", "remove", name, "-s", scope] => ("remove", *name, None, *scope),
@@ -791,7 +829,7 @@ pub fn fake_claude(args: &[String]) -> Result<(), String> {
             .or_insert_with(|| json!({}))
             .as_object_mut()
             .ok_or("projects not an object")?
-            .entry(project.to_string_lossy().into_owned())
+            .entry(key)
             .or_insert_with(|| json!({}))
             .as_object_mut()
             .ok_or("project not an object")?
@@ -895,5 +933,17 @@ mod tests {
         let s = servers(&cfg, Path::new("/p"));
         let names: Vec<(&str, Scope)> = s.iter().map(|s| (s.name.as_str(), s.scope)).collect();
         assert_eq!(names, vec![("l", Scope::Local), ("u", Scope::User)]);
+        // Trailing separators and (on Windows) case and slashes do not matter.
+        assert_eq!(servers(&cfg, Path::new("/p/")).len(), 2);
+    }
+
+    #[test]
+    fn verbatim_prefix_is_stripped_before_a_drive_letter_only() {
+        assert_eq!(plain(Path::new(r"\\?\C:\x\y")), PathBuf::from(r"C:\x\y"));
+        assert_eq!(
+            plain(Path::new(r"\\?\UNC\srv\s")),
+            PathBuf::from(r"\\?\UNC\srv\s")
+        );
+        assert_eq!(plain(Path::new("/usr/bin")), PathBuf::from("/usr/bin"));
     }
 }

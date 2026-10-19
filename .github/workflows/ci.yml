@@ -34,3 +34,20 @@ jobs:
         run: cargo test --release
       - name: Round trip on the committed fixtures
         run: ./target/release/ldf-bench roundtrip --scale small
+
+  # The proxy launches servers through .cmd files and the release ships a
+  # Windows binary, so ldf-mcp is built and tested there too. Not a
+  # required check until it has a record of passing.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Keep line endings as committed
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Toolchain
+        run: rustup show active-toolchain; cargo --version
+      - name: Clippy
+        run: cargo clippy -p ldf-mcp --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --release -p ldf-mcp

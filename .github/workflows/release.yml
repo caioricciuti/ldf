@@ -1,7 +1,7 @@
 # Binaries for a tagged release. Pushing a tag `vX.Y.Z` builds ldf-mcp on
-# four targets, packages each as a tarball with a SHA-256 next to it, and
-# attaches them to a GitHub release whose notes are the matching CHANGELOG
-# section. The only external action is actions/checkout, pinned to a
+# five targets, packages each as a tarball (a zip on Windows) with a SHA-256
+# next to it, and attaches them to a GitHub release whose notes are the
+# matching CHANGELOG section. The only external action is actions/checkout, pinned to a
 # commit hash; uploads go through the gh CLI that the runners ship with.
 #
 # Run by hand (workflow_dispatch) it builds an existing tag into its
@@ -67,7 +67,12 @@ jobs:
             target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 40
     env:
       RUN: ${{ github.event_name == 'push' || inputs.target == '' || inputs.target == matrix.target }}
@@ -75,6 +80,9 @@ jobs:
       - name: Check the tag
         if: env.RUN == 'true'
         run: '[[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a release tag: $TAG"; exit 1; }'
+      - name: Keep line endings as committed
+        if: env.RUN == 'true' && runner.os == 'Windows'
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: env.RUN == 'true'
         with:
@@ -90,11 +98,22 @@ jobs:
         run: |
           name="ldf-mcp-${TAG}-${{ matrix.target }}"
           mkdir -p "dist/$name"
-          cp "target/${{ matrix.target }}/release/ldf-mcp" README.md LICENSE-MIT LICENSE-APACHE CHANGELOG.md "dist/$name/"
-          tar -C dist -czf "dist/$name.tar.gz" "$name"
-          cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256" && cat "$name.tar.gz.sha256"
+          if [ "$RUNNER_OS" = Windows ]; then
+            cp "target/${{ matrix.target }}/release/ldf-mcp.exe" README.md LICENSE-MIT LICENSE-APACHE CHANGELOG.md "dist/$name/"
+            archive="$name.zip"
+            (cd dist && 7z a -tzip "$archive" "$name" > /dev/null)
+            (cd dist && sha256sum "$archive" > "$archive.sha256")
+          else
+            cp "target/${{ matrix.target }}/release/ldf-mcp" README.md LICENSE-MIT LICENSE-APACHE CHANGELOG.md "dist/$name/"
+            archive="$name.tar.gz"
+            tar -C dist -czf "dist/$archive" "$name"
+            (cd dist && shasum -a 256 "$archive" > "$archive.sha256")
+          fi
+          cat "dist/$archive.sha256"
       - name: Upload
         if: env.RUN == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" dist/*.tar.gz dist/*.sha256 --clobber
+        run: |
+          shopt -s nullglob
+          gh release upload "$TAG" dist/*.tar.gz dist/*.zip dist/*.sha256 --clobber
