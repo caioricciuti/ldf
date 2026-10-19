@@ -37,6 +37,30 @@ password from the `CLICKHOUSE_PASSWORD` environment variable only; it is
 never accepted as an argument, so it cannot end up in a process list or a
 shell history.
 
+## Choosing the format per model
+
+`--model ID`, in all three modes, hands the JSON-or-LDF decision to the
+selector in `ldf-select` (the same rule as `ldf-discover select`). For each
+result it profiles the rows, encodes LDF at sparse thresholds 0.5 and 0.75,
+round-trips both, and uses LDF only when there is measured evidence for this
+exact model on data with the same traits (child tables, JSON cells,
+sparse keys): at least 50 questions, no more than 3 points below JSON, no
+significant loss, no more rows than measured, and at least 5 percent
+smaller than the JSON in bytes. Anything else stays JSON, and a stderr line
+says why:
+
+    ldf-mcp: query json for claude-haiku-5-5 (1 rows): no evidence for ldf (sparse threshold 0.5) on a measured dataset with traits {"child_tables"}
+
+The evidence is a copy of `docs/reports/evidence/evidence.json` built into
+the binary; `--evidence FILE` uses another file of the same shape. A model
+with no row of 50 questions or more gets JSON throughout, and the proxy then
+leaves the primer and tool notes out. As of 2026-10-19 that includes Opus
+and GPT (15 to 20 questions per cell); Haiku 5.5 and DeepSeek get LDF on
+flat, sparse and mixed-type data and JSON on nested orders. TOON is not
+offered here because the primer explains LDF only. Each result is decided
+on its own, so pages of one file can differ. Without `--model`, LDF is used
+whenever it is shorter, as before.
+
 ## Local ClickHouse with the benchmark datasets
 
 Any ClickHouse 24.x or 25.x works. With Docker (OrbStack on macOS), using a

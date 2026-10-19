@@ -16,5 +16,6 @@ ldf-data = { workspace = true }
 ldf-formats = { workspace = true }
 ldf-bench = { workspace = true }
 ldf = { workspace = true }
+ldf-select = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

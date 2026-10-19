@@ -2,6 +2,7 @@
 
 use ldf_data::Value;
 use ldf_data::input::{JsonEngine, parse_json_value};
+use ldf_select::{Choice, Evidence, Policy};
 use serde_json::Value as Json;
 
 /// What the model is told once, at `initialize`, about the format it will
@@ -38,21 +39,57 @@ pub struct Replaced {
     pub ldf_bytes: usize,
 }
 
+/// Picks JSON or LDF for each result from measured evidence for one model
+/// (`ldf-select`). Without a selector, LDF is used whenever it is shorter.
+#[derive(Debug, Clone)]
+pub struct Selector {
+    pub model: String,
+    pub evidence: Vec<Evidence>,
+    pub policy: Policy,
+}
+
+impl Selector {
+    /// `evidence` defaults to the evidence built into `ldf-select`.
+    pub fn new(model: &str, evidence: Option<Vec<Evidence>>) -> Selector {
+        Selector {
+            model: model.to_string(),
+            evidence: evidence.unwrap_or_else(ldf_select::builtin_evidence),
+            policy: Policy::default(),
+        }
+    }
+
+    /// False when the evidence holds nothing for this model, so every
+    /// result stays JSON.
+    pub fn knows_model(&self) -> bool {
+        ldf_select::knows_model(&self.model, &self.evidence, &self.policy)
+    }
+}
+
+/// [`convert`] without a selector.
+pub fn convert_text(text: &str, min_bytes: usize) -> Option<String> {
+    convert(text, min_bytes, None).ok()
+}
+
 /// Returns the LDF text for `text` when it is a JSON dataset worth
 /// converting: a non-empty array of objects, or an object holding at least
 /// one non-empty array of objects (which becomes a one-row root table with
-/// child tables). `None` when the text is not JSON, not a dataset, shorter
-/// than `min_bytes`, or when the LDF would not be shorter.
-pub fn convert_text(text: &str, min_bytes: usize) -> Option<String> {
+/// child tables). `Err(None)` when the text is not JSON, not a dataset,
+/// shorter than `min_bytes`, or when the LDF would not be shorter;
+/// `Err(Some(reason))` when the selector kept a dataset as JSON.
+pub fn convert(
+    text: &str,
+    min_bytes: usize,
+    sel: Option<&Selector>,
+) -> Result<String, Option<String>> {
     if text.len() < min_bytes {
-        return None;
+        return Err(None);
     }
     let trimmed = text.trim_start();
     if !(trimmed.starts_with('[') || trimmed.starts_with('{')) {
-        return None;
+        return Err(None);
     }
     let mut bytes = text.as_bytes().to_vec();
-    let root = parse_json_value(&mut bytes, JsonEngine::SerdeJson).ok()?;
+    let root = parse_json_value(&mut bytes, JsonEngine::SerdeJson).map_err(|_| None)?;
     let records: Vec<Value> = match root {
         Value::Array(items) if !items.is_empty() && items.iter().all(|v| v.as_object().is_some()) => items,
         Value::Object(ref o)
@@ -62,17 +99,57 @@ pub fn convert_text(text: &str, min_bytes: usize) -> Option<String> {
         {
             vec![root]
         }
-        _ => return None,
+        _ => return Err(None),
     };
-    let out = ldf::encode(&records);
-    (out.len() < text.len()).then_some(out)
+    let Some(sel) = sel else {
+        let out = ldf::encode(&records);
+        return if out.len() < text.len() {
+            Ok(out)
+        } else {
+            Err(None)
+        };
+    };
+    let (d, out) = ldf_select::select_ldf(
+        &records,
+        &sel.model,
+        &sel.evidence,
+        &sel.policy,
+        text.len() as u64,
+    );
+    out.ok_or_else(|| {
+        // The first reason the smallest LDF candidate was turned down.
+        let why = d
+            .verdicts
+            .iter()
+            .filter(|v| v.choice != Choice::Json && !v.accepted)
+            .min_by_key(|v| v.tokens.unwrap_or(u64::MAX))
+            .and_then(|v| v.notes.iter().rev().find(|n| !n.starts_with("ok: ")))
+            .cloned()
+            .unwrap_or_default();
+        Some(format!(
+            "json for {} ({} rows): {why}",
+            sel.model, d.profile.rows
+        ))
+    })
+}
+
+/// What [`rewrite_tool_result`] did to the text blocks of one result.
+#[derive(Debug, Default)]
+pub struct Rewritten {
+    pub replaced: Vec<Replaced>,
+    /// Datasets the selector kept as JSON, with the reason.
+    pub kept: Vec<String>,
 }
 
 /// Rewrites the text content blocks of a `tools/call` result in place.
 /// Results flagged `isError` and non-text blocks are left alone, as is
 /// `structuredContent`.
-pub fn rewrite_tool_result(result: &mut Json, min_bytes: usize) -> Vec<Replaced> {
-    let mut done = Vec::new();
+pub fn rewrite_tool_result(
+    result: &mut Json,
+    min_bytes: usize,
+    sel: Option<&Selector>,
+) -> Rewritten {
+    let mut done = Rewritten::default();
     if result.get("isError").and_then(Json::as_bool) == Some(true) {
         return done;
     }
@@ -86,12 +163,16 @@ pub fn rewrite_tool_result(result: &mut Json, min_bytes: usize) -> Vec<Replaced>
         let Some(text) = block.get("text").and_then(Json::as_str) else {
             continue;
         };
-        if let Some(ldf) = convert_text(text, min_bytes) {
-            done.push(Replaced {
-                json_bytes: text.len(),
-                ldf_bytes: ldf.len(),
-            });
-            block["text"] = Json::String(ldf);
+        match convert(text, min_bytes, sel) {
+            Ok(ldf) => {
+                done.replaced.push(Replaced {
+                    json_bytes: text.len(),
+                    ldf_bytes: ldf.len(),
+                });
+                block["text"] = Json::String(ldf);
+            }
+            Err(Some(why)) => done.kept.push(why),
+            Err(None) => {}
         }
     }
     done
@@ -195,8 +276,8 @@ mod tests {
             {"type": "text", "text": "done"},
             {"type": "image", "data": "AAAA", "mimeType": "image/png"}
         ]});
-        let done = rewrite_tool_result(&mut ok, 0);
-        assert_eq!(done.len(), 1);
+        let done = rewrite_tool_result(&mut ok, 0, None);
+        assert_eq!(done.replaced.len(), 1);
         assert!(
             ok["content"][0]["text"]
                 .as_str()
@@ -206,7 +287,7 @@ mod tests {
         assert_eq!(ok["content"][1]["text"], "done");
 
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": ROWS}]});
-        assert!(rewrite_tool_result(&mut err, 0).is_empty());
+        assert!(rewrite_tool_result(&mut err, 0, None).replaced.is_empty());
         assert_eq!(err["content"][0]["text"], ROWS);
     }
 
@@ -235,5 +316,62 @@ mod tests {
         let example = PRIMER.split_once("array:\n").unwrap().1;
         let recs = ldf::decode(example).unwrap();
         assert_eq!(recs.len(), 2);
+    }
+
+    fn rows(n: usize) -> String {
+        let r: Vec<String> = (0..n)
+            .map(|i| format!(r#"{{"id":{i},"name":"user {i}","score":{}.5}}"#, i % 9))
+            .collect();
+        format!("[{}]", r.join(","))
+    }
+
+    fn evidence(model: &str) -> Vec<Evidence> {
+        vec![Evidence {
+            model: model.into(),
+            run: "r".into(),
+            dataset: "d".into(),
+            records: 200,
+            traits: vec![],
+            family: "ldf".into(),
+            thresholds: vec![0.5, 0.75],
+            format: "ldf".into(),
+            n: 80,
+            k: 70,
+            json_k: 70,
+            wins: 1,
+            losses: 1,
+            p: 1.0,
+            tokens_ratio: 0.6,
+        }]
+    }
+
+    #[test]
+    fn selector_converts_for_a_measured_model_only() {
+        let text = rows(50);
+        let sel = Selector::new("m", Some(evidence("m")));
+        assert!(sel.knows_model());
+        let out = convert(&text, 0, Some(&sel)).unwrap();
+        assert_eq!(ldf::decode(&out).unwrap().len(), 50);
+
+        let other = Selector::new("other", Some(evidence("m")));
+        assert!(!other.knows_model());
+        let why = convert(&text, 0, Some(&other)).unwrap_err().unwrap();
+        assert!(why.contains("no evidence for model other"), "{why}");
+
+        // More rows than measured: JSON, with the reason.
+        let why = convert(&rows(300), 0, Some(&sel)).unwrap_err().unwrap();
+        assert!(why.contains("extrapolation is off"), "{why}");
+
+        // Not a dataset: no reason, the selector never ran.
+        assert_eq!(convert("[1,2]", 0, Some(&sel)), Err(None));
+    }
+
+    #[test]
+    fn builtin_evidence_keeps_opus_on_json() {
+        // Opus runs have under 50 questions per cell: not enough to count.
+        let sel = Selector::new("claude-opus-5-5", None);
+        assert!(!sel.knows_model());
+        assert!(Selector::new("claude-haiku-5-5", None).knows_model());
+        assert!(convert(&rows(50), 0, Some(&sel)).is_err());
     }
 }

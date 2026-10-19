@@ -19,4 +19,5 @@ path = "src/main.rs"
 ldf = { workspace = true, features = ["arrow"] }
 parquet = { workspace = true }
 ldf-data = { workspace = true }
+ldf-select = { workspace = true }
 serde_json = { workspace = true }

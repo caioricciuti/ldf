@@ -8,7 +8,7 @@ use std::thread;
 
 use serde_json::Value as Json;
 
-use crate::rewrite::{rewrite_initialize, rewrite_tool_result, rewrite_tools_list};
+use crate::rewrite::{Selector, rewrite_initialize, rewrite_tool_result, rewrite_tools_list};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -22,6 +22,18 @@ pub struct Config {
     pub min_bytes: usize,
     /// One stderr line per converted result.
     pub log: bool,
+    /// Pick JSON or LDF per result for one model; `None` converts whenever
+    /// LDF is shorter.
+    pub selector: Option<Selector>,
+}
+
+impl Config {
+    /// Whether the client is told about LDF: not with `--plain`, and not
+    /// when the selector has no evidence for the model (every result stays
+    /// JSON then).
+    fn primed(&self) -> bool {
+        !self.plain && self.selector.as_ref().is_none_or(Selector::knows_model)
+    }
 }
 
 /// Request id and the method the client sent under it, remembered until the
@@ -142,15 +154,20 @@ fn rewrite_line(line: &str, pending: &Pending, cfg: &Config) -> Option<String> {
     let (method, tool) = pending.lock().ok()?.remove(&id)?;
     let result = msg.get_mut("result")?;
     match method.as_str() {
-        "initialize" if !cfg.plain => rewrite_initialize(result),
-        "tools/list" if !cfg.plain => rewrite_tools_list(result),
+        "initialize" if cfg.primed() => rewrite_initialize(result),
+        "tools/list" if cfg.primed() => rewrite_tools_list(result),
         "tools/call" if !cfg.passthrough => {
-            let done = rewrite_tool_result(result, cfg.min_bytes);
-            if done.is_empty() {
+            let done = rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref());
+            if cfg.log {
+                for why in &done.kept {
+                    eprintln!("ldf-mcp: {} {why}", tool.as_deref().unwrap_or("?"));
+                }
+            }
+            if done.replaced.is_empty() {
                 return None;
             }
             if cfg.log {
-                for r in &done {
+                for r in &done.replaced {
                     eprintln!(
                         "ldf-mcp: {} json {} B -> ldf {} B ({:.0}%)",
                         tool.as_deref().unwrap_or("?"),

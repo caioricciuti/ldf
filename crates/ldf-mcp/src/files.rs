@@ -9,7 +9,7 @@ use ldf_data::Value;
 use ldf_data::input::{InputKind, ReadOptions, open};
 use serde_json::{Value as Json, json};
 
-use crate::rewrite::{PRIMER, convert_text};
+use crate::rewrite::{PRIMER, Selector, convert};
 use crate::rpc;
 
 #[derive(Debug, Clone)]
@@ -20,6 +20,8 @@ pub struct Config {
     pub max_rows: usize,
     pub passthrough: bool,
     pub min_bytes: usize,
+    /// Pick JSON or LDF per result for one model (`--model`).
+    pub selector: Option<Selector>,
     pub log: bool,
 }
 
@@ -256,8 +258,8 @@ fn render(cfg: &Config, tool: &str, rows: &[Value]) -> String {
     if cfg.passthrough {
         return json_text;
     }
-    match convert_text(&json_text, cfg.min_bytes) {
-        Some(ldf) => {
+    match convert(&json_text, cfg.min_bytes, cfg.selector.as_ref()) {
+        Ok(ldf) => {
             if cfg.log {
                 eprintln!(
                     "ldf-mcp: {tool} {} rows, json {} B -> ldf {} B ({:.0}%)",
@@ -269,7 +271,12 @@ fn render(cfg: &Config, tool: &str, rows: &[Value]) -> String {
             }
             ldf
         }
-        None => json_text,
+        Err(why) => {
+            if let (true, Some(why)) = (cfg.log, why) {
+                eprintln!("ldf-mcp: {tool} {why}");
+            }
+            json_text
+        }
     }
 }
 
@@ -284,6 +291,7 @@ mod tests {
             max_rows: 7,
             passthrough: false,
             min_bytes: 0,
+            selector: None,
             log: false,
         }
     }
