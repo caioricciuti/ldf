@@ -183,3 +183,10 @@ Each row: one model, one bundle, one format, against JSON on the same questions.
 | deepseek-chat | stage-b/sparse_events | 200 | sparse | ldf-tab | other |  | 115 | 56.5% | 60.9% | +5 / -10 | 0.30 | 0.78 | 983 (957) |
 | deepseek-chat | stage-b/sparse_events | 200 | sparse | ldf-v0 | ldf | 0.0 | 115 | 48.7% | 60.9% | +3 / -17 | 0.00 | 0.638 | 948 (957) |
 | deepseek-chat | stage-b/sparse_events | 200 | sparse | toon | toon |  | 115 | 62.6% | 60.9% | +6 / -4 | 0.75 | 1.222 | 1014 (957) |
+| claude-opus-5-5 | stage-c10/flat_users | 200 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 65 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.608 | 2566 (2666) |
+| claude-opus-5-5 | stage-c10/mixed_types | 200 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 57 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.73 | 1795 (1643) |
+| claude-opus-5-5 | stage-c10/nested_orders | 200 | child_tables,sparse | ldf | ldf | 0.0,0.25,0.5 | 95 | 98.9% | 98.9% | +1 / -1 | 1.00 | 0.647 | 3155 (3255) |
+| claude-opus-5-5 | stage-c10/nested_orders | 200 | child_tables,sparse | ldf-hoisted | other |  | 95 | 97.9% | 98.9% | +1 / -2 | 1.00 | 0.552 | 3180 (3255) |
+| claude-opus-5-5 | stage-c10/nested_orders | 200 | child_tables,sparse | ldf-s75 | ldf | 0.75,1.0 | 95 | 100.0% | 98.9% | +1 / -0 | 1.00 | 0.681 | 3061 (3255) |
+| claude-opus-5-5 | stage-c10/sparse_events | 200 | sparse | ldf | ldf | 0.5 | 80 | 97.5% | 97.5% | +2 / -2 | 1.00 | 0.801 | 2652 (2247) |
+| claude-opus-5-5 | stage-c10/sparse_events | 200 | sparse | ldf-s75 | ldf | 0.75,1.0 | 80 | 95.0% | 97.5% | +2 / -4 | 0.69 | 0.888 | 2315 (2247) |

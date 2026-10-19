@@ -163,10 +163,16 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   object null in some row decoded as absent, and a string starting with
   `@` as the first cell of a row read as a header. Output on all twelve
   medium fixtures is unchanged by the fix.
+- Stage C (2026-10-19, `docs/reports/2026-10-19-stage-c/`): Opus 5.5 on
+  held-out data, 57 to 95 questions per cell: LDF v0.1 ties JSON (294 of
+  297) at 57 to 77 percent of JSON's Claude input tokens, so the selector
+  now gives Opus LDF. Threshold 0.75 adds tokens and nothing on Opus (it
+  helps DeepSeek); hoisted arrays save 17 percent on nested_orders for
+  +1 / -2 (n.s.), no significant loss on any model so far. $5.96.
 - 2026-10-19 (`docs/reports/2026-10-19-engine/`): the direct Arrow path is
   1.9x to 3.2x faster than the Value path in block form at 1M rows (2.8x to
   4.8x for a whole document, 1.4x to 4.3x less memory), same bytes. The
-  selector gives JSON to Opus and GPT for now: their runs have 15 to 20
-  questions per cell, under the 50 the policy needs. LDF at sparse
+  selector gives JSON to GPT: its runs have 15 to 20 questions per cell,
+  under the 50 the policy needs (Opus had the same gap until Stage C). LDF at sparse
   threshold 0.5 changes object member order on rows where some keys move to
   `~` (`semantic-unordered`, documented in spec section 7).

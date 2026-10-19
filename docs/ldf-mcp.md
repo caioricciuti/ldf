@@ -54,9 +54,10 @@ says why:
 The evidence is a copy of `docs/reports/evidence/evidence.json` built into
 the binary; `--evidence FILE` uses another file of the same shape. A model
 with no row of 50 questions or more gets JSON throughout, and the proxy then
-leaves the primer and tool notes out. As of 2026-10-19 that includes Opus
-and GPT (15 to 20 questions per cell); Haiku 5.5 and DeepSeek get LDF on
-flat, sparse and mixed-type data and JSON on nested orders. TOON is not
+leaves the primer and tool notes out. As of the Stage C run (2026-10-19) that
+is GPT (15 to 20 questions per cell); Opus 5.5 gets LDF on flat, nested,
+sparse and mixed-type data, Haiku 5.5 and DeepSeek on flat, sparse and
+mixed-type data with JSON on nested orders. TOON is not
 offered here because the primer explains LDF only. Each result is decided
 on its own, so pages of one file can differ. Without `--model`, LDF is used
 whenever it is shorter, as before.
