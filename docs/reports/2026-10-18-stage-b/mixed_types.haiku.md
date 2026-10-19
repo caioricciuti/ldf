@@ -1,14 +1,14 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-haiku-5-5 | json | 82 | 98.8% | 81 | 1 | 0 | 0 | 0 | 0 | 0 | 7843 | 914 ms |
-| claude-haiku-5-5 | ldf | 82 | 96.3% | 79 | 3 | 0 | 0 | 0 | 0 | 0 | 5972 | 949 ms |
-| claude-haiku-5-5 | ldf-global | 82 | 91.5% | 75 | 7 | 0 | 0 | 0 | 0 | 0 | 5142 | 1117 ms |
-| claude-haiku-5-5 | ldf-tab | 82 | 98.8% | 81 | 1 | 0 | 0 | 0 | 0 | 0 | 6261 | 992 ms |
-| claude-haiku-5-5 | ldf-v0 | 82 | 96.3% | 79 | 3 | 0 | 0 | 0 | 0 | 0 | 5214 | 926 ms |
-| claude-haiku-5-5 | toon | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 7947 | 912 ms |
-| - | csv | 0 | format unsupported: record 0 field "value" is a object (nested) | | | | | | | | |
+| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-haiku-5-5 | json | 82 | 98.8% | 81 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 7843 | 914 ms |
+| claude-haiku-5-5 | ldf | 82 | 96.3% | 79 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 5972 | 949 ms |
+| claude-haiku-5-5 | ldf-global | 82 | 91.5% | 75 | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 5142 | 1117 ms |
+| claude-haiku-5-5 | ldf-tab | 82 | 98.8% | 81 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 6261 | 992 ms |
+| claude-haiku-5-5 | ldf-v0 | 82 | 96.3% | 79 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 5214 | 926 ms |
+| claude-haiku-5-5 | toon | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7947 | 912 ms |
+| - | csv | 0 | format unsupported: record 0 field "value" is a object (nested) | | | | | | | | | |
 
 ## By task kind
 

@@ -1,13 +1,13 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| deepseek-chat | csv | 89 | 61.8% | 55 | 34 | 0 | 0 | 0 | 0 | 0 | 6159 | 897 ms |
-| deepseek-chat | json | 89 | 66.3% | 59 | 30 | 0 | 0 | 0 | 0 | 0 | 10086 | 1025 ms |
-| deepseek-chat | ldf | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 6174 | 916 ms |
-| deepseek-chat | ldf-global | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 6166 | 877 ms |
-| deepseek-chat | ldf-tab | 89 | 64.0% | 57 | 32 | 0 | 0 | 0 | 0 | 0 | 6237 | 955 ms |
-| deepseek-chat | toon | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 6364 | 904 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| deepseek-chat | csv | 89 | 61.8% | 55 | 34 | 0 | 0 | 0 | 0 | 0 | 0 | 6159 | 897 ms |
+| deepseek-chat | json | 89 | 66.3% | 59 | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 10086 | 1025 ms |
+| deepseek-chat | ldf | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 0 | 6174 | 916 ms |
+| deepseek-chat | ldf-global | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 0 | 6166 | 877 ms |
+| deepseek-chat | ldf-tab | 89 | 64.0% | 57 | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 6237 | 955 ms |
+| deepseek-chat | toon | 89 | 68.5% | 61 | 28 | 0 | 0 | 0 | 0 | 0 | 0 | 6364 | 904 ms |
 
 ## By task kind
 

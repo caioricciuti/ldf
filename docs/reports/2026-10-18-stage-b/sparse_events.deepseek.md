@@ -1,14 +1,14 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| deepseek-chat | csv | 115 | 47.8% | 55 | 60 | 0 | 0 | 0 | 0 | 0 | 7197 | 951 ms |
-| deepseek-chat | json | 115 | 60.9% | 70 | 45 | 0 | 0 | 0 | 0 | 0 | 11388 | 957 ms |
-| deepseek-chat | ldf | 115 | 52.2% | 60 | 55 | 0 | 0 | 0 | 0 | 0 | 8875 | 974 ms |
-| deepseek-chat | ldf-global | 115 | 40.9% | 47 | 68 | 0 | 0 | 0 | 0 | 0 | 7260 | 1022 ms |
-| deepseek-chat | ldf-tab | 115 | 56.5% | 65 | 50 | 0 | 0 | 0 | 0 | 0 | 9008 | 983 ms |
-| deepseek-chat | ldf-v0 | 115 | 48.7% | 56 | 59 | 0 | 0 | 0 | 0 | 0 | 7480 | 948 ms |
-| deepseek-chat | toon | 115 | 62.6% | 72 | 43 | 0 | 0 | 0 | 0 | 0 | 13745 | 1014 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| deepseek-chat | csv | 115 | 47.8% | 55 | 60 | 0 | 0 | 0 | 0 | 0 | 0 | 7197 | 951 ms |
+| deepseek-chat | json | 115 | 60.9% | 70 | 45 | 0 | 0 | 0 | 0 | 0 | 0 | 11388 | 957 ms |
+| deepseek-chat | ldf | 115 | 52.2% | 60 | 55 | 0 | 0 | 0 | 0 | 0 | 0 | 8875 | 974 ms |
+| deepseek-chat | ldf-global | 115 | 40.9% | 47 | 68 | 0 | 0 | 0 | 0 | 0 | 0 | 7260 | 1022 ms |
+| deepseek-chat | ldf-tab | 115 | 56.5% | 65 | 50 | 0 | 0 | 0 | 0 | 0 | 0 | 9008 | 983 ms |
+| deepseek-chat | ldf-v0 | 115 | 48.7% | 56 | 59 | 0 | 0 | 0 | 0 | 0 | 0 | 7480 | 948 ms |
+| deepseek-chat | toon | 115 | 62.6% | 72 | 43 | 0 | 0 | 0 | 0 | 0 | 0 | 13745 | 1014 ms |
 
 ## By task kind
 

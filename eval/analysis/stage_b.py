@@ -49,8 +49,8 @@ P = lines.append
 P('# Stage B results (generated)\n')
 for model in ['haiku', 'deepseek']:
     P(f'\n## {model}\n')
-    P('| dataset | format | data tokens | / json | accuracy | 95% CI | mean out | vs ldf v0.1: +/- (p) | truncated |')
-    P('|---|---|---:|---:|---:|---|---:|---|---:|')
+    P('| dataset | format | data tokens | / json | accuracy | 95% CI | mean out | vs ldf v0.1: +/- (p) | truncated | bare |')
+    P('|---|---|---:|---:|---:|---|---:|---|---:|---:|')
     for d in DATASETS:
         fmts = sorted({f for (dd, mm, f) in idx if dd == d and mm == model}, key=lambda f: ['json','csv','toon','ldf','ldf-v0','ldf-hoisted','ldf-tab','ldf-global'].index(f))
         base_ldf = idx.get((d, model, 'ldf'), {})
@@ -60,13 +60,14 @@ for model in ['haiku', 'deepseek']:
             lo, hi = wilson(k, n)
             mo = sum(v[1] for v in r.values()) / max(n, 1)
             tr = sum(1 for v in r.values() if v[3] == 'truncated')
+            ba = sum(1 for v in r.values() if v[3] == 'bare')
             cmp = ''
             if f != 'ldf' and base_ldf:
                 common = set(r) & set(base_ldf)
                 b = sum(1 for t in common if r[t][0] and not base_ldf[t][0])
                 c = sum(1 for t in common if not r[t][0] and base_ldf[t][0])
                 cmp = f'+{b} / -{c} (p={binom_two_sided(b, c):.2f})'
-            P(f'| {d} | {f} | {data_tokens[(d,f)]} | {data_tokens[(d,f)]/data_tokens[(d,"json")]:.2f} | {100*k/n:.1f}% ({k}/{n}) | {100*lo:.0f}-{100*hi:.0f} | {mo:.0f} | {cmp} | {tr} |')
+            P(f'| {d} | {f} | {data_tokens[(d,f)]} | {data_tokens[(d,f)]/data_tokens[(d,"json")]:.2f} | {100*k/n:.1f}% ({k}/{n}) | {100*lo:.0f}-{100*hi:.0f} | {mo:.0f} | {cmp} | {tr} | {ba} |')
     # pooled over datasets for formats present everywhere
     P(f'\n### {model}: pooled over the four datasets (formats present in all)\n')
     P('| format | accuracy | n | vs ldf: +/- (p) | mean out tokens | data tokens / json (mean) |')

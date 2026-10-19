@@ -238,6 +238,21 @@ pub fn parse_wrapped(raw: &str) -> Option<Answer> {
     Answer::from_value(&obj[0].1)
 }
 
+/// The last line of a response as an unquoted string, as in prose
+/// followed by `ORD-000050` where `"ORD-000050"` was asked for. The scorer
+/// reports a right value in this shape as *bare*, apart from *correct* and
+/// *wrong*: tabular data with bare strings primes bare answers (Stage B).
+/// Lines that start like JSON are not bare.
+pub fn parse_bare(raw: &str) -> Option<Answer> {
+    let text = unfenced(raw);
+    let line = text.lines().rev().map(str::trim).find(|l| !l.is_empty())?;
+    let line = line.trim_matches('`').trim();
+    if line.is_empty() || line.starts_with(['"', '[', '{']) {
+        return None;
+    }
+    Some(Answer::Text(line.to_string()))
+}
+
 /// Parses a raw model response into an [`Answer`]. Accepts a bare JSON
 /// value, a JSON value inside a Markdown code fence, or, failing that, the
 /// trimmed text as a string (numbers and booleans recognised).

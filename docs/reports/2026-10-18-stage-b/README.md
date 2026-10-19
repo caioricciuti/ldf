@@ -64,8 +64,9 @@ other wrong, with an exact sign test):
    way, JSON none. Tabular data with bare strings primes bare answers. With
    a bare final string accepted, Haiku nested_orders moves: ldf-hoisted
    88.9 to 94.8, ldf-global 75.6 to 80.7, v0.1 91.9 to 94.1, TOON 92.6 to
-   94.8. DeepSeek is unaffected. The scorer should count these as a
-   separate outcome, as it does for wrapped answers.
+   94.8. DeepSeek is unaffected. The scorer now reports these as their
+   own outcome, `bare`, next to `wrapped`; the tables here are regraded
+   with it (accuracy unchanged, a `bare` column added).
 7. **child_aggregate and aggregate_where are beyond DeepSeek at 1024 output
    tokens** (0 to 7 and 13 to 33 percent in every format): it answers in
    about 5 tokens without working. Those kinds carry no format signal for

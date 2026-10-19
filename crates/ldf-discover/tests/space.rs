@@ -135,3 +135,22 @@ fn edge_cases_are_lossless() {
         }
     }
 }
+
+/// The `-` and empty null markers left the search after Stage B but the
+/// codec still supports them.
+#[test]
+fn null_markers_outside_the_search_still_round_trip() {
+    use ldf_discover::knobs::Nulls;
+    let data: Vec<(&str, Vec<Value>)> = ["sparse_events", "empty_values", "mixed_types"]
+        .iter()
+        .map(|n| (*n, fixture(n)))
+        .collect();
+    for cfg in space().iter().step_by(97) {
+        for nulls in [Nulls::DashEmpty, Nulls::EmptyQuestion] {
+            let c = Config { nulls, ..*cfg };
+            for (name, recs) in &data {
+                assert_lossless(c, recs, name);
+            }
+        }
+    }
+}

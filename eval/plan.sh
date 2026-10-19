@@ -13,6 +13,9 @@
 #   eval/plan.sh stage-b-build     build the Stage B bundles (free, deterministic)
 #   eval/plan.sh stage-b-haiku     Haiku 5.5, Stage B bundles, max_tokens 4096 (~$1.10, cap $1.60)
 #   eval/plan.sh stage-b-deepseek  deepseek-chat, Stage B bundles             (~$1.25, cap $1.80)
+#   eval/plan.sh sparse-sweep-build     sparse_events at threshold 0.75 (free)
+#   eval/plan.sh sparse-sweep-deepseek  deepseek-chat on it (~$0.04, cap $0.10)
+#   eval/plan.sh stage-c-build          Stage C bundles on held-out data (free)
 #   eval/plan.sh all           the first four stages above, in that order
 #   eval/plan.sh score         regrade every responses file into results.<model>.md
 set -euo pipefail
@@ -68,6 +71,32 @@ stage_b_build() {
       --candidate "ldf-global=$g" --out "eval/out/stage-b/$b"
   done
 }
+# Sparse threshold sweep for DeepSeek (Stage B finding 3): the Stage B
+# sparse_events records and questions with v0.1 at threshold 0.75 (1.0
+# gives the same document here: no key between 60 and 100 percent fill).
+# Compared against the Stage B answers for json, toon, ldf (0.5), ldf-v0 (0).
+sparse_sweep_build() {
+  local s75='d=comma h=typed q?=1 o=dotted a=child-key sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  ./target/release/ldf-eval build --input fixtures/medium/sparse_events.json --records 200 --per-kind 15 --seed 1 \
+    --formats json,ldf --candidate "ldf-s75=$s75" --out eval/out/sparse-sweep/sparse_events
+}
+stage_sparse_sweep_deepseek() {
+  run --bundle eval/out/sparse-sweep/sparse_events "${DEEPSEEK[@]}" --formats ldf-s75 --budget 0.10
+}
+# Stage C (discovery step 4): finalists on held-out data. fixtures/holdout
+# (ldf-gen --seed 20261118) with question seed 2, so neither the records
+# nor the questions were seen when the finalists were picked.
+STAGE_C_DATASETS=(flat_users nested_orders sparse_events mixed_types)
+stage_c_build() {
+  local s75='d=comma h=typed q?=1 o=dotted a=child-key sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  local h='d=comma h=typed q?=1 o=dotted a=hoisted sp=50 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  local hs75='d=comma h=typed q?=1 o=dotted a=hoisted sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  for b in "${STAGE_C_DATASETS[@]}"; do
+    ./target/release/ldf-eval build --input "fixtures/holdout/medium/$b.json" --records 200 --per-kind 15 --seed 2 \
+      --formats json,toon,ldf --candidate "ldf-s75=$s75" --candidate "ldf-hoisted=$h" --candidate "ldf-hs75=$hs75" \
+      --out "eval/out/stage-c/$b"
+  done
+}
 stage_b() {
   local cap=$1; shift
   for entry in "${STAGE_B[@]}"; do
@@ -83,7 +112,7 @@ stage_deepseek() {
   done
 }
 stage_score() {
-  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl; do
+  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl; do
     [ -e "$r" ] || continue
     bundle=$(dirname "$r")
     model=$(basename "$r" .jsonl | cut -d. -f3-)
@@ -91,7 +120,7 @@ stage_score() {
   done
 }
 
-[ $# -gt 0 ] || { sed -n '2,17p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,20p' "$0"; exit 1; }
 for stage in "$@"; do
   case "$stage" in
     opus-ldf) stage_opus_ldf ;;
@@ -101,6 +130,9 @@ for stage in "$@"; do
     haiku-cap) stage_haiku_cap ;;
     haiku-sparse) stage_haiku_sparse ;;
     stage-b-build) stage_b_build ;;
+    sparse-sweep-build) sparse_sweep_build ;;
+    stage-c-build) stage_c_build ;;
+    sparse-sweep-deepseek) stage_sparse_sweep_deepseek ;;
     stage-b-haiku) stage_stage_b_haiku ;;
     stage-b-deepseek) stage_stage_b_deepseek ;;
     all) stage_opus_ldf; stage_haiku; stage_opus_200; stage_deepseek ;;

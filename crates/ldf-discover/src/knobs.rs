@@ -197,6 +197,13 @@ impl Config {
         if self.keys == Keys::Row && (self.sparse != 0 || self.trim) {
             return false;
         }
+        // Stage B (docs/reports/2026-10-18-stage-b): with `-` as the null
+        // marker Haiku and DeepSeek answered the string "-" for null values.
+        // Null stays the word `null`; the other markers remain decodable
+        // but are out of the search.
+        if self.nulls != Nulls::NullEmpty {
+            return false;
+        }
         true
     }
 

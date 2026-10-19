@@ -1,13 +1,13 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claude-haiku-5-5 | csv | 89 | 96.6% | 86 | 3 | 0 | 0 | 0 | 0 | 0 | 7755 | 2166 ms |
-| claude-haiku-5-5 | json | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 13742 | 2043 ms |
-| claude-haiku-5-5 | ldf | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 7778 | 2247 ms |
-| claude-haiku-5-5 | ldf-global | 89 | 100.0% | 89 | 0 | 0 | 0 | 0 | 0 | 0 | 7762 | 2344 ms |
-| claude-haiku-5-5 | ldf-tab | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 7778 | 2168 ms |
-| claude-haiku-5-5 | toon | 89 | 96.6% | 86 | 3 | 0 | 0 | 0 | 0 | 0 | 7961 | 2268 ms |
+| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claude-haiku-5-5 | csv | 89 | 96.6% | 86 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 7755 | 2166 ms |
+| claude-haiku-5-5 | json | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 13742 | 2043 ms |
+| claude-haiku-5-5 | ldf | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 7778 | 2247 ms |
+| claude-haiku-5-5 | ldf-global | 89 | 100.0% | 89 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7762 | 2344 ms |
+| claude-haiku-5-5 | ldf-tab | 89 | 97.8% | 87 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 7778 | 2168 ms |
+| claude-haiku-5-5 | toon | 89 | 96.6% | 86 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 7961 | 2268 ms |
 
 ## By task kind
 

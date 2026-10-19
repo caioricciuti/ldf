@@ -1,14 +1,14 @@
 # LLM comprehension results
 
-| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| deepseek-chat | json | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 5326 | 981 ms |
-| deepseek-chat | ldf | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 3994 | 879 ms |
-| deepseek-chat | ldf-global | 82 | 78.0% | 64 | 18 | 0 | 0 | 0 | 0 | 0 | 3579 | 908 ms |
-| deepseek-chat | ldf-tab | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 4438 | 979 ms |
-| deepseek-chat | ldf-v0 | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 3625 | 872 ms |
-| deepseek-chat | toon | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 6639 | 993 ms |
-| - | csv | 0 | format unsupported: record 0 field "value" is a object (nested) | | | | | | | | |
+| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| deepseek-chat | json | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5326 | 981 ms |
+| deepseek-chat | ldf | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3994 | 879 ms |
+| deepseek-chat | ldf-global | 82 | 78.0% | 64 | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 3579 | 908 ms |
+| deepseek-chat | ldf-tab | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4438 | 979 ms |
+| deepseek-chat | ldf-v0 | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3625 | 872 ms |
+| deepseek-chat | toon | 82 | 100.0% | 82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6639 | 993 ms |
+| - | csv | 0 | format unsupported: record 0 field "value" is a object (nested) | | | | | | | | | |
 
 ## By task kind
 

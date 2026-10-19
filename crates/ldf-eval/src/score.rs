@@ -14,7 +14,7 @@ use std::fmt::Write as _;
 
 use serde::{Deserialize, Serialize};
 
-use crate::answer::{parse_response, parse_wrapped};
+use crate::answer::{parse_bare, parse_response, parse_wrapped};
 use crate::tasks::{Task, TaskKind};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,6 +41,9 @@ pub enum Outcome {
     /// Not counted as correct; reported so the answer-shape slips are
     /// visible apart from misreads.
     Wrapped,
+    /// The right string, unquoted, on the last line after prose
+    /// (`ORD-000050` for `"ORD-000050"`). Not counted as correct.
+    Bare,
     Malformed,
     Truncated,
     ContextExceeded,
@@ -87,14 +90,19 @@ pub fn grade(tasks: &[Task], responses: &[Response]) -> Vec<Graded> {
                     parse_wrapped(text)
                         .is_some_and(|inner| task.answer.accepts(&inner, &task.tolerance))
                 };
+                let bare =
+                    || parse_bare(text).is_some_and(|b| task.answer.accepts(&b, &task.tolerance));
                 match parse_response(text) {
                     None if wrapped() => Outcome::Wrapped,
+                    None if bare() => Outcome::Bare,
                     None => Outcome::Malformed,
                     Some(got) => {
                         if task.answer.accepts(&got, &task.tolerance) {
                             Outcome::Correct
                         } else if wrapped() {
                             Outcome::Wrapped
+                        } else if bare() {
+                            Outcome::Bare
                         } else {
                             Outcome::Wrong
                         }
@@ -124,6 +132,7 @@ pub struct Cell {
     pub correct: usize,
     pub wrong: usize,
     pub wrapped: usize,
+    pub bare: usize,
     pub malformed: usize,
     pub truncated: usize,
     pub context_exceeded: usize,
@@ -141,6 +150,7 @@ impl Cell {
             Outcome::Correct => self.correct += 1,
             Outcome::Wrong => self.wrong += 1,
             Outcome::Wrapped => self.wrapped += 1,
+            Outcome::Bare => self.bare += 1,
             Outcome::Malformed => self.malformed += 1,
             Outcome::Truncated => self.truncated += 1,
             Outcome::ContextExceeded => self.context_exceeded += 1,
@@ -188,21 +198,22 @@ pub fn render_markdown(graded: &[Graded], unsupported: &[(String, String)]) -> S
     let _ = writeln!(md, "# LLM comprehension results\n");
     let _ = writeln!(
         md,
-        "| model | format | n | accuracy | correct | wrong | wrapped | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |"
+        "| model | format | n | accuracy | correct | wrong | wrapped | bare | malformed | truncated | ctx exceeded | api error | mean input tokens | mean latency |"
     );
     let _ = writeln!(
         md,
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
     );
     for ((model, format), c) in &by_format {
         let _ = writeln!(
             md,
-            "| {model} | {format} | {} | {:.1}% | {} | {} | {} | {} | {} | {} | {} | {:.0} | {} |",
+            "| {model} | {format} | {} | {:.1}% | {} | {} | {} | {} | {} | {} | {} | {} | {:.0} | {} |",
             c.n,
             c.accuracy() * 100.0,
             c.correct,
             c.wrong,
             c.wrapped,
+            c.bare,
             c.malformed,
             c.truncated,
             c.context_exceeded,
@@ -222,7 +233,7 @@ pub fn render_markdown(graded: &[Graded], unsupported: &[(String, String)]) -> S
     for (f, reason) in unsupported {
         let _ = writeln!(
             md,
-            "| - | {f} | 0 | format unsupported: {reason} | | | | | | | | |"
+            "| - | {f} | 0 | format unsupported: {reason} | | | | | | | | | |"
         );
     }
     let _ = writeln!(md, "\n## By task kind\n");
@@ -238,4 +249,58 @@ pub fn render_markdown(graded: &[Graded], unsupported: &[(String, String)]) -> S
         );
     }
     md
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::answer::{Answer, Tolerance};
+
+    fn task() -> Task {
+        Task {
+            id: "compare-01".into(),
+            kind: TaskKind::Compare,
+            question: "Which order has the larger total?".into(),
+            answer: Answer::Text("ORD-000050".into()),
+            tolerance: Tolerance::default(),
+            depends_on: vec![],
+        }
+    }
+
+    fn response(text: &str) -> Response {
+        Response {
+            prompt_id: "compare-01__ldf".into(),
+            task_id: "compare-01".into(),
+            format: "ldf".into(),
+            provider: "p".into(),
+            model: "m".into(),
+            text: Some(text.into()),
+            finish_reason: Some("end_turn".into()),
+            error: None,
+            input_tokens: None,
+            output_tokens: None,
+            latency_ms: None,
+        }
+    }
+
+    #[test]
+    fn bare_final_string_is_its_own_outcome() {
+        let cases = [
+            // The Stage B shape: prose, blank line, unquoted value.
+            (
+                "ORD-000050 has total 4310.99; ORD-000107 has total 433.71.\n\nORD-000050",
+                Outcome::Bare,
+            ),
+            (
+                "ORD-000050 has total 4310.99.\n\n\"ORD-000050\"",
+                Outcome::Correct,
+            ),
+            ("ORD-000050", Outcome::Correct),
+            ("Totals compared.\n\nORD-000107", Outcome::Wrong),
+        ];
+        for (text, want) in cases {
+            let g = grade(&[task()], &[response(text)]);
+            assert_eq!(g[0].outcome, want, "{text:?}");
+        }
+    }
 }
