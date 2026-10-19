@@ -2,10 +2,10 @@ use std::io::{Read, Write};
 use std::path::Path;
 use std::process::ExitCode;
 
-use ldf_mcp::clickhouse;
 use ldf_mcp::proxy::{self, Config};
 use ldf_mcp::rewrite::Selector;
 use ldf_mcp::stats::{self, Recorder};
+use ldf_mcp::{clickhouse, install};
 use std::sync::Arc;
 
 fn usage() -> ExitCode {
@@ -37,6 +37,15 @@ fn usage() -> ExitCode {
          \x20 ldf-mcp stats [--days N] [--json] [--file PATH]\n\
          \x20     summarize the local statistics: responses, LDF or JSON and why, bytes, conversion time;\n\
          \x20     the file is LDF_STATS_FILE or ldf/events.jsonl under XDG_STATE_HOME, ~/.local/state or LOCALAPPDATA\n\
+         \x20 ldf-mcp install claude-code [--wrap NAME]... [--wrap-all] [--add-files DIR [--files-name NAME] [--scope local|user]]\n\
+         \x20                             [--model ID] [--apply]\n\
+         \x20     put stdio MCP servers of Claude Code behind ldf-mcp proxy, or add a files server, through\n\
+         \x20     `claude mcp`; without --apply only prints the plan. Every change is recorded for uninstall\n\
+         \x20 ldf-mcp uninstall claude-code [--apply]\n\
+         \x20     restore what install changed, where the entry is still the one install wrote\n\
+         \x20 ldf-mcp doctor\n\
+         \x20     this binary, the statistics file, agents on PATH, Claude Code servers and their state\n\
+         \x20 ldf-mcp --version\n\
          \x20 ldf-mcp fake-server [--ignore-eof]\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
     );
@@ -51,6 +60,26 @@ fn main() -> ExitCode {
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("files") => run_files(&args[1..]),
         Some("stats") => run_stats(&args[1..]),
+        Some("install") => run_install(&args[1..]),
+        Some("uninstall") => run_uninstall(&args[1..]),
+        Some("doctor") => match install::Env::detect() {
+            Ok(env) => {
+                print!("{}", install::doctor(&env));
+                ExitCode::SUCCESS
+            }
+            Err(e) => fail("ldf-mcp doctor", e),
+        },
+        Some("--version" | "-V") => {
+            println!("ldf-mcp {}", env!("CARGO_PKG_VERSION"));
+            ExitCode::SUCCESS
+        }
+        // Tests stand in for the claude CLI with this binary.
+        Some("mcp") if std::env::var("LDF_FAKE_CLAUDE").is_ok_and(|v| v == "1") => {
+            match install::fake_claude(&args) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(e) => fail("fake-claude", e),
+            }
+        }
         Some("fake-server") => {
             match ldf_mcp::fake::run(args[1..].iter().any(|a| a == "--ignore-eof")) {
                 Ok(()) => ExitCode::SUCCESS,
@@ -323,6 +352,57 @@ fn run_stats(args: &[String]) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => fail("ldf-mcp stats", format!("{}: {e}", path.display())),
+    }
+}
+
+fn run_install(args: &[String]) -> ExitCode {
+    if args.first().map(String::as_str) != Some(install::AGENT) {
+        return usage();
+    }
+    let mut a = install::InstallArgs::default();
+    let mut it = args[1..].iter();
+    while let Some(arg) = it.next() {
+        match arg.as_str() {
+            "--apply" => a.apply = true,
+            "--wrap-all" => a.wrap_all = true,
+            "--wrap" | "--add-files" | "--files-name" | "--model" | "--scope" => {
+                let Some(v) = it.next() else { return usage() };
+                match arg.as_str() {
+                    "--wrap" => a.wrap.push(v.clone()),
+                    "--add-files" => a.add_files = Some(v.into()),
+                    "--files-name" => a.files_name = Some(v.clone()),
+                    "--model" => a.model = Some(v.clone()),
+                    _ => match v.as_str() {
+                        "local" => a.scope = Some(install::Scope::Local),
+                        "user" => a.scope = Some(install::Scope::User),
+                        _ => return usage(),
+                    },
+                }
+            }
+            _ => return usage(),
+        }
+    }
+    match install::Env::detect().and_then(|env| install::install(&env, &a)) {
+        Ok(text) => {
+            print!("{text}");
+            ExitCode::SUCCESS
+        }
+        Err(e) => fail("ldf-mcp install", e),
+    }
+}
+
+fn run_uninstall(args: &[String]) -> ExitCode {
+    let apply = match args {
+        [agent] if agent == install::AGENT => false,
+        [agent, flag] if agent == install::AGENT && flag == "--apply" => true,
+        _ => return usage(),
+    };
+    match install::Env::detect().and_then(|env| install::uninstall(&env, apply)) {
+        Ok(text) => {
+            print!("{text}");
+            ExitCode::SUCCESS
+        }
+        Err(e) => fail("ldf-mcp uninstall", e),
     }
 }
 

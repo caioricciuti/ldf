@@ -14,6 +14,23 @@ stated in `docs/ldf-spec-v0.md`.
   `ldf/events.jsonl` under the user's state directory, and `ldf-mcp stats`
   summarises it (`--days`, `--json`, `--file`). `--name NAME` labels a
   server, `--no-stats` or `LDF_STATS=0` turns recording off.
+- `ldf-mcp install claude-code` puts Claude Code's stdio MCP servers behind
+  `ldf-mcp proxy` (`--wrap NAME`, `--wrap-all`) and adds a files server
+  (`--add-files DIR`), through `claude mcp remove` / `add-json` only. It
+  prints the plan unless given `--apply`, records every change with the
+  original entry, changes nothing on a second run, and restores the
+  original when an add fails. Servers with env, credential-like arguments,
+  remote servers and `.mcp.json` are listed and left alone.
+  `ldf-mcp uninstall claude-code [--apply]` restores each entry that is
+  still the one install wrote.
+- `ldf-mcp doctor`: binary, statistics file, agents on PATH, Claude Code
+  servers and whether they are behind LDF or broken, models with evidence.
+  `ldf-mcp --version`.
+- `docs/agents.md`: integration architecture, compatibility matrix for
+  Claude Code, Codex CLI and OpenCode (MCP, hooks, plugins, model
+  visibility, usage counters), setup in five minutes, limitations.
+  `eval/demo_agents.py` and `docs/reports/2026-10-19-agent-demos/`: the
+  proxy and files data paths, JSON against LDF in bytes and o200k tokens.
 
 ### Fixed
 
