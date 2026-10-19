@@ -30,7 +30,7 @@ fn usage() -> ExitCode {
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
          \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
          \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
-         \x20 ldf-mcp fake-server\n\
+         \x20 ldf-mcp fake-server [--ignore-eof]\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
     );
     ExitCode::from(2)
@@ -43,13 +43,15 @@ fn main() -> ExitCode {
         Some("convert") => convert(&args[1..]),
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("files") => run_files(&args[1..]),
-        Some("fake-server") => match ldf_mcp::fake::run() {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(e) => {
-                eprintln!("ldf-mcp fake-server: {e}");
-                ExitCode::from(1)
+        Some("fake-server") => {
+            match ldf_mcp::fake::run(args[1..].iter().any(|a| a == "--ignore-eof")) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(e) => {
+                    eprintln!("ldf-mcp fake-server: {e}");
+                    ExitCode::from(1)
+                }
             }
-        },
+        }
         _ => usage(),
     }
 }

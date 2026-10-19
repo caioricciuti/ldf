@@ -186,22 +186,30 @@ pub fn rewrite_tools_list(result: &mut Json) {
         return;
     };
     for tool in tools.iter_mut() {
+        // A malformed entry is the client's to reject, not ours to crash on.
+        let Some(tool) = tool.as_object_mut() else {
+            continue;
+        };
         let desc = tool
             .get("description")
             .and_then(Json::as_str)
             .unwrap_or("")
             .trim_end()
             .to_string();
-        tool["description"] = Json::String(if desc.is_empty() {
+        let note = if desc.is_empty() {
             TOOL_NOTE.trim_start().to_string()
         } else {
             desc + TOOL_NOTE
-        });
+        };
+        tool.insert("description".into(), Json::String(note));
     }
 }
 
 /// Appends [`PRIMER`] to the `instructions` of an `initialize` result.
 pub fn rewrite_initialize(result: &mut Json) {
+    let Some(result) = result.as_object_mut() else {
+        return;
+    };
     let existing = result
         .get("instructions")
         .and_then(Json::as_str)
@@ -213,7 +221,7 @@ pub fn rewrite_initialize(result: &mut Json) {
     } else {
         existing + "\n\n" + PRIMER
     };
-    result["instructions"] = Json::String(text);
+    result.insert("instructions".into(), Json::String(text));
 }
 
 #[cfg(test)]
