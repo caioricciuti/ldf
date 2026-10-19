@@ -11,6 +11,7 @@ pub mod decode;
 pub mod encode;
 pub mod knobs;
 pub mod plan;
+pub mod select;
 pub mod stage_a;
 pub mod text;
 
