@@ -367,11 +367,12 @@ mod tests {
     }
 
     #[test]
-    fn builtin_evidence_keeps_opus_on_json() {
-        // Opus runs have under 50 questions per cell: not enough to count.
-        let sel = Selector::new("claude-opus-5-5", None);
+    fn builtin_evidence_keeps_gpt_on_json() {
+        // GPT runs have under 50 questions per cell: not enough to count.
+        let sel = Selector::new("gpt-6.1-sol", None);
         assert!(!sel.knows_model());
         assert!(Selector::new("claude-haiku-5-5", None).knows_model());
+        assert!(Selector::new("claude-opus-5-5", None).knows_model());
         assert!(convert(&rows(50), 0, Some(&sel)).is_err());
     }
 }

@@ -3928,5 +3928,182 @@
   "mean_latency_ms": 1014,
   "json_mean_latency_ms": 957,
   "mean_output_tokens": 5
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/flat_users",
+  "dataset": "flat_users",
+  "records": 200,
+  "traits": [],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "format": "ldf",
+  "n": 65,
+  "k": 65,
+  "json_k": 65,
+  "wins": 0,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.608,
+  "mean_latency_ms": 2566,
+  "json_mean_latency_ms": 2666,
+  "mean_output_tokens": 173
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/mixed_types",
+  "dataset": "mixed_types",
+  "records": 200,
+  "traits": [
+   "json_cells",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5,
+   0.75
+  ],
+  "format": "ldf",
+  "n": 57,
+  "k": 57,
+  "json_k": 57,
+  "wins": 0,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.73,
+  "mean_latency_ms": 1795,
+  "json_mean_latency_ms": 1643,
+  "mean_output_tokens": 9
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5
+  ],
+  "format": "ldf",
+  "n": 95,
+  "k": 94,
+  "json_k": 94,
+  "wins": 1,
+  "losses": 1,
+  "p": 1.0,
+  "tokens_ratio": 0.647,
+  "mean_latency_ms": 3155,
+  "json_mean_latency_ms": 3255,
+  "mean_output_tokens": 191
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "other",
+  "thresholds": [],
+  "format": "ldf-hoisted",
+  "n": 95,
+  "k": 93,
+  "json_k": 94,
+  "wins": 1,
+  "losses": 2,
+  "p": 1.0,
+  "tokens_ratio": 0.552,
+  "mean_latency_ms": 3180,
+  "json_mean_latency_ms": 3255,
+  "mean_output_tokens": 197
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "format": "ldf-s75",
+  "n": 95,
+  "k": 95,
+  "json_k": 94,
+  "wins": 1,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.681,
+  "mean_latency_ms": 3061,
+  "json_mean_latency_ms": 3255,
+  "mean_output_tokens": 184
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5
+  ],
+  "format": "ldf",
+  "n": 80,
+  "k": 78,
+  "json_k": 78,
+  "wins": 2,
+  "losses": 2,
+  "p": 1.0,
+  "tokens_ratio": 0.801,
+  "mean_latency_ms": 2652,
+  "json_mean_latency_ms": 2247,
+  "mean_output_tokens": 120
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "stage-c10/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "format": "ldf-s75",
+  "n": 80,
+  "k": 76,
+  "json_k": 78,
+  "wins": 2,
+  "losses": 4,
+  "p": 0.6875,
+  "tokens_ratio": 0.888,
+  "mean_latency_ms": 2315,
+  "json_mean_latency_ms": 2247,
+  "mean_output_tokens": 111
  }
 ]

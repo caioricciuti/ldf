@@ -84,8 +84,13 @@ where not" with a cheap switch.
   the Value path at 1M rows, same bytes (`docs/reports/2026-10-19-engine`).
 - Done 2026-10-19: the selector inside `ldf-mcp` (`--model`), its rule
   moved to the `ldf-select` crate with the evidence built in.
-- Next: child tables (lists of structs) on the Arrow path; Stage C on
-  held-out data (priced, waiting for approval).
+- Done 2026-10-19: Stage C, Opus 5.5 on held-out data
+  (`docs/reports/2026-10-19-stage-c`): LDF v0.1 ties JSON (294 of 297) at
+  57 to 77 percent of its tokens; the selector now picks LDF for Opus.
+  Hoisted arrays: no significant loss on any of three models, the lead
+  v0.2 candidate.
+- Next: hoisted arrays as a selector candidate and a v0.2 spec draft;
+  child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
 - Round-trip and conformance fixtures for LDF itself, in the same style as
