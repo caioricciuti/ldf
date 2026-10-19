@@ -14,7 +14,8 @@ use std::time::{Duration, Instant};
 
 use serde_json::Value as Json;
 
-use crate::rewrite::{Selector, rewrite_initialize, rewrite_tool_result, rewrite_tools_list};
+use crate::rewrite::{Kept, Selector, rewrite_initialize, rewrite_tool_result, rewrite_tools_list};
+use crate::stats::Recorder;
 
 /// How long the child gets to exit after the client closed our stdin (and
 /// we closed the child's) before it is killed. The MCP stdio transport
@@ -36,6 +37,8 @@ pub struct Config {
     /// Pick JSON or LDF per result for one model; `None` converts whenever
     /// LDF is shorter.
     pub selector: Option<Selector>,
+    /// Local statistics, one line per `tools/call` response.
+    pub stats: Arc<Recorder>,
 }
 
 impl Config {
@@ -47,10 +50,18 @@ impl Config {
     }
 }
 
-/// Request id and the method the client sent under it, remembered until the
-/// downstream reply arrives or the client cancels it. Ids are keyed by their
-/// JSON text so numeric and string ids never collide.
-type Pending = Arc<Mutex<HashMap<String, (String, Option<String>)>>>;
+/// A request the client sent: its method, the tool name for `tools/call`,
+/// and when it passed through.
+struct Request {
+    method: String,
+    tool: Option<String>,
+    at: Instant,
+}
+
+/// Requests remembered until the downstream reply arrives or the client
+/// cancels them. Ids are keyed by their JSON text so numeric and string ids
+/// never collide.
+type Pending = Arc<Mutex<HashMap<String, Request>>>;
 
 /// Runs the proxy until the client closes stdin or the child exits. Returns
 /// the child's exit code.
@@ -190,7 +201,14 @@ fn note_request(pending: &Pending, msg: &Json) {
         None
     };
     if let Ok(mut p) = pending.lock() {
-        p.insert(id.to_string(), (method.to_string(), tool));
+        p.insert(
+            id.to_string(),
+            Request {
+                method: method.to_string(),
+                tool,
+                at: Instant::now(),
+            },
+        );
     }
 }
 
@@ -238,31 +256,39 @@ fn rewrite_line(line: &str, pending: &Pending, cfg: &Config) -> Option<String> {
         return None;
     }
     let id = msg.get("id")?.to_string();
-    let (method, tool) = pending.lock().ok()?.remove(&id)?;
+    let req = pending.lock().ok()?.remove(&id)?;
     let result = msg.get_mut("result")?;
-    match method.as_str() {
+    let tool = req.tool.as_deref().unwrap_or("?");
+    match req.method.as_str() {
         "initialize" if cfg.primed() => rewrite_initialize(result),
         "tools/list" if cfg.primed() => rewrite_tools_list(result),
-        "tools/call" if !cfg.passthrough => {
-            let done = rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref());
-            if cfg.log {
-                for why in &done.kept {
-                    eprintln!("ldf-mcp: {} {why}", tool.as_deref().unwrap_or("?"));
-                }
-            }
-            if done.replaced.is_empty() {
+        "tools/call" => {
+            let call_ms = Some(req.at.elapsed().as_millis() as u64);
+            if cfg.passthrough {
+                // Measure what passes, change nothing: with no size large
+                // enough to convert, the rewrite only counts the blocks.
+                let done = rewrite_tool_result(result, usize::MAX, None);
+                cfg.stats.record(tool, &done, true, call_ms);
                 return None;
             }
+            let done = rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref());
+            cfg.stats.record(tool, &done, false, call_ms);
             if cfg.log {
-                for r in &done.replaced {
-                    eprintln!(
-                        "ldf-mcp: {} json {} B -> ldf {} B ({:.0}%)",
-                        tool.as_deref().unwrap_or("?"),
-                        r.json_bytes,
-                        r.ldf_bytes,
-                        100.0 * r.ldf_bytes as f64 / r.json_bytes as f64
-                    );
+                for b in &done.blocks {
+                    match &b.kept {
+                        None => eprintln!(
+                            "ldf-mcp: {tool} json {} B -> ldf {} B ({:.0}%)",
+                            b.in_bytes,
+                            b.out_bytes,
+                            100.0 * b.out_bytes as f64 / b.in_bytes as f64
+                        ),
+                        Some(Kept::Selector(why)) => eprintln!("ldf-mcp: {tool} {why}"),
+                        Some(_) => {}
+                    }
                 }
+            }
+            if !done.converted() {
+                return None;
             }
         }
         _ => return None,
@@ -283,6 +309,7 @@ mod tests {
             min_bytes: 0,
             log: false,
             selector: None,
+            stats: Arc::new(Recorder::off()),
         }
     }
 

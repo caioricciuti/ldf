@@ -15,7 +15,8 @@
 //! interface, and `ldf-mcp files` one over a directory of data files; both
 //! return LDF directly. The protocol surface used is
 //! the stdio transport of MCP 2025-06-18: newline-delimited JSON-RPC
-//! messages, logging on stderr only.
+//! messages, logging on stderr only. Every mode appends one line per tool
+//! response to a local statistics file ([`stats`]); `ldf-mcp stats` reads it.
 
 pub mod clickhouse;
 pub mod fake;
@@ -23,3 +24,4 @@ pub mod files;
 pub mod proxy;
 pub mod rewrite;
 pub mod rpc;
+pub mod stats;

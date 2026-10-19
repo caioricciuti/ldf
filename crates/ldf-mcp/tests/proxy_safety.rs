@@ -24,6 +24,7 @@ impl Session {
             .arg(exe)
             .arg("fake-server")
             .args(server_args)
+            .env("LDF_STATS", "0")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
@@ -172,6 +173,7 @@ fn the_servers_answer_bad_lines_with_parse_errors_and_keep_going() {
     let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures/small");
     let mut child = Command::new(env!("CARGO_BIN_EXE_ldf-mcp"))
         .args(["files", "--root", root, "--quiet"])
+        .env("LDF_STATS", "0")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())

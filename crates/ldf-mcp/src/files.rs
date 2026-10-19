@@ -9,7 +9,7 @@ use ldf_data::Value;
 use ldf_data::input::{InputKind, ReadOptions, open};
 use serde_json::{Value as Json, json};
 
-use crate::rewrite::{PRIMER, Selector, convert};
+use crate::rewrite::{Kept, PRIMER, Selector, convert};
 use crate::rpc;
 
 #[derive(Debug, Clone)]
@@ -23,6 +23,8 @@ pub struct Config {
     /// Pick JSON or LDF per result for one model (`--model`).
     pub selector: Option<Selector>,
     pub log: bool,
+    /// Local statistics, one line per tool response.
+    pub stats: std::sync::Arc<crate::stats::Recorder>,
 }
 
 /// Rows the schema is inferred from in `describe_file`.
@@ -256,9 +258,23 @@ fn render(cfg: &Config, tool: &str, rows: &[Value]) -> String {
     }
     json_text.push(']');
     if cfg.passthrough {
+        cfg.stats
+            .record_text(tool, json_text.len(), json_text.len(), None, 0, true);
         return json_text;
     }
-    match convert(&json_text, cfg.min_bytes, cfg.selector.as_ref()) {
+    let start = std::time::Instant::now();
+    let converted = convert(&json_text, cfg.min_bytes, cfg.selector.as_ref());
+    let micros = start.elapsed().as_micros() as u64;
+    let out_len = converted.as_ref().map_or(json_text.len(), String::len);
+    cfg.stats.record_text(
+        tool,
+        json_text.len(),
+        out_len,
+        converted.as_ref().err().cloned(),
+        micros,
+        false,
+    );
+    match converted {
         Ok(ldf) => {
             if cfg.log {
                 eprintln!(
@@ -272,7 +288,7 @@ fn render(cfg: &Config, tool: &str, rows: &[Value]) -> String {
             ldf
         }
         Err(why) => {
-            if let (true, Some(why)) = (cfg.log, why) {
+            if let (true, Kept::Selector(why)) = (cfg.log, why) {
                 eprintln!("ldf-mcp: {tool} {why}");
             }
             json_text
@@ -293,6 +309,7 @@ mod tests {
             min_bytes: 0,
             selector: None,
             log: false,
+            stats: std::sync::Arc::new(crate::stats::Recorder::off()),
         }
     }
 
