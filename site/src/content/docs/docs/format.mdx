@@ -40,6 +40,7 @@ column list: `key:type`, comma separated.
 | `b` | `true` or `false` |
 | `j` | any JSON value, written as compact JSON |
 | `t` | child table: the cell holds how many child rows this record has |
+| `[k1,k2]` | hoisted array of objects (v0.2, opt-in): one array of values per element |
 
 A `?` after the type says the column may hold `null` or be absent in some
 rows. It is a hint for the reader; decoders accept both in any column.
@@ -77,6 +78,22 @@ first column when its values are unique across the parent table, otherwise
 `_`, the parent's 1-based row number. Child rows come in parent order, then
 element order. Arrays of scalars, mixed arrays and anything else stay as a
 `j` cell.
+
+Since v0.2 an encoder can be asked to hoist such an array instead
+(`Options::hoist`, `ldf-mcp convert --hoist`; off by default). When every
+element has the same keys in the same order and only scalar values, the
+keys go once into the header and the cell holds one array of values per
+element:
+
+```text
+@records order_id:s,items:[sku,qty,price],total:f
+ORD-000001,[["E5",3,28.78],["C3",4,157.4]],715.94
+ORD-000002,[["A1",1,2757.03]],2757.03
+```
+
+Any other shape stays a child table. A v0.1 decoder cannot read a hoisted
+column. On nested orders it is about 15 percent fewer tokens than the
+child table; `ldf-mcp --model` sends it only to models measured on it.
 
 ## Sparse keys
 

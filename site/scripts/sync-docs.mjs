@@ -18,7 +18,7 @@ const github = "https://github.com/caioricciuti/ldf/blob/main/";
 // source path (from the repository root) -> site slug, description, and a
 // title where the file's own H1 is not the right page name
 const pages = [
-  ["docs/ldf-spec-v0.md", "docs/spec", "Every rule of the format, checked by the reference implementation's tests.", "Specification (v0.1)"],
+  ["docs/ldf-spec-v0.md", "docs/spec", "Every rule of the format, checked by the reference implementation's tests.", "Specification (v0.2)"],
   ["docs/ldf-mcp.md", "docs/mcp", "LDF between a data source and the model: the proxy and the ClickHouse mode.", "ldf-mcp"],
   ["docs/benchmark-methodology.md", "docs/methodology", "How every number on this site was produced, and what it does not show."],
   ["docs/design-candidates.md", "docs/design", "The candidates that were measured and the decisions they led to."],
