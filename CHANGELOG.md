@@ -7,10 +7,19 @@ stated in `docs/ldf-spec-v0.md`.
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.3.0 (2026-10-19)
+
 Specification v0.2: hoisted arrays, an additive and opt-in column type.
+The built-in selector evidence now includes the Stage C runs on Opus 5.5.
 
 ### Added
 
+- Selector evidence from Stage C (`docs/reports/2026-10-19-stage-c`):
+  Opus 5.5 on held-out data, LDF ties JSON (294 of 297) at 57 to 77
+  percent of its input tokens, so `ldf-mcp --model claude-opus-5-5` now
+  sends LDF. GPT still has too few questions per cell and gets JSON.
 - Spec v0.2 (`docs/ldf-spec-v0.md`, section 7, rule 2a): with hoisting on,
   an array of objects whose elements all have the same keys in the same
   order and only scalar values is one column `items:[sku,qty,price]` whose

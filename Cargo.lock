@@ -764,7 +764,7 @@ dependencies = [
 
 [[package]]
 name = "ldf"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "arrow",
  "ldf-data",
@@ -775,7 +775,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-bench"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "arrow",
  "criterion",
@@ -791,7 +791,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-data"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "arrow",
  "csv",
@@ -803,7 +803,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-discover"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ldf",
  "ldf-bench",
@@ -816,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-eval"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ldf-data",
  "ldf-discover",
@@ -829,7 +829,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-fixtures"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ldf-data",
  "ldf-formats",
@@ -838,7 +838,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-formats"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "csv",
  "ldf",
@@ -850,7 +850,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-mcp"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ldf",
  "ldf-data",
@@ -861,7 +861,7 @@ dependencies = [
 
 [[package]]
 name = "ldf-select"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ldf",
  "ldf-data",
