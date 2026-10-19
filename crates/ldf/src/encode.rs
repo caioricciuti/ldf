@@ -187,7 +187,7 @@ impl Encoder {
 
 /// Spec 5: a bare first cell starting with `@` would read as a header line.
 /// Only a bare string can start with `@`, so the cell text is the string.
-fn quote_line_start(out: &mut String, start: usize) {
+pub(crate) fn quote_line_start(out: &mut String, start: usize) {
     if out[start..].starts_with('@') {
         let s = out.split_off(start);
         push_json_string(&s, out);

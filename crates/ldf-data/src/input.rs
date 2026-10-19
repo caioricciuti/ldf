@@ -383,7 +383,10 @@ pub mod parquet {
         Ok(out)
     }
 
-    enum ColumnReader {
+    /// One Arrow column read as [`Value`]s, row by row, with the mapping
+    /// described in the module docs. Public so the direct Arrow encoder in
+    /// `ldf` converts the cells it does not write natively the same way.
+    pub enum ColumnReader {
         Typed(ArrayRef),
         Struct(Vec<(String, ColumnReader)>, ArrayRef),
         List(Box<ColumnReader>, ArrayRef),
@@ -392,7 +395,7 @@ pub mod parquet {
     }
 
     impl ColumnReader {
-        fn new(array: ArrayRef) -> Result<ColumnReader, InputError> {
+        pub fn new(array: ArrayRef) -> Result<ColumnReader, InputError> {
             Ok(match array.data_type() {
                 DataType::Null
                 | DataType::Boolean
@@ -431,7 +434,7 @@ pub mod parquet {
             })
         }
 
-        fn value(&self, row: usize) -> Result<Value, InputError> {
+        pub fn value(&self, row: usize) -> Result<Value, InputError> {
             match self {
                 ColumnReader::Typed(a) => Ok(typed_value(a, row)),
                 ColumnReader::Struct(children, a) => {

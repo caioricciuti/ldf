@@ -18,6 +18,9 @@ simd = ["ldf-data/simd"]
 [dependencies]
 ldf-data = { workspace = true }
 ldf-formats = { workspace = true }
+ldf = { workspace = true, features = ["arrow"] }
+arrow = { workspace = true }
+parquet = { workspace = true }
 ldf-fixtures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

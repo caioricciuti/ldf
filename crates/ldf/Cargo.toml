@@ -11,9 +11,15 @@ documentation = "https://ldflabs.org/docs/spec/"
 keywords = ["llm", "serialization", "tokens", "json", "format"]
 categories = ["encoding", "parser-implementations"]
 
+[features]
+# Direct Arrow RecordBatch encoder (module `arrow`), no Value per row.
+arrow = ["dep:arrow", "ldf-data/parquet"]
+
 [dependencies]
 ldf-data = { workspace = true }
+arrow = { workspace = true, optional = true }
 serde_json = { workspace = true }
 
 [dev-dependencies]
 serde = { workspace = true }
+parquet = { workspace = true }

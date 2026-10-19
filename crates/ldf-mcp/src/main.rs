@@ -190,6 +190,11 @@ fn convert(args: &[String]) -> ExitCode {
             _ => return usage(),
         }
     }
+    if let Some(p) = path.filter(|p| p.ends_with(".parquet"))
+        && let Some(code) = convert_parquet_direct(p, block, opts)
+    {
+        return code;
+    }
     if let Some(n) = block {
         return convert_streaming(path, n, opts);
     }
@@ -234,6 +239,84 @@ fn convert(args: &[String]) -> ExitCode {
         out.len()
     );
     ExitCode::SUCCESS
+}
+
+/// Parquet through the direct Arrow encoder (`ldf::arrow`), which writes
+/// the same bytes as the record path two to four times faster. `None` when
+/// the schema needs the record path (a list of structs is a child table).
+fn convert_parquet_direct(
+    path: &str,
+    block: Option<usize>,
+    opts: ldf::plan::Options,
+) -> Option<ExitCode> {
+    use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+    let fail = |e: String| {
+        eprintln!("ldf-mcp convert: {e}");
+        Some(ExitCode::from(1))
+    };
+    let builder = match std::fs::File::open(path)
+        .map_err(|e| e.to_string())
+        .and_then(|f| ParquetRecordBatchReaderBuilder::try_new(f).map_err(|e| e.to_string()))
+    {
+        Ok(b) => b,
+        Err(e) => return fail(e),
+    };
+    ldf::arrow::check_schema(builder.schema()).ok()?;
+    let reader = match builder.build() {
+        Ok(r) => r,
+        Err(e) => return fail(e.to_string()),
+    };
+    let mut stdout = std::io::stdout().lock();
+    let mut buf = String::new();
+    let mut records = 0usize;
+    let mut bytes = 0usize;
+    let mut enc = block.map(|n| ldf::arrow::ArrowBlockEncoder::new(n, opts));
+    let mut whole = Vec::new();
+    for batch in reader {
+        let batch = match batch {
+            Ok(b) => b,
+            Err(e) => return fail(e.to_string()),
+        };
+        records += batch.num_rows();
+        match enc.as_mut() {
+            Some(enc) => {
+                if let Err(e) = enc.batch(&batch, &mut buf) {
+                    return fail(e.to_string());
+                }
+                if !buf.is_empty() {
+                    bytes += buf.len();
+                    if stdout.write_all(buf.as_bytes()).is_err() {
+                        return Some(ExitCode::from(1));
+                    }
+                    buf.clear();
+                }
+            }
+            None => whole.push(batch),
+        }
+    }
+    let tail = match enc.as_mut() {
+        Some(enc) => enc.finish(&mut buf).map(|_| std::mem::take(&mut buf)),
+        None => ldf::arrow::encode_batches(&whole, &opts),
+    };
+    let tail = match tail {
+        Ok(t) => t,
+        Err(e) => return fail(e.to_string()),
+    };
+    bytes += tail.len();
+    if stdout
+        .write_all(tail.as_bytes())
+        .and_then(|_| stdout.flush())
+        .is_err()
+    {
+        return Some(ExitCode::from(1));
+    }
+    match block {
+        Some(n) => eprintln!(
+            "ldf-mcp convert: {records} records, {bytes} bytes of LDF, blocks of {n} (Arrow path)"
+        ),
+        None => eprintln!("ldf-mcp convert: {records} records, {bytes} bytes of LDF (Arrow path)"),
+    }
+    Some(ExitCode::SUCCESS)
 }
 
 /// Streams a file through the block encoder: one block of records in
