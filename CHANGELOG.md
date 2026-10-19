@@ -2,12 +2,51 @@
 
 All notable changes to this repository. The format follows Keep a Changelog.
 Versions are tags on this repository and, from 0.1.0, the versions of the
-`ldf`, `ldf-data` and `ldf-mcp` crates; the specification version is
+`ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `docs/ldf-spec-v0.md`.
 
 ## Unreleased
 
 Nothing yet.
+
+## 0.2.0 (2026-10-19)
+
+The format discovery engine, a direct Arrow path for Parquet, and a
+per-model format selector in `ldf-mcp`. The specification stays v0.1;
+two encoder bugs are fixed against it.
+
+### Added
+
+- `ldf-mcp --model ID` (in `proxy`, `clickhouse` and `files`): each result
+  goes out as LDF only when measured evidence for that exact model on data
+  of the same shape shows no accuracy loss against JSON (at least 50
+  questions, no more than 3 points below, no significant loss, no more
+  rows than measured) and LDF is at least 5 percent smaller; otherwise
+  JSON, with the reason on stderr. A model without evidence gets JSON
+  throughout and no LDF primer. `--evidence FILE` replaces the built-in
+  evidence. Without `--model` nothing changes.
+- `ldf-select`, a new crate with the selector's rule and the evidence
+  table built in, shared by `ldf-mcp` and `ldf-discover`.
+- `ldf::arrow` (feature `arrow`): encodes Arrow RecordBatches directly,
+  byte-identical to the record path, 1.9x to 3.2x faster in block form at
+  1M rows and 1.4x to 4.3x less memory. `ldf-mcp convert` uses it for
+  Parquet and falls back to the record path for lists of structs.
+  `ldf_data::input::ColumnReader` is public for it.
+- `ldf-discover` (not published): a parameterized encoder whose layout
+  choices are knobs, a decoder for every point, Stage A token search over
+  the space, and the `select` command.
+- Evaluation: four new task kinds, more questions per kind, held-out
+  fixtures, a *bare* answer outcome, Stage B and the DeepSeek sparse sweep
+  (reports under `docs/reports/`), `eval/analysis/evidence.py` for the
+  selector's evidence, and `eval/bench_mcp.py` for end-to-end MCP timing.
+
+### Fixed
+
+- An object field that is null in some rows decoded as absent; such a
+  field is now a `j` column (spec 7.1).
+- A bare string starting with `@` as the first cell of a row was read back
+  as a header; it is now quoted (spec 5). LDF output on the twelve medium
+  fixtures is byte-identical before and after both fixes.
 
 ## 0.1.0 (2026-10-18)
 
