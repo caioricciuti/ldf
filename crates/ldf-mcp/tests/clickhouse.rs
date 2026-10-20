@@ -1,6 +1,6 @@
 //! End-to-end against a real ClickHouse. Runs only when `LDF_CLICKHOUSE_URL`
 //! is set (for example `http://127.0.0.1:8124` with the tables that
-//! `docs/ldf-mcp.md` describes, `LDF_CLICKHOUSE_USER` optional); otherwise
+//! `site/src/content/docs/docs/mcp.md` describes, `LDF_CLICKHOUSE_USER` optional); otherwise
 //! it is skipped with a note.
 
 use std::io::{BufRead, BufReader, Write};

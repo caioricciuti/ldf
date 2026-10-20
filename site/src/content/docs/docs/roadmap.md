@@ -1,4 +1,7 @@
-# Roadmap
+---
+title: "Roadmap"
+description: "What is done, what is next, what is deliberately not done yet."
+---
 
 ## Phase 1: research and benchmarking foundation (this repository state)
 
@@ -16,10 +19,10 @@ Done:
   warm, peak RSS), Criterion microbenchmarks, exact OpenAI token counts,
   evaluation bundle builder, scorer, and a stdlib-only Python API runner with a
   spend gate.
-- Initial measured report on small and medium fixtures (`docs/reports/`).
+- Initial measured report on small and medium fixtures (`reports/`).
 - Comprehension runs: Claude Opus 5.5 and GPT-6.1 Sol on flat_users,
   nested_orders and sparse_events (50 records each, 364 prompts per model),
-  results and raw responses under `docs/reports/2026-10-17-baseline/eval/`.
+  results and raw responses under `reports/2026-10-17-baseline/eval/`.
 
 Not done, by decision:
 
@@ -39,13 +42,13 @@ Not done, by decision:
    usage tokens (exact Claude counts fall out of this).
 3. Add `eval/count_tokens_claude.py` results to the token tables.
 4. Study the three questions the research notes leave open (see
-   `docs/research.md`, "Open questions"): where tabular forms lose accuracy,
+   [research notes](/docs/research/), "Open questions"): where tabular forms lose accuracy,
    how much header/schema repetition costs per record for each tokenizer, and
    whether quoting rules or delimiter choice move token counts materially.
 
 ## Phase 3: LDF design
 
-Opened 2026-10-17 with `docs/design-candidates.md`: three candidate families
+Opened 2026-10-17 with [design notes](/docs/design/): three candidate families
 measured on the comprehension datasets, a recommendation (typed table, comma,
 dotted paths, child tables) and six decisions still to make together.
 Design inputs, in priority order:
@@ -81,11 +84,11 @@ where not" with a cheap switch.
   on uniform data with bounded memory.
 - Done 2026-10-19: Arrow RecordBatch fast path (`ldf::arrow`, feature
   `arrow`), used by `ldf-mcp convert` for Parquet; 1.9x to 4.8x faster than
-  the Value path at 1M rows, same bytes (`docs/reports/2026-10-19-engine`).
+  the Value path at 1M rows, same bytes (`reports/2026-10-19-engine`).
 - Done 2026-10-19: the selector inside `ldf-mcp` (`--model`), its rule
   moved to the `ldf-select` crate with the evidence built in.
 - Done 2026-10-19: Stage C, Opus 5.5 on held-out data
-  (`docs/reports/2026-10-19-stage-c`): LDF v0.1 ties JSON (294 of 297) at
+  (`reports/2026-10-19-stage-c`): LDF v0.1 ties JSON (294 of 297) at
   57 to 77 percent of its tokens; the selector now picks LDF for Opus.
   Hoisted arrays: no significant loss on Opus or DeepSeek, the lead
   v0.2 candidate.

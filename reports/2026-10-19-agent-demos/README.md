@@ -5,7 +5,7 @@ rows per call: 500; files root: fixtures/medium
 Reproduce: `cargo build --release && ./target/release/ldf-gen --scale medium && python3 -I eval/demo_agents.py --root fixtures/medium`.
 Bytes and o200k_base tokens (`ldf-bench count`) of the text a model would
 receive; deterministic, so no machine description applies. No agent and no
-model ran: these are serialization numbers, not model usage (docs/agents.md).
+model ran: these are serialization numbers, not model usage (site/src/content/docs/docs/agents.md).
 
 | demo | call | JSON bytes | LDF bytes | ratio | JSON o200k | LDF o200k | ratio | sent |
 |---|---|---:|---:|---:|---:|---:|---:|---|

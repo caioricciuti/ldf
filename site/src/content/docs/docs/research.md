@@ -1,4 +1,7 @@
-# Research notes: existing LLM-facing data formats
+---
+title: "Research notes: existing LLM-facing data formats"
+description: "What exists already, with facts established by implementing and measuring it."
+---
 
 State as of 2026-10-17. Two parts:
 
@@ -17,7 +20,7 @@ hypothesis, not measured anywhere found.
 
 ## Part A: findings from building and measuring the baselines
 
-All numbers below are from `docs/reports/2026-10-17-baseline/` (Apple M2 Pro,
+All numbers below are from `reports/2026-10-17-baseline/` (Apple M2 Pro,
 10 000-row fixtures, release build, `ldf-bench perf --iters 7` and
 `ldf-bench tokens --sample 1000`).
 
@@ -96,12 +99,12 @@ All numbers below are from `docs/reports/2026-10-17-baseline/` (Apple M2 Pro,
     `perf-medium.md`.
 
 11. **A typed table with child tables closes the irregular-data gap.** LDF
-    v0 (`docs/ldf-spec-v0.md`), built from items 3 to 7, measures 0.61 /
+    v0 ([the specification](/docs/spec/)), built from items 3 to 7, measures 0.61 /
     0.64 / 0.63 / 0.68 / 0.80 / 0.36 of compact JSON's o200k tokens on
     flat_users / nested_orders / sparse_events / mixed_types / deep_nesting
     / empty_values, against TOON's 0.65 / 1.08 / 1.22 / 1.33 / 1.82 / 1.27,
     and round-trips byte-exact on 11 of 12 datasets. The design choices that
-    matter, each measured separately in `docs/design-candidates.md`: a typed
+    matter, each measured separately in [design notes](/docs/design/): a typed
     header costs nothing and removes quoting; relational child tables save
     37 percent on arrays of objects; comma tokenizes 5 to 7 percent better
     than pipe. **[V]** `tokens-medium.md`, `perf-medium.md`.

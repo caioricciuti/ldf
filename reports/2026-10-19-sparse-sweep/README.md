@@ -5,7 +5,7 @@ Run 2026-10-19, `eval/plan.sh sparse-sweep-build sparse-sweep-deepseek`
 bundle; LDF v0.1 with the sparse threshold at 0.75 (`ldf-s75`). Threshold
 1.0 gives the identical document on this dataset (no key between 60 and 100
 percent fill) and was not sent. Other rows are DeepSeek's Stage B answers
-(`docs/reports/2026-10-18-stage-b`), graded with the same scorer. The 0.75
+(`reports/2026-10-18-stage-b`), graded with the same scorer. The 0.75
 answers come from a separate run; run-to-run variance is not measured.
 
 | format | threshold | tokens / JSON | accuracy | vs v0.1 (0.5) | vs JSON |

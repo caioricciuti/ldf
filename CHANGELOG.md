@@ -3,7 +3,7 @@
 All notable changes to this repository. The format follows Keep a Changelog.
 Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
-stated in `docs/ldf-spec-v0.md`.
+stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
@@ -26,10 +26,10 @@ stated in `docs/ldf-spec-v0.md`.
 - `ldf-mcp doctor`: binary, statistics file, agents on PATH, Claude Code
   servers and whether they are behind LDF or broken, models with evidence.
   `ldf-mcp --version`.
-- `docs/agents.md`: integration architecture, compatibility matrix for
+- `site/src/content/docs/docs/agents.md`: integration architecture, compatibility matrix for
   Claude Code, Codex CLI and OpenCode (MCP, hooks, plugins, model
   visibility, usage counters), setup in five minutes, limitations.
-  `eval/demo_agents.py` and `docs/reports/2026-10-19-agent-demos/`: the
+  `eval/demo_agents.py` and `reports/2026-10-19-agent-demos/`: the
   proxy and files data paths, JSON against LDF in bytes and o200k tokens.
 
 ### Fixed
@@ -49,11 +49,11 @@ The built-in selector evidence now includes the Stage C runs on Opus 5.5.
 
 ### Added
 
-- Selector evidence from Stage C (`docs/reports/2026-10-19-stage-c`):
+- Selector evidence from Stage C (`reports/2026-10-19-stage-c`):
   Opus 5.5 on held-out data, LDF ties JSON (294 of 297) at 57 to 77
   percent of its input tokens, so `ldf-mcp --model claude-opus-5-5` now
   sends LDF. GPT still has too few questions per cell and gets JSON.
-- Spec v0.2 (`docs/ldf-spec-v0.md`, section 7, rule 2a): with hoisting on,
+- Spec v0.2 (`site/src/content/docs/docs/spec.md`, section 7, rule 2a): with hoisting on,
   an array of objects whose elements all have the same keys in the same
   order and only scalar values is one column `items:[sku,qty,price]` whose
   cell is `[["E5",3,28.78],["C3",4,157.4]]`, instead of a `t` column and a
@@ -109,7 +109,7 @@ two encoder bugs are fixed against it.
   the space, and the `select` command.
 - Evaluation: four new task kinds, more questions per kind, held-out
   fixtures, a *bare* answer outcome, Stage B and the DeepSeek sparse sweep
-  (reports under `docs/reports/`), `eval/analysis/evidence.py` for the
+  (reports under `reports/`), `eval/analysis/evidence.py` for the
   selector's evidence, and `eval/bench_mcp.py` for end-to-end MCP timing.
 
 ### Fixed

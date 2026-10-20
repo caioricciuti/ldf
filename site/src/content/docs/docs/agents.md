@@ -1,4 +1,7 @@
-# LDF with coding agents
+---
+title: "Coding agents"
+description: "LDF with Claude Code, Codex CLI and OpenCode: setup, what is intercepted, limits."
+---
 
 How LDF sits between a coding agent and its tools, which agent paths it can
 reach today, and how to set it up. Facts about each agent come from its
@@ -139,7 +142,7 @@ OpenCode, `opencode.json` (project) or `~/.config/opencode/opencode.json`:
 
 `python3 -I eval/demo_agents.py --root fixtures/medium` drives the proxy
 and the files server over stdio the way an agent does and compares what the
-model would receive (`docs/reports/2026-10-19-agent-demos/`):
+model would receive (`reports/2026-10-19-agent-demos/`):
 
 | demo | call | JSON bytes | LDF bytes | ratio | JSON o200k | LDF o200k | ratio |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -172,7 +175,7 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
 - The token estimate in `stats` is bytes / 4; exact counts need a tokenizer
   (`ldf-bench count`) and real usage needs the agent's own counters.
 - No model has been run through these integrations yet, so there is no
-  measured end-to-end usage saving; the eval results in `docs/reports/`
+  measured end-to-end usage saving; the eval results in `reports/`
   measure accuracy and tokens on prepared prompts, not agent sessions.
 
 ## Next milestone

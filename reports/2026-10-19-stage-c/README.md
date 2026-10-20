@@ -2,7 +2,7 @@
 
 Run 2026-10-19, `eval/plan.sh stage-c10-build stage-c10-opus`. Per-bundle
 scorer output in `<dataset>.opus.md`; the evidence rows are in
-`docs/reports/evidence/` (runs `stage-c10/*`).
+`reports/evidence/` (runs `stage-c10/*`).
 
 **Setup.** First 200 records of the held-out medium fixtures
 (`ldf-gen --seed 20261118`), question seed 2, so neither the records nor

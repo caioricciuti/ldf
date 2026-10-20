@@ -10,7 +10,7 @@ Each case is driven over stdio the way an agent drives an MCP server
 (initialize, then tools/call), the replies are saved, and the table gives
 bytes and exact o200k_base tokens (`ldf-bench count`) for what the model
 would receive. These are serialization numbers: what a model is billed
-also depends on its own tokenizer and caching (docs/ldf-mcp.md,
+also depends on its own tokenizer and caching (site/src/content/docs/docs/mcp.md,
 "Measuring"). The local statistics of both runs are summarised at the end.
 
     cargo build --release

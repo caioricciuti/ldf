@@ -4,7 +4,7 @@ One page over everything measured so far for the serialization engine:
 which representation a model reads as well as JSON, what it costs in
 tokens, how fast it is produced, and what it adds to a tool call. Every
 number below is copied from a file in this directory or from
-`docs/reports/evidence/`, each written by a tool in this repository.
+`reports/evidence/`, each written by a tool in this repository.
 Machine for the timings: Apple M2 Pro, 10 logical CPUs, macOS (Darwin
 27.0.0), release profile, commit 2291f06 plus the uncommitted changes
 described here.
@@ -26,7 +26,7 @@ described here.
 
 ## 1. Quality: where a model reads LDF or TOON as well as JSON
 
-Source: `docs/reports/evidence/evidence.md`. Each row is one model, one
+Source: `reports/evidence/evidence.md`. Each row is one model, one
 dataset, one format, paired against JSON on the same questions; p is an
 exact two-sided sign test on the questions where exactly one of the two
 was right. Rows with at least 50 questions (Stage B and the sparse sweep,

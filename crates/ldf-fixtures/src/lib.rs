@@ -3,7 +3,7 @@
 //!
 //! Every dataset is a pure function of `(name, seed, row index)`; see
 //! [`datasets::catalog`] for the schema of each one and
-//! `docs/benchmark-methodology.md` for the rationale. Records are generated
+//! `site/src/content/docs/docs/methodology.md` for the rationale. Records are generated
 //! one at a time so GB-scale files stream to disk with bounded memory.
 
 pub mod datasets;

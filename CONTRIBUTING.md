@@ -8,8 +8,8 @@ discipline are welcome.
 ## Before you start
 
 * Read `AGENTS.md` for the architecture, the commands and the conventions.
-* Read `docs/ldf-spec-v0.md` before touching the encoder or the decoder,
-  and `docs/design-candidates.md` before proposing a syntax change. A
+* Read `site/src/content/docs/docs/spec.md` before touching the encoder or the decoder,
+  and `site/src/content/docs/docs/design.md` before proposing a syntax change. A
   syntax change is a measurement first and a pull request second.
 * Open an issue for anything bigger than a fix, so the approach is agreed
   before the work.
@@ -22,7 +22,7 @@ discipline are welcome.
 * A behaviour change to the format comes with conformance fixtures under
   `crates/ldf/tests/fixtures` and a spec change in the same pull request.
 * A performance claim comes with the `ldf-bench` output that supports it.
-  Do not edit numbers in `docs/reports/` by hand; copy the files the tool
+  Do not edit numbers in `reports/` by hand; copy the files the tool
   wrote.
 * No new external crate without a discussion. Every dependency is pinned
   to an exact version and the lockfile is committed. Anything published in

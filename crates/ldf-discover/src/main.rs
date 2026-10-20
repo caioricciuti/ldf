@@ -83,7 +83,7 @@ fn cmd_select(args: &[String]) -> Result<(), String> {
     use ldf_discover::select::{Evidence, Policy, select};
     let model = flag(args, "--model").ok_or("--model required")?;
     let input = flag(args, "--input").ok_or("--input required")?;
-    let ev_path = flag(args, "--evidence").unwrap_or("docs/reports/evidence/evidence.json");
+    let ev_path = flag(args, "--evidence").unwrap_or("reports/evidence/evidence.json");
     let evidence: Vec<Evidence> =
         serde_json::from_slice(&fs::read(ev_path).map_err(|e| format!("{ev_path}: {e}"))?)
             .map_err(|e| format!("{ev_path}: {e}"))?;

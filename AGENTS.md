@@ -3,8 +3,8 @@
 Working notes for anyone (human or agent) touching this repository. The
 project is LDF, a research effort towards a lossless, token-efficient data
 format for LLM consumption. Phases 1 and 2 built the measurement foundation;
-Phase 3 produced LDF v0, now v0.2 (`docs/ldf-spec-v0.md`, `crates/ldf`), from those
-measurements. Read `docs/roadmap.md` and `docs/design-candidates.md` before
+Phase 3 produced LDF v0, now v0.2 (`site/src/content/docs/docs/spec.md`, `crates/ldf`), from those
+measurements. Read `site/src/content/docs/docs/roadmap.md` and `site/src/content/docs/docs/design.md` before
 proposing syntax changes.
 
 ## Architecture
@@ -18,14 +18,18 @@ Cargo workspace, Rust stable, edition 2024.
 | `ldf-formats` | `Format` trait, baseline encoders/decoders: json, json-pretty, jsonl, csv, tsv, markdown, toon, toon-tab, yaml, plus the `ldf` adapter (`ldf` current, `ldf-v0` old layout, same display name in prompts). TOON v4.4 is implemented from the spec and tested against the vendored official fixtures; YAML has its own emitter and decodes with yaml-rust2 | |
 | `ldf-bench` | round-trip validation, process-isolated perf (io/parse/encode/decode, cold/warm, peak RSS), exact OpenAI token counts, Markdown and JSON reports, Criterion benches | `ldf-bench` |
 | `ldf-eval` | task generation with ground truth (eleven kinds; new kinds are appended to `TaskKind::all` and a golden test pins the original stream, so old bundles regenerate as an exact prefix; the manifest reports per-kind counts, short where a dataset runs out of distinct questions), prompt bundles (`--candidate name=ID` adds an `ldf-discover` configuration, shown to the model as `ldf`), response scoring | `ldf-eval` |
-| `ldf` | LDF v0.2 encoder and decoder (`docs/ldf-spec-v0.md`), plan analysis for flattening, child tables, hoisted arrays (`Options::hoist`, off by default, so default output is v0.1) and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures`; feature `arrow` adds `ldf::arrow`, a direct RecordBatch encoder (batch and block form) byte-identical to the Value path, which refuses lists of structs (child tables) so the caller falls back | |
-| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop; `--model ID` in every server mode picks JSON or LDF per result through `ldf-select` (JSON and no primer for a model without evidence, LDF-when-shorter without the flag); `convert --hoist` writes hoisted arrays; `stats.rs` appends one line per tool response to a local events file (reason codes and sizes, never content; `--no-stats`, `LDF_STATS=0`) read by `ldf-mcp stats`; `install.rs` is `install` / `uninstall claude-code` (reads `~/.claude.json`, writes only through `claude mcp remove` / `add-json`, records originals in `installed.json` for rollback) and `doctor`; tests stand in for the claude CLI with this binary (`LDF_FAKE_CLAUDE=1`); agent integration and its limits: `docs/agents.md` | `ldf-mcp` |
-| `ldf-select` | the selector's decision rule, shared by `ldf-discover select` and `ldf-mcp --model`: dataset profile and traits, evidence rows, policy (n >= 50, drop <= 3 points, sign test, rows <= measured, saving >= 5 percent), candidates are LDF at sparse 0.5 and 0.75, each with and without hoisting (evidence field `hoist_thresholds`); `select_ldf` for JSON-or-LDF in bytes; `evidence.json` is a built-in copy of `docs/reports/evidence/evidence.json` (a test fails when they differ; `evidence.py` writes both) | |
-| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01`, `LDF_V0` and `LDF_HOISTED` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1; `select.rs` runs the `ldf-select` rule over JSON, TOON and LDF at sparse threshold 0.5 or 0.75, hoisted or not, in o200k tokens, from `docs/reports/evidence/evidence.json`, JSON whenever evidence is missing | `ldf-discover` |
+| `ldf` | LDF v0.2 encoder and decoder (`site/src/content/docs/docs/spec.md`), plan analysis for flattening, child tables, hoisted arrays (`Options::hoist`, off by default, so default output is v0.1) and the sparse-key `~` column (`Options::sparse_threshold`, default 0.5; `Options::V0` for the old layout), conformance fixtures under `tests/fixtures`; feature `arrow` adds `ldf::arrow`, a direct RecordBatch encoder (batch and block form) byte-identical to the Value path, which refuses lists of structs (child tables) so the caller falls back | |
+| `ldf-mcp` | MCP stdio proxy: forwards every JSON-RPC message, appends an LDF primer to `initialize` instructions and a note to tool descriptions, re-encodes JSON `tools/call` text results as LDF when shorter (`rewrite.rs` holds the pure rules, `proxy.rs` the pumps). `convert` CLI for files, `fake-server` test double; `clickhouse` mode is its own MCP server with `list_tables`, `describe_table`, `run_select` (readonly=1) over ClickHouse HTTP; `files` mode serves a directory of data files through the `ldf-data` streaming readers (`list_files`, `describe_file`, `read_rows` paged); both return rows as LDF with a note block when a cap is hit; `rpc.rs` is the shared stdio loop; `--model ID` in every server mode picks JSON or LDF per result through `ldf-select` (JSON and no primer for a model without evidence, LDF-when-shorter without the flag); `convert --hoist` writes hoisted arrays; `stats.rs` appends one line per tool response to a local events file (reason codes and sizes, never content; `--no-stats`, `LDF_STATS=0`) read by `ldf-mcp stats`; `install.rs` is `install` / `uninstall claude-code` (reads `~/.claude.json`, writes only through `claude mcp remove` / `add-json`, records originals in `installed.json` for rollback) and `doctor`; tests stand in for the claude CLI with this binary (`LDF_FAKE_CLAUDE=1`); agent integration and its limits: `site/src/content/docs/docs/agents.md` | `ldf-mcp` |
+| `ldf-select` | the selector's decision rule, shared by `ldf-discover select` and `ldf-mcp --model`: dataset profile and traits, evidence rows, policy (n >= 50, drop <= 3 points, sign test, rows <= measured, saving >= 5 percent), candidates are LDF at sparse 0.5 and 0.75, each with and without hoisting (evidence field `hoist_thresholds`); `select_ldf` for JSON-or-LDF in bytes; `evidence.json` is a built-in copy of `reports/evidence/evidence.json` (a test fails when they differ; `evidence.py` writes both) | |
+| `ldf-discover` | format discovery engine, step 1: `knobs.rs` is the search space (13 knobs, 154 440 valid configurations; `Config::LDF_V01`, `LDF_V0` and `LDF_HOISTED` are points in it, byte-identical to `crates/ldf`, tested), one encoder and one decoder for every point (`encode.rs`, `decode.rs`, planner in `plan.rs`), `Candidate` puts a config behind `Format` so `ldf-bench` round-trip checks it, `stage_a.rs` hashes every output, round-trips and o200k-counts the distinct ones, ranks against JSON and v0.1; `select.rs` runs the `ldf-select` rule over JSON, TOON and LDF at sparse threshold 0.5 or 0.75, hoisted or not, in o200k tokens, from `reports/evidence/evidence.json`, JSON whenever evidence is missing | `ldf-discover` |
 
-`site/` is the website (ldflabs.org): Astro with Starlight, the docs pages
-mirrored from `docs/` and this file by `site/scripts/sync-docs.mjs` at build
-time, deployed by Cloudflare from the repository (root directory `/site`,
+`site/` is the website (ldflabs.org) and the home of the documentation:
+Astro with Starlight. The pages (spec, ldf-mcp, agents, methodology, design,
+research, roadmap) are written in `site/src/content/docs/docs/` and edited
+there; this file, `CHANGELOG.md`, `CONTRIBUTING.md` and the baseline report
+stay where they are and are mirrored in by `site/scripts/sync-docs.mjs` at
+build time. Measurement reports and their raw files live in `reports/`.
+Deployed by Cloudflare from the repository (root directory `/site`,
 `bun run build`). Its two npm dependencies are pinned exactly and locked;
 `bun install --frozen-lockfile`, never a bare install.
 
@@ -39,7 +43,7 @@ Data flow: `ldf-gen` writes fixtures to `fixtures/<scale>/`; `ldf-bench`
 reads them through `ldf-data::input`, encodes with `ldf-formats`, and writes
 `results/<name>/{perf,tokens}.{json,md}`; `ldf-eval build` writes a bundle
 under `eval/out/`, `eval/run_eval.py` appends responses, `ldf-eval score`
-grades them. Curated reports are copied to `docs/reports/`.
+grades them. Curated reports are copied to `reports/`.
 
 ## Commands
 
@@ -62,14 +66,14 @@ eval/plan.sh                          # the agreed paid stages with prices and b
 eval/plan.sh stage-b-build            # Stage B bundles, free and deterministic; the paid stages need Caio's go
 ./target/release/ldf-mcp proxy -- <mcp server command>   # LDF between a stdio MCP server and the model
 ./target/release/ldf-mcp convert FILE  # json, jsonl, csv, tsv or parquet to LDF on stdout
-./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124   # MCP server over ClickHouse HTTP, see docs/ldf-mcp.md
+./target/release/ldf-mcp clickhouse --url http://127.0.0.1:8124   # MCP server over ClickHouse HTTP, see site/src/content/docs/docs/mcp.md
 ./target/release/ldf-mcp files --root fixtures/small --model claude-haiku-5-5   # JSON or LDF per result from measured evidence
 ./target/release/ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.anthropic.claude-opus-5-5.jsonl
 ./target/release/ldf-discover space   # knob list and size
 ./target/release/ldf-discover stage-a --scale medium --sample 200 --recheck 1000 --out results/discovery/<name>   # about a minute, no API calls
 ./target/release/ldf-discover show --id v0.1 --input fixtures/small/nested_orders.json   # one candidate's output; --id takes any id from a report
 ./target/release/ldf-bench arrow fixtures/medium/*.parquet --iters 5 --out results/arrow   # Parquet to LDF, Value path vs direct Arrow path, output hashes compared
-python3 -I eval/analysis/evidence.py eval/out docs/reports/evidence   # rebuild the selector evidence after any graded run
+python3 -I eval/analysis/evidence.py eval/out reports/evidence   # rebuild the selector evidence after any graded run
 ./target/release/ldf-discover select --model claude-haiku-5-5 --input F --sample 200   # selector decision with its reasons
 python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files   # MCP end to end; --mode clickhouse needs CLICKHOUSE_PASSWORD
 ```
@@ -81,7 +85,7 @@ machine with nothing else compiling.
 
 - Correctness before speed: every format is round-trip checked before it is
   timed, and an unsupported dataset is reported as such, never coerced.
-- No fabricated numbers. A table in `docs/reports/` is a copy of a file that
+- No fabricated numbers. A table in `reports/` is a copy of a file that
   `ldf-bench` wrote, with the machine description it recorded. If something
   was not measured, the report says so.
 - Equality has levels (byte, semantic, semantic-unordered, lossy). Say which
@@ -150,7 +154,7 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   ran at 1 MB/s. The quadratic column scans in planning and decode insert
   were removed on 2026-10-18 (wide_table: encode 55 to 28 ms, decode 50 to
   18 ms, now level with CSV encode and JSON decode).
-- Stage A (2026-10-18, `docs/reports/2026-10-18-stage-a/`): over 154 440
+- Stage A (2026-10-18, `reports/2026-10-18-stage-a/`): over 154 440
   configurations on 200 records per dataset, the best lossless layout per
   dataset is 0 to 20 percent below LDF v0.1 in o200k tokens; one config for
   all datasets is 4 percent below v0.1 on average. The large gaps are nested_orders
@@ -163,13 +167,13 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   object null in some row decoded as absent, and a string starting with
   `@` as the first cell of a row read as a header. Output on all twelve
   medium fixtures is unchanged by the fix.
-- Stage C (2026-10-19, `docs/reports/2026-10-19-stage-c/`): Opus 5.5 on
+- Stage C (2026-10-19, `reports/2026-10-19-stage-c/`): Opus 5.5 on
   held-out data, 57 to 95 questions per cell: LDF v0.1 ties JSON (294 of
   297) at 57 to 77 percent of JSON's Claude input tokens, so the selector
   now gives Opus LDF. Threshold 0.75 adds tokens and nothing on Opus (it
   helps DeepSeek); hoisted arrays save 17 percent on nested_orders for
   +1 / -2 (n.s.), no significant loss on Opus or DeepSeek (Haiku: below). $5.96.
-- 2026-10-19 (`docs/reports/2026-10-19-engine/`): the direct Arrow path is
+- 2026-10-19 (`reports/2026-10-19-engine/`): the direct Arrow path is
   1.9x to 3.2x faster than the Value path in block form at 1M rows (2.8x to
   4.8x for a whole document, 1.4x to 4.3x less memory), same bytes. The
   selector gives JSON to GPT: its runs have 15 to 20 questions per cell,

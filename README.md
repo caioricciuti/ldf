@@ -38,7 +38,7 @@ Docs, spec and results: **[ldflabs.org](https://ldflabs.org)**.
 | tokens on sparse events | 1.00 | 0.61, lossy | 1.22 | 0.80 |
 
 Token figures are o200k_base on the first 1 000 records of the benchmark
-datasets, from `docs/reports/2026-10-17-baseline/tokens-medium-2026-10-18.md`.
+datasets, from `reports/2026-10-17-baseline/tokens-medium-2026-10-18.md`.
 
 Comprehension, from the same report: Claude Opus 5.5 at 200 records answers
 131 of 150 in LDF with zero wrong answers, the same as every other format
@@ -50,7 +50,7 @@ better than another, and the report says so.
 ## Use it
 
 With a coding agent (Claude Code: `ldf-mcp install claude-code`, then `ldf-mcp stats`), see
-[docs/agents.md](docs/agents.md): setup in five minutes, what is intercepted and what is not, Codex and OpenCode by hand.
+[site/src/content/docs/docs/agents.md](site/src/content/docs/docs/agents.md): setup in five minutes, what is intercepted and what is not, Codex and OpenCode by hand.
 
 ### As a middle man: `ldf-mcp`
 
@@ -72,7 +72,7 @@ The initialize result carries a short primer, so the model has read the
 format once before it sees any data. Results under 1 KB, error results and
 non-text blocks pass through untouched; `--passthrough` forwards JSON
 unchanged for an A/B in the same session. Setup with a local ClickHouse and
-test data: `docs/ldf-mcp.md`.
+test data: `site/src/content/docs/docs/mcp.md`.
 
 ### As a file
 
@@ -92,7 +92,7 @@ Not on crates.io yet.
 
 ## The format
 
-Seven rules, specified in `docs/ldf-spec-v0.md` (v0.1):
+Seven rules, specified in `site/src/content/docs/docs/spec.md` (v0.1):
 
 1. A header `@name col:type,...` opens a table. Types: `i` `f` `s` `b` `j` `t`; `?` marks nullable.
 2. A row is one record, cells separated by commas; strings are bare unless they need JSON quoting.
@@ -114,8 +114,8 @@ Seven rules, specified in `docs/ldf-spec-v0.md` (v0.1):
 | `crates/ldf-bench` | `ldf-bench`: round trips, process-isolated perf, exact token counts |
 | `crates/ldf-eval` | `ldf-eval`: questions with ground truth, prompt bundles, scoring |
 | `eval/` | stdlib-only Python: the spend-gated API runner and the agreed run plan |
-| `docs/` | spec, methodology, design candidates, research notes, the measured report |
-| `site/` | ldflabs.org, built from `docs/` |
+| `site/` | ldflabs.org and the documentation: spec, ldf-mcp, coding agents, methodology, design, research, roadmap (`site/src/content/docs/docs/`) |
+| `reports/` | measurement reports with the raw files the tools wrote |
 
 Build and test with Rust 1.98 or newer:
 
@@ -132,7 +132,7 @@ processes untrusted input and how to report a problem.
 ## Status
 
 v0.1, a prototype with its evidence attached. What is next is in
-`docs/roadmap.md`: more sources for `ldf-mcp`, a first tagged release, the
+`site/src/content/docs/docs/roadmap.md`: more sources for `ldf-mcp`, a first tagged release, the
 open questions at the end of the spec.
 
 ## License

@@ -3,7 +3,7 @@
 Every number here is copied from the files next to this README, which
 `ldf-bench` wrote. Machine: Apple M2 Pro, 10 logical CPUs, 16 GiB, macOS
 (Darwin 27.0.0), rustc 1.98.0, release profile. Crate versions are in each
-file's header. Procedure: `docs/benchmark-methodology.md`.
+file's header. Procedure: `site/src/content/docs/docs/methodology.md`.
 
 Files:
 
@@ -249,7 +249,7 @@ misread.
 
 ### The sparse-key rule, measured (Haiku 5.5, sparse_events_200, 4 096 cap)
 
-`docs/design-candidates.md` describes the candidate: a key filled in fewer
+`site/src/content/docs/docs/design.md` describes the candidate: a key filled in fewer
 than a threshold share of rows leaves its positional column and travels as
 `"key":value` inside a per-row `~` object. Same 18 questions, same model
 and cap as the rerun above, three thresholds, $0.02
@@ -340,7 +340,7 @@ of the accuracy measured above, paid only where keys are sparse.
 | empty_values | unsupported | | unsupported | | 1.18 | 1.27 | 1.04 | 1.22 | 1.62 | **0.32** | **0.36** |
 | deep_nesting | unsupported | | unsupported | | 2.50 | 1.82 | 2.64 | 1.88 | 2.45 | **0.68** | **0.80** |
 
-LDF v0 (`docs/ldf-spec-v0.md`, added 2026-10-18) is the project's own
+LDF v0 (`site/src/content/docs/docs/spec.md`, added 2026-10-18) is the project's own
 format, designed from the rows above it. It is within 1 to 3 percent of CSV
 in tokens on every dataset CSV can represent, lossless where CSV is not, and
 20 to 64 percent below compact JSON on every dataset where TOON is above

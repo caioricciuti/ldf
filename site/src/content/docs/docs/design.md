@@ -1,4 +1,7 @@
-# LDF design candidates
+---
+title: "LDF design candidates"
+description: "The candidates that were measured and the decisions they led to."
+---
 
 Status: proposal for discussion, 2026-10-17. Nothing here is implemented in
 `crates/ldf`. Every number is measured with `o200k_base` on the same three
@@ -12,7 +15,7 @@ for b in flat_users nested_orders sparse_events; do python3 -I design/prototypes
 
 ## 1. Targets, from the measurements
 
-From `docs/reports/2026-10-17-baseline/` and `docs/research.md`:
+From `reports/2026-10-17-baseline/` and [research notes](/docs/research/):
 
 | target | evidence |
 |---|---|
