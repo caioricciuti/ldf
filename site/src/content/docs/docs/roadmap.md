@@ -98,9 +98,10 @@ where not" with a cheap switch.
   Haiku on hoisted nested_orders is 120 of 135 against JSON's 130 (+2 / -12,
   p=0.01; the Stage B tie counted bare answers), so the selector keeps
   Haiku on JSON there; Opus and DeepSeek get the hoisted form.
-- Done 2026-10-20 (unreleased): `ldf-mcp hook claude-code` and
+- Done 2026-10-20 (0.5.0): `ldf-mcp hook claude-code` and
   `install claude-code --hooks`, JSON in Bash stdout as LDF
-  (`reports/2026-10-20-hook`).
+  (`reports/2026-10-20-hook`); provider-usage A/B on Haiku 5.5 and Opus
+  5.5: tool results at 0.56 of JSON's tokens, no answer lost.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
