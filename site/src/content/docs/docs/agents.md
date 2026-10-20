@@ -155,11 +155,16 @@ as Anthropic reported them (tool result, note and primer included):
 | 20 nested orders (selector keeps JSON) | 5 998 | 3 083 | 3 083 | 1.00 | 6/6 | 6/6 |
 | all | | 46 907 | 26 456 | 0.56 | 36/36 | 36/36 |
 
+Opus 5.5 on the same 36 runs (`reports/2026-10-20-hook/ab-opus/`, $3.09):
+46 899 against 26 463 added tokens, 0.56 again, per case 0.41 to 0.65 where
+converted and 1.00 on the nested control, 36 of 36 correct in both arms.
+
 These are the first billed-usage numbers: on these tasks the hook cut the
-tokens a tool result costs by 35 to 59 percent, with no answer lost. The
+tokens a tool result costs by 35 to 59 percent on both models, with no
+answer lost. The
 per-run cost was lower with the hook too, but run order affects prompt
 caching (the JSON arm ran first), so the cost column is not a clean
-comparison; the token columns are. One model, short tasks, small n: it
+comparison; the token columns are. Short tasks, small n: it
 shows the mechanism pays, not a general saving for every session.
 
 ## Five minutes with Claude Code: MCP servers
@@ -334,8 +339,8 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
   your PATH.
 - The token estimate in `stats` is bytes / 4; exact counts need a tokenizer
   (`ldf-bench count`) and real usage needs the agent's own counters.
-- The usage A/B covers Haiku 5.5 on six short tasks; Opus and long
-  sessions are not measured yet. The eval results in `reports/` measure accuracy and tokens
+- The usage A/B covers Haiku 5.5 and Opus 5.5 on six short tasks; long
+  sessions and Sonnet are not measured. The eval results in `reports/` measure accuracy and tokens
   on prepared prompts, not agent sessions.
 
 ## Next milestone

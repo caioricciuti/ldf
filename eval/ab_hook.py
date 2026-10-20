@@ -125,6 +125,8 @@ def main():
     a = ap.parse_args()
     if not a.confirm_spend:
         sys.exit('this runs paid model calls; pass --confirm-spend')
+    # Claude runs in each case's directory: every path handed to it is absolute.
+    a.out = os.path.abspath(a.out)
     os.makedirs(a.out, exist_ok=True)
     log = os.path.join(a.out, 'runs.jsonl')
     done = {}
