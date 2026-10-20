@@ -9,6 +9,20 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 Nothing yet.
 
+## 0.5.1 (2026-10-20)
+
+Selector evidence for Claude Sonnet 5.5. No code or format change; the
+specification stays v0.2.
+
+### Changed
+
+- The evidence built into `ldf-select` (and so `ldf-mcp --model` and the
+  Claude Code hook) now has Stage C on Sonnet 5.5
+  (`reports/2026-10-20-stage-c-sonnet`): Sonnet gets LDF at sparse
+  threshold 0.5 on flat, sparse and mixed-type data, threshold 0.75 on
+  nested data with sparse keys, and JSON on other nested data. Before this
+  release Sonnet always got JSON.
+
 ## 0.5.0 (2026-10-20)
 
 Automatic Bash output for Claude Code: `ldf-mcp install claude-code --hooks

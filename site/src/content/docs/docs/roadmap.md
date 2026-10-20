@@ -105,7 +105,7 @@ where not" with a cheap switch.
 - Done 2026-10-20: Stage C on Sonnet 5.5 (`reports/2026-10-20-stage-c-sonnet`):
   the selector gives Sonnet LDF on flat, sparse and mixed-type data, and
   threshold 0.75 or JSON on nested orders, where most of v0.1's misses are
-  ids answered without quotes.
+  ids answered without quotes. Released as 0.5.1.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
