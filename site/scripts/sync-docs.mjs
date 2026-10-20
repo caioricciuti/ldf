@@ -85,3 +85,9 @@ for (const [path, slug, description, override] of pages) {
   await writeFile(join(out, `${slug}.md`), page);
   console.log(`${path} -> ${slug}.md`);
 }
+
+// The selector's evidence, for the charts (src/components/EvidenceChart.astro).
+const data = join(here, "..", "src", "data");
+await mkdir(data, { recursive: true });
+await writeFile(join(data, "evidence.json"), await readFile(join(repo, "reports/evidence/evidence.json")));
+console.log("reports/evidence/evidence.json -> src/data/evidence.json");

@@ -1,0 +1,279 @@
+---
+// Accuracy on LDF against JSON, one row per model, size and dataset, from
+// reports/evidence/evidence.json (copied to src/data by sync-docs.mjs, so
+// the chart follows the evidence the selector ships). A dot plot: JSON and
+// LDF v0.1 on the same questions, joined by a line; the right column is
+// LDF's o200k tokens as a share of JSON's. Static SVG, no script: hover
+// text is the native <title>, and the same rows are in the table below it.
+import evidence from "../data/evidence.json";
+
+interface Row {
+  model: string;
+  run: string;
+  dataset: string;
+  records: number;
+  format: string;
+  n: number;
+  k: number;
+  json_k: number;
+  wins: number;
+  losses: number;
+  p: number;
+  tokens_ratio: number;
+}
+
+interface Props {
+  /** Force the dark palette (the landing page has no theme toggle). */
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+
+// Runs with held-out data or the Stage B question set; older runs had 15 to
+// 18 questions per cell and are left to the reports.
+const runs: [string, string][] = [
+  ["stage-c10/", "held-out"],
+  ["large/", "held-out"],
+  ["stage-b/", "Stage B"],
+];
+const models: [string, string][] = [
+  ["claude-opus-5-5", "Opus 5.5"],
+  ["claude-sonnet-5-5", "Sonnet 5.5"],
+  ["claude-haiku-5-5", "Haiku 5.5"],
+  ["deepseek-chat", "DeepSeek"],
+];
+const datasets = ["flat_users", "nested_orders", "sparse_events", "mixed_types"];
+
+const rows = (evidence as Row[])
+  .filter((r) => r.format === "ldf" && runs.some(([p]) => r.run.startsWith(p)))
+  .filter((r) => models.some(([m]) => m === r.model))
+  .sort(
+    (a, b) =>
+      models.findIndex(([m]) => m === a.model) - models.findIndex(([m]) => m === b.model) ||
+      a.records - b.records ||
+      datasets.indexOf(a.dataset) - datasets.indexOf(b.dataset),
+  );
+
+const groups: { label: string; rows: Row[] }[] = [];
+for (const r of rows) {
+  const label = `${models.find(([m]) => m === r.model)?.[1]} · ${r.records.toLocaleString("en-US")} records`;
+  const last = groups[groups.length - 1];
+  if (last?.label === label) last.rows.push(r);
+  else groups.push({ label, rows: [r] });
+}
+
+const pct = (k: number, n: number) => (100 * k) / n;
+const lo = Math.min(80, ...rows.map((r) => Math.floor(Math.min(pct(r.k, r.n), pct(r.json_k, r.n)) / 5) * 5));
+const hi = 100;
+
+// Geometry, in viewBox units.
+const W = 760;
+const labelW = 150;
+const tokW = 92;
+const plotL = labelW + 12;
+const plotR = W - tokW - 12;
+const rowH = 24;
+const headH = 30;
+const axisH = 26;
+const x = (v: number) => plotL + ((v - lo) / (hi - lo)) * (plotR - plotL);
+const ticks = Array.from({ length: Math.round((hi - lo) / 5) + 1 }, (_, i) => lo + i * 5);
+
+let y = 8;
+const laid = groups.map((g) => {
+  const top = y;
+  y += headH;
+  const items = g.rows.map((r) => {
+    const cy = y + rowH / 2;
+    y += rowH;
+    return { r, cy };
+  });
+  y += 6;
+  return { ...g, top, items };
+});
+const H = y + axisH;
+const name = (d: string) => d.replace("_", " ");
+// The accuracy half of the selector's rule (ldf-select): at least 50
+// questions, at most 3 points below JSON, not significantly worse.
+const verdict = (r: Row) => {
+  if (r.n < 50) return "too few questions";
+  const drop = pct(r.json_k, r.n) - pct(r.k, r.n);
+  return drop > 3 || (r.losses > r.wins && r.p < 0.05) ? "fails" : "passes";
+};
+---
+
+<figure class:list={["viz", { dark }]}>
+  <div class="legend" aria-hidden="true">
+    <span><i class="dot json"></i>JSON</span>
+    <span><i class="dot ldf"></i>LDF v0.1</span>
+    <span class="dim">ring with a dot inside: same score · right: LDF tokens as a share of JSON (o200k)</span>
+  </div>
+  <div class="scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Accuracy on LDF and on JSON per model, size and dataset; the table below has every value.">
+      {ticks.map((t) => (
+        <g>
+          <line class="grid" x1={x(t)} x2={x(t)} y1={8} y2={H - axisH} />
+          <text class="tick" x={x(t)} y={H - 8} text-anchor="middle">{t}%</text>
+        </g>
+      ))}
+      {laid.map((g) => (
+        <g>
+          <text class="group" x={0} y={g.top + 20}>{g.label}</text>
+          {g.items.map(({ r, cy }) => {
+            const a = pct(r.json_k, r.n);
+            const b = pct(r.k, r.n);
+            return (
+              <g class="row">
+                <title>{`${g.label}, ${name(r.dataset)}: LDF ${r.k}/${r.n}, JSON ${r.json_k}/${r.n} (+${r.wins} / -${r.losses}), LDF at ${r.tokens_ratio.toFixed(2)} of JSON's tokens; accuracy rule: ${verdict(r)}`}</title>
+                <rect class="hit" x={0} y={cy - rowH / 2} width={W} height={rowH} />
+                <text class="label" x={labelW} y={cy + 4} text-anchor="end">{name(r.dataset)}</text>
+                <line class="link" x1={x(Math.min(a, b))} x2={x(Math.max(a, b))} y1={cy} y2={cy} />
+                <circle class="mark json" cx={x(a)} cy={cy} r={7} />
+                <circle class="mark ldf" cx={x(b)} cy={cy} r={5} />
+                <text class="tok" x={W} y={cy + 4} text-anchor="end">{r.tokens_ratio.toFixed(2)}×</text>
+              </g>
+            );
+          })}
+        </g>
+      ))}
+    </svg>
+  </div>
+  <details>
+    <summary>Table view</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>model, size</th><th>dataset</th><th>JSON</th><th>LDF</th><th>+ / -</th><th>p</th><th>tokens</th><th>accuracy rule</th></tr></thead>
+        <tbody>
+          {laid.flatMap((g) => g.items.map(({ r }) => (
+            <tr><td>{g.label}</td><td>{name(r.dataset)}</td><td>{r.json_k}/{r.n}</td><td>{r.k}/{r.n}</td><td>+{r.wins} / -{r.losses}</td><td>{r.p.toFixed(2)}</td><td>{r.tokens_ratio.toFixed(2)}</td><td>{verdict(r)}</td></tr>
+          )))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .viz {
+    --json: #2a78d6;
+    --ldf: #eb6834;
+    --ink: #1a1f1e;
+    --ink-2: #4a5552;
+    --grid: rgba(0, 0, 0, 0.08);
+    --hover: rgba(0, 0, 0, 0.035);
+    margin: 1.5rem 0 0;
+    color: var(--ink);
+  }
+  :global(:root[data-theme="dark"]) .viz,
+  .viz.dark {
+    --json: #3987e5;
+    --ldf: #d95926;
+    --ink: #eef2f0;
+    --ink-2: #9aa6a2;
+    --grid: rgba(255, 255, 255, 0.08);
+    --hover: rgba(255, 255, 255, 0.04);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .legend .dim {
+    color: var(--ink-2);
+    font-size: 0.8rem;
+  }
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+    vertical-align: -1px;
+  }
+  /* JSON is a ring, LDF a filled dot inside it: a tie reads as one ringed
+     dot instead of hiding one mark under the other. */
+  .dot.json {
+    border: 2px solid var(--json);
+    width: 12px;
+    height: 12px;
+  }
+  .mark.json {
+    fill: none;
+    stroke: var(--json);
+    stroke-width: 2;
+  }
+  .dot.ldf,
+  .mark.ldf {
+    background: var(--ldf);
+    fill: var(--ldf);
+  }
+  .scroll {
+    overflow-x: auto;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+    font-family: inherit;
+  }
+  .grid {
+    stroke: var(--grid);
+    stroke-width: 1;
+  }
+  .tick,
+  .tok {
+    fill: var(--ink-2);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .group {
+    fill: var(--ink);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .label {
+    fill: var(--ink-2);
+    font-size: 12px;
+  }
+  .link {
+    stroke: var(--ink-2);
+    stroke-width: 2;
+    opacity: 0.45;
+  }
+  .hit {
+    fill: transparent;
+  }
+  .row:hover .hit {
+    fill: var(--hover);
+  }
+  .row:hover .label {
+    fill: var(--ink);
+  }
+  details {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+  }
+  summary {
+    cursor: pointer;
+    color: var(--ink-2);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid var(--grid);
+    white-space: nowrap;
+  }
+  th {
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+</style>

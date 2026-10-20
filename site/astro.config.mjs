@@ -82,6 +82,7 @@ export default defineConfig({
         {
           label: "Results",
           items: [
+            { label: "Evidence at a glance", slug: "docs/evidence" },
             { label: "Bash hook in Claude Code (2026-10-20)", slug: "docs/results/hook" },
             { label: "Stage C: Opus 5.5, held-out (2026-10-19)", slug: "docs/results/stage-c" },
             { label: "Baseline report (2026-10-17)", slug: "docs/results/baseline" },
