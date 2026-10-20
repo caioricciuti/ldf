@@ -169,9 +169,10 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
   is fixed at install and does not follow `/model`.
 - Codex reads `structuredContent` when present, so a proxied server that
   sends it gets no saving there.
-- Release binaries exist for macOS and Linux (arm64, x86-64). Windows is not
-  built yet, and the proxy does not yet resolve `.cmd` launchers such as
-  `npx.cmd` there.
+- Release binaries cover macOS and Linux (arm64, x86-64) and Windows
+  x86-64 (a zip; Windows on Arm runs it under emulation). There is no
+  install script yet: download, check the `.sha256`, and put the binary on
+  your PATH.
 - The token estimate in `stats` is bytes / 4; exact counts need a tokenizer
   (`ldf-bench count`) and real usage needs the agent's own counters.
 - No model has been run through these integrations yet, so there is no
@@ -187,8 +188,7 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
 2. `install codex` and `install opencode` writing the entries above, with
    the same record and rollback, and an OpenCode plugin file with no
    dependencies for built-in tool output.
-3. Windows binaries in the release workflow, `.cmd` resolution in the proxy,
-   and an install script that checks the SHA-256.
+3. An install script that picks the right archive and checks its SHA-256.
 4. A measured agent session: the same scripted task with and without LDF,
    reading the agent's own token counters (needs approval; it uses a paid
    model).

@@ -7,6 +7,15 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.4.0 (2026-10-20)
+
+Agent integration: `ldf-mcp install claude-code`, local statistics,
+`doctor`, a hardened proxy and a Windows binary. The specification stays
+v0.2. The documentation moves into the website's sources and the
+measurement reports to `reports/`.
+
 ### Added
 
 - Local statistics: every `ldf-mcp` mode appends one line per tool response
@@ -31,8 +40,23 @@ stated in `site/src/content/docs/docs/spec.md`.
   visibility, usage counters), setup in five minutes, limitations.
   `eval/demo_agents.py` and `reports/2026-10-19-agent-demos/`: the
   proxy and files data paths, JSON against LDF in bytes and o200k tokens.
+- Windows: the release builds `x86_64-pc-windows-msvc` as a zip with its
+  SHA-256, and CI builds and tests `ldf-mcp` on Windows.
+
+### Changed
+
+- The documentation pages live in `site/src/content/docs/docs/` (spec,
+  agents, mcp, methodology, design, research, roadmap) and the measurement
+  reports in `reports/`; `docs/` is gone. `ldf-discover select` reads its
+  default evidence from `reports/evidence/evidence.json`.
 
 ### Fixed
+
+- On Windows, `ldf-mcp proxy` finds a server's `.cmd` launcher (as Node
+  servers ship): a bare program name is looked up with PATHEXT, since the
+  standard library only tries `.exe`. `install` matches Claude Code's
+  project keys whatever their spelling (`\\?\` prefix, separators, case)
+  and writes paths without the `\\?\` prefix.
 
 - `ldf-mcp proxy` no longer panics on a `tools/list` entry or `initialize`
   result that is not an object, no longer mistakes a server-to-client
