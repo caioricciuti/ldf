@@ -1,5 +1,5 @@
 //! Benchmark library behind the `ldf-bench` binary and the Criterion
-//! microbenchmarks. See `docs/benchmark-methodology.md`.
+//! microbenchmarks. See `site/src/content/docs/docs/methodology.md`.
 
 pub mod arrow;
 pub mod measure;

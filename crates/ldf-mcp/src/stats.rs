@@ -392,7 +392,7 @@ pub fn render(s: &Summary, path: &Path) -> String {
     o.push_str(
         "\nThese are serialization savings: bytes the agent did not have to put in the model's\n\
          context. What a model was billed depends on its tokenizer and on caching; compare with\n\
-         the agent's own usage counters (docs/ldf-mcp.md, \"Measuring\").\n",
+         the agent's own usage counters (site/src/content/docs/docs/mcp.md, \"Measuring\").\n",
     );
     if s.bad_lines > 0 {
         o.push_str(&format!("({} unreadable lines skipped)\n", s.bad_lines));

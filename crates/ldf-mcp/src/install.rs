@@ -735,7 +735,7 @@ pub fn doctor(env: &Env) -> String {
             None => o.push_str(&format!("{}{agent}: not found on PATH\n", ok(false))),
         }
     }
-    o.push_str("      codex and opencode: not supported by install yet; see docs/agents.md\n");
+    o.push_str("      codex and opencode: not supported by install yet; see site/src/content/docs/docs/agents.md\n");
     match env.read_config() {
         Ok(cfg) => {
             let found = servers(&cfg, &env.project);

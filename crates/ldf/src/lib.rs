@@ -1,7 +1,7 @@
 //! LDF v0: Language Data Format.
 //!
 //! Lossless, line-oriented, token-efficient text encoding of JSON records.
-//! Specification: `docs/ldf-spec-v0.md`. This crate has no opinion about
+//! Specification: `site/src/content/docs/docs/spec.md`. This crate has no opinion about
 //! benchmarks; `ldf-formats` wraps it in the common `Format` trait.
 //!
 //! ```text

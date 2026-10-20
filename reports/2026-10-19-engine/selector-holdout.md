@@ -1,6 +1,6 @@
 # Selector decisions on held-out data (generated)
 
-fixtures/holdout/medium (seed 20261118), first 200 records, default policy, evidence docs/reports/evidence/evidence.json. Command: `ldf-discover select --model M --input fixtures/holdout/medium/D.json --sample 200`.
+fixtures/holdout/medium (seed 20261118), first 200 records, default policy, evidence reports/evidence/evidence.json. Command: `ldf-discover select --model M --input fixtures/holdout/medium/D.json --sample 200`.
 
 | dataset | traits | claude-haiku-5-5 | deepseek-chat | claude-opus-5-5 | gpt-6.1-sol | unknown model |
 |---|---|---|---|---|---|---|

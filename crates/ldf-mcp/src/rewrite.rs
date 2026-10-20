@@ -9,7 +9,7 @@ use serde_json::Value as Json;
 
 /// What the model is told once, at `initialize`, about the format it will
 /// receive. Kept to the rules a reader needs; the full spec is
-/// `docs/ldf-spec-v0.md`.
+/// `site/src/content/docs/docs/spec.md`.
 pub const PRIMER: &str = "Tool results from this server may be returned in LDF (Language Data Format), \
 a lossless table encoding of JSON records. A document is one or more tables. A table is a header line \
 `@name col:type,col:type,...` followed by one row per record, cells separated by commas, in header order. \

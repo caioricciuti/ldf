@@ -1,4 +1,7 @@
-# ldf-mcp: LDF between a data source and the model
+---
+title: "ldf-mcp"
+description: "LDF between a data source and the model: the proxy and the ClickHouse mode."
+---
 
 `ldf-mcp` is the "middle man": the model keeps using ordinary MCP tools and
 receives LDF instead of JSON. Three modes:
@@ -52,7 +55,7 @@ says why:
 
     ldf-mcp: query json for claude-haiku-5-5 (1 rows): no evidence for ldf (sparse threshold 0.5) on a measured dataset with traits {"child_tables"}
 
-The evidence is a copy of `docs/reports/evidence/evidence.json` built into
+The evidence is a copy of `reports/evidence/evidence.json` built into
 the binary; `--evidence FILE` uses another file of the same shape. A model
 with no row of 50 questions or more gets JSON throughout, and the proxy then
 leaves the primer and tool notes out. As of the Stage C run (2026-10-19) that
@@ -182,7 +185,7 @@ model's context. Three things sit between that and what a model is billed.
 
 1. Tokens are not bytes. `bytes / 4` is a rule of thumb; for the measured
    o200k token ratios of LDF against JSON per dataset see
-   `docs/reports/`, and for Claude the ratio is measured with Anthropic's
+   `reports/`, and for Claude the ratio is measured with Anthropic's
    count_tokens (`eval/count_tokens_claude.py`), not estimated.
 2. Agents truncate or spill large tool results before the model sees them
    (Claude Code saves results over 25 000 tokens or 50 000 characters to a

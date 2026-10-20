@@ -111,7 +111,7 @@ pub struct Options {
 
 impl Options {
     /// The default threshold, chosen on 2026-10-18 from the Haiku runs in
-    /// `docs/design-candidates.md`: JSON's accuracy at 25 percent fewer
+    /// `site/src/content/docs/docs/design.md`: JSON's accuracy at 25 percent fewer
     /// tokens on sparse data, dense data unchanged.
     pub const DEFAULT_SPARSE_THRESHOLD: f64 = 0.5;
     /// v0 layout: every key is a column.

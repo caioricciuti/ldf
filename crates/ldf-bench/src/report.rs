@@ -109,7 +109,7 @@ pub fn render_markdown(run: &Run) -> String {
         "Each operation runs in its own child process. Iteration 0 is the cold run; \
          medians and p95 are over the remaining {} warm iterations. MB = 1e6 bytes. \
          Peak RSS is the child process high-water mark after the operation, as reported by getrusage, \
-         minus nothing: it includes the loaded input. See docs/benchmark-methodology.md.\n",
+         minus nothing: it includes the loaded input. See site/src/content/docs/docs/methodology.md.\n",
         run.iters.saturating_sub(1)
     );
 

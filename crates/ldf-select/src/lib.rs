@@ -25,7 +25,7 @@
 //! counts o200k tokens and checks TOON through `ldf-formats`; `ldf-mcp`
 //! offers JSON and LDF only and measures bytes with [`measure_ldf`].
 //! Evidence rows come from `eval/analysis/evidence.py`; a copy of
-//! `docs/reports/evidence/evidence.json` ships in this crate
+//! `reports/evidence/evidence.json` ships in this crate
 //! ([`builtin_evidence`]).
 
 use std::collections::BTreeSet;
@@ -292,7 +292,7 @@ fn row_passes(e: &Evidence, policy: &Policy) -> Result<(), String> {
     Ok(())
 }
 
-/// The evidence this crate was built with, `docs/reports/evidence/evidence.json`.
+/// The evidence this crate was built with, `reports/evidence/evidence.json`.
 pub const EVIDENCE_JSON: &str = include_str!("../evidence.json");
 
 pub fn builtin_evidence() -> Vec<Evidence> {
@@ -682,12 +682,12 @@ mod builtin_tests {
         let ev: Vec<Evidence> = serde_json::from_str(EVIDENCE_JSON).unwrap();
         assert!(!ev.is_empty());
         let report = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../docs/reports/evidence/evidence.json");
+            .join("../../reports/evidence/evidence.json");
         // Absent in the published crate; in the repository the copy must match.
         if let Ok(text) = std::fs::read_to_string(report) {
             assert!(
                 text == EVIDENCE_JSON,
-                "crates/ldf-select/evidence.json differs from docs/reports/evidence/evidence.json; copy it over"
+                "crates/ldf-select/evidence.json differs from reports/evidence/evidence.json; copy it over"
             );
         }
     }

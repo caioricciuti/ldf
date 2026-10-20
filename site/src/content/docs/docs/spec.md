@@ -1,14 +1,17 @@
-# LDF v0.2 (draft, 2026-10-19)
+---
+title: "Specification (v0.2)"
+description: "Every rule of the format, checked by the reference implementation's tests."
+---
 
 Language Data Format: a lossless, line-oriented, token-efficient text
 encoding of JSON records for language-model consumption. Version 0.2 is
 the prototype that `crates/ldf` implements; every rule here is checked by
 that implementation's tests. Rationale and measurements:
-`docs/design-candidates.md`.
+[design notes](/docs/design/).
 
 Changes from v0.1: the hoisted column type `[k1,k2,...]` (sections 3, 4
 and 7, rule 2a), measured in Stage B and Stage C
-(`docs/reports/2026-10-18-stage-b`, `docs/reports/2026-10-19-stage-c`).
+(`reports/2026-10-18-stage-b`, `reports/2026-10-19-stage-c`).
 The change is additive. Every v0.1 document is a valid v0.2 document with
 the same meaning, and an encoder writes a hoisted column only when asked
 to (`Options::hoist`, off by default), so default output is v0.1. A v0.1

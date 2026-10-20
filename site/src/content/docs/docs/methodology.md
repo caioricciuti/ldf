@@ -1,8 +1,11 @@
-# Benchmark methodology
+---
+title: "Benchmark methodology"
+description: "How every number on this site was produced, and what it does not show."
+---
 
 This document states exactly what `ldf-bench`, `ldf-gen` and `ldf-eval`
 measure, how, and what the known blind spots are. Numbers that appear in
-`docs/reports/` were produced by these procedures; nothing else is reported.
+`reports/` were produced by these procedures; nothing else is reported.
 
 ## 1. Data model and equality
 
