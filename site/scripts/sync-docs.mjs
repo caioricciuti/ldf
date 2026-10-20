@@ -21,6 +21,8 @@ const github = "https://github.com/caioricciuti/ldf/blob/main/";
 // title where the file's own H1 is not the right page name
 const pages = [
   ["reports/2026-10-17-baseline/README.md", "docs/results/baseline", "Perf, tokens and comprehension runs on an M2 Pro, with the raw files next to them.", "Baseline report (October 2026)"],
+  ["reports/2026-10-19-stage-c/README.md", "docs/results/stage-c", "Claude Opus 5.5 on held-out data: LDF v0.1, threshold 0.75 and hoisted arrays against JSON.", "Stage C: Opus 5.5 on held-out data"],
+  ["reports/2026-10-20-hook/README.md", "docs/results/hook", "The Claude Code Bash hook on the medium fixtures: exact o200k tokens per dataset and model, per-call timing.", "Bash hook in Claude Code"],
   ["AGENTS.md", "docs/working-notes", "Architecture, commands and conventions for anyone touching the repository.", "Working notes"],
   ["CHANGELOG.md", "docs/changelog", "What changed, by version of the specification."],
   ["CONTRIBUTING.md", "docs/contributing", "The bar for a change: measurements first, fixtures with the spec, pinned dependencies."],

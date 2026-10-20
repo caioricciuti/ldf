@@ -6,9 +6,11 @@ description: What LDF is, what it is for, and where to look next.
 LDF, the Language Data Format, is a lossless, line-oriented text encoding of
 JSON records. It exists for one reader: a language model. A dataset becomes
 one typed header and one line per record, with child tables for nested
-arrays, and the model reads it for 35 to 45 percent fewer tokens than compact
-JSON while every value, key and distinction between missing and null survives
-the round trip.
+arrays, and every value, key and distinction between missing and null
+survives the round trip. On held-out data Claude Opus 5.5 answers from LDF as
+well as from JSON (294 of 297 questions each) at 57 to 77 percent of JSON's
+input tokens; in Claude Code sessions, JSON tool output reached the model at
+0.56 of its tokens with no answer lost.
 
 Two things set it apart from the other compact formats:
 
@@ -30,6 +32,8 @@ Two things set it apart from the other compact formats:
   document by hand.
 * [Specification](/docs/spec/): every rule, checked by the reference
   implementation's tests.
+* [With Claude Code, Codex and OpenCode](/docs/agents/): two commands put
+  LDF in Claude Code's Bash output, chosen per model from the evidence.
 * [ldf-mcp](/docs/mcp/): the middle man. Put LDF between any MCP server and
   the model, or run read-only SQL over ClickHouse and get rows back as LDF.
 * [Baseline report](/docs/results/baseline/): perf, tokens and comprehension
@@ -39,7 +43,9 @@ Two things set it apart from the other compact formats:
 
 ## Status
 
-Version 0.1, a prototype in Rust (`crates/ldf` in the
-[repository](https://github.com/caioricciuti/ldf)), MIT or Apache-2.0. The
-encoder, the block encoder for streaming and the decoder are complete for
-the spec. The [roadmap](/docs/roadmap/) says what is next.
+Specification v0.2 (hoisted arrays, opt-in); releases since then changed the
+tools, not the format. The crates are at 0.5.0 on crates.io (`ldf`,
+`ldf-data`, `ldf-select`, `ldf-mcp`), Rust, MIT or Apache-2.0, source in the
+[repository](https://github.com/caioricciuti/ldf). The
+[changelog](/docs/changelog/) lists every release and the
+[roadmap](/docs/roadmap/) says what is next.
