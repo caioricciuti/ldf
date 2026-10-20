@@ -20,6 +20,9 @@
 #   eval/plan.sh stage-c10-build        Stage C at 10 questions per kind (free)
 #   eval/plan.sh stage-c10-opus         Opus 5.5 on it, JSON and LDF variants only (~$5.00-6.60, cap $7)
 #   eval/plan.sh stage-c10-sonnet       Sonnet 5.5 on it, same prompts (~$4.30-6.50, cap $7)
+#   eval/plan.sh large-build            1 000 held-out records, no arithmetic kinds (free)
+#   eval/plan.sh large-opus             Opus 5.5 on it (cap $16)
+#   eval/plan.sh large-sonnet           Sonnet 5.5 on it (cap $13)
 #   eval/plan.sh stage-c-sonnet         Sonnet 5.5 on them (~$7.50-11.50, cap $12)
 #   eval/plan.sh stage-c-gpt            GPT on them; needs GPT_MODEL and GPT_PRICE_IN/CACHED/OUT set (cap $GPT_BUDGET)
 #   eval/plan.sh all           the first four stages above, in that order
@@ -156,6 +159,37 @@ stage_stage_c10_opus() { stage_c10 7 "${OPUS[@]}"; }
 # repriced at Sonnet rates is $4.26; cache reads cost the same on both, so
 # the spread is output length and tokenizer: about $4.30-6.50, cap $7.
 stage_stage_c10_sonnet() { stage_c10 7 "${SONNET[@]}"; }
+# Large (2026-10-20): 1 000 held-out records, so the selector has evidence
+# above 200 rows. Only kinds a model can answer at that size without long
+# arithmetic: no aggregate, aggregate_where or child_aggregate (sums and
+# means failed in every format at 500 records). flat_users runs out of
+# distinct questions, so it asks 20 per kind (64 questions); the others 10 (52 to 68 per
+# dataset). Each model gets only the layouts its selector could pick:
+# hoisted nested for Opus, threshold 0.75 nested for Sonnet, no 0.75 on
+# sparse (both models rejected it at 200).
+LARGE_KINDS=lookup,filter,compare,multi_record,rank,missing_value,nested_extract,child_count
+large_build() {
+  local s75='d=comma h=typed q?=1 o=dotted a=child-key sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  local h='d=comma h=typed q?=1 o=dotted a=hoisted sp=50 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+  for b in "${STAGE_C_DATASETS[@]}"; do
+    local pk=10
+    [ "$b" = flat_users ] && pk=20
+    ./target/release/ldf-eval build --input "fixtures/holdout/medium/$b.json" --records 1000 --per-kind "$pk" --seed 2 \
+      --kinds "$LARGE_KINDS" --formats json,ldf --candidate "ldf-s75=$s75" --candidate "ldf-hoisted=$h" \
+      --out "eval/out/large/$b"
+  done
+}
+large_run() {
+  local total=$1 nested=$2; shift 2
+  local entry b formats share
+  for entry in "flat_users json,ldf 0.14" "nested_orders $nested 0.57" "sparse_events json,ldf 0.22" "mixed_types json,ldf 0.07"; do
+    read -r b formats share <<< "$entry"
+    run --bundle "eval/out/large/$b" "$@" --formats "$formats" --max-tokens 4096 \
+      --budget "$(python3 -c "print(round($total * $share, 2))")"
+  done
+}
+stage_large_opus() { large_run 16 json,ldf,ldf-hoisted "${OPUS[@]}"; }
+stage_large_sonnet() { large_run 13 json,ldf,ldf-s75 "${SONNET[@]}"; }
 stage_stage_c_sonnet() { stage_c eval/out/stage-c 12 "${SONNET[@]}"; }
 stage_stage_c_gpt() {
   : "${GPT_MODEL:?set GPT_MODEL}" "${GPT_PRICE_IN:?set GPT_PRICE_IN (USD per M input)}" \
@@ -178,7 +212,7 @@ stage_deepseek() {
   done
 }
 stage_score() {
-  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl eval/out/stage-c10/*/responses.*.jsonl; do
+  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl eval/out/stage-c10/*/responses.*.jsonl eval/out/large/*/responses.*.jsonl; do
     [ -e "$r" ] || continue
     bundle=$(dirname "$r")
     model=$(basename "$r" .jsonl | cut -d. -f3-)
@@ -202,6 +236,9 @@ for stage in "$@"; do
     stage-c10-build) stage_c_build 10 eval/out/stage-c10 ;;
     stage-c10-opus) stage_stage_c10_opus ;;
     stage-c10-sonnet) stage_stage_c10_sonnet ;;
+    large-build) large_build ;;
+    large-opus) stage_large_opus ;;
+    large-sonnet) stage_large_sonnet ;;
     stage-c-sonnet) stage_stage_c_sonnet ;;
     stage-c-gpt) stage_stage_c_gpt ;;
     sparse-sweep-deepseek) stage_sparse_sweep_deepseek ;;

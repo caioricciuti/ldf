@@ -484,7 +484,16 @@ mod tests {
     fn session_model_drives_the_selector_and_primer_goes_once() {
         let dir = std::env::temp_dir().join(format!("ldf-hook-unit-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
-        let c = cfg(Some(&dir));
+        // One passing row for Opus on flat data, so the test checks the
+        // hook's wiring, not whatever evidence the release ships.
+        let row = json!({"model": "claude-opus-5-5", "run": "t/flat", "dataset": "flat", "records": 200,
+            "traits": [], "family": "ldf", "thresholds": [0.0, 0.25, 0.5, 0.75, 1.0],
+            "hoist_thresholds": [0.0, 0.25, 0.5, 0.75, 1.0], "format": "ldf", "n": 60, "k": 60,
+            "json_k": 60, "wins": 0, "losses": 0, "p": 1.0, "tokens_ratio": 0.6});
+        let c = Config {
+            evidence: Some(vec![serde_json::from_value(row).unwrap()]),
+            ..cfg(Some(&dir))
+        };
         let start = |model: &str, source: &str| {
             let ev = json!({"session_id": "s1", "hook_event_name": "SessionStart", "model": model, "source": source});
             assert!(handle(ev.to_string().as_bytes(), &c).output.is_none());

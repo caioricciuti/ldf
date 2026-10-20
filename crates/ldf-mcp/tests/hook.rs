@@ -333,13 +333,27 @@ fn session_model_selects_and_primer_is_sent_once_per_context() {
     let state = temp_dir("session");
     let text = users(80);
     let input = post_bash("gh api x", &text, json!({}));
+    // One passing row for Opus on flat data, so the test checks the hook's
+    // wiring, not whatever evidence the release ships.
+    let evidence = state.join("evidence.json");
+    std::fs::write(
+        &evidence,
+        json!([{"model": "claude-opus-5-5", "run": "t/flat", "dataset": "flat", "records": 200,
+            "traits": [], "family": "ldf", "thresholds": [0.0, 0.25, 0.5, 0.75, 1.0],
+            "hoist_thresholds": [0.0, 0.25, 0.5, 0.75, 1.0], "format": "ldf", "n": 60, "k": 60,
+            "json_k": 60, "wins": 0, "losses": 0, "p": 1.0, "tokens_ratio": 0.6}])
+        .to_string(),
+    )
+    .unwrap();
+    let ev = evidence.to_str().unwrap();
+    let args = ["--evidence", ev];
     assert!(
-        hook(&state, &[], &session_start("gpt-6.1-sol", "startup"))
+        hook(&state, &args, &session_start("gpt-6.1-sol", "startup"))
             .stdout
             .is_empty()
     );
     assert!(
-        replaced(&hook(&state, &[], &input)).is_none(),
+        replaced(&hook(&state, &args, &input)).is_none(),
         "no evidence for GPT"
     );
     assert_eq!(events(&state)[0]["reason"], "selector");
@@ -347,7 +361,7 @@ fn session_model_selects_and_primer_is_sent_once_per_context() {
     let switch = json!({"session_id": SESSION, "hook_event_name": "PostModelSwitch",
                         "from_model": "gpt-6.1-sol", "to_model": "claude-opus-5-5"});
     assert!(
-        hook(&state, &[], switch.to_string().as_bytes())
+        hook(&state, &args, switch.to_string().as_bytes())
             .stdout
             .is_empty()
     );
@@ -357,15 +371,19 @@ fn session_model_selects_and_primer_is_sent_once_per_context() {
             .unwrap()
             .contains("Language Data Format")
     };
-    assert!(primer(&hook(&state, &[], &input)));
+    assert!(primer(&hook(&state, &args, &input)));
     assert_eq!(events(&state)[1]["model"], "claude-opus-5-5");
-    assert!(!primer(&hook(&state, &[], &input)));
-    assert!(!primer(&hook(&state, &[], &input)));
+    assert!(!primer(&hook(&state, &args, &input)));
+    assert!(!primer(&hook(&state, &args, &input)));
     // After compaction the primer is gone from the context: send it again.
-    hook(&state, &[], &session_start("claude-opus-5-5", "compact"));
-    assert!(primer(&hook(&state, &[], &input)));
+    hook(&state, &args, &session_start("claude-opus-5-5", "compact"));
+    assert!(primer(&hook(&state, &args, &input)));
     // --model overrides what the session reported.
-    let r = hook(&state, &["--model", "gpt-6.1-sol"], &input);
+    let r = hook(
+        &state,
+        &["--evidence", ev, "--model", "gpt-6.1-sol"],
+        &input,
+    );
     assert!(replaced(&r).is_none());
     assert!(
         !r.stderr.contains("user-"),

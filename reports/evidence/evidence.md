@@ -67,6 +67,16 @@ Each row: one model, one bundle, one format, against JSON on the same questions.
 | deepseek-chat | flat_users_500 | 500 | flat | toon-tab | other |  |  | 15 | 66.7% | 73.3% | +0 / -1 | 1.00 | 0.647 | 1218 (1364) |
 | deepseek-chat | flat_users_500 | 500 | flat | tsv | other |  |  | 15 | 60.0% | 73.3% | +0 / -2 | 0.50 | 0.604 | 1104 (1364) |
 | deepseek-chat | flat_users_500 | 500 | flat | yaml | other |  |  | 15 | 73.3% | 73.3% | +1 / -1 | 1.00 | 1.248 | 1297 (1364) |
+| claude-opus-5-5 | large/flat_users | 1000 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 0.0,0.25,0.5,0.75,1.0 | 64 | 92.2% | 100.0% | +0 / -5 | 0.06 | 0.606 | 2741 (2573) |
+| claude-sonnet-5-5 | large/flat_users | 1000 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 0.0,0.25,0.5,0.75,1.0 | 64 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.606 | 1831 (2055) |
+| claude-opus-5-5 | large/mixed_types | 1000 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 0.5,0.75 | 52 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.726 | 2194 (2101) |
+| claude-sonnet-5-5 | large/mixed_types | 1000 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 0.5,0.75 | 52 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.726 | 1892 (1755) |
+| claude-opus-5-5 | large/nested_orders | 1000 | child_tables,sparse | ldf | ldf | 0.0,0.25,0.5 |  | 68 | 97.1% | 97.1% | +2 / -2 | 1.00 | 0.645 | 3036 (3208) |
+| claude-opus-5-5 | large/nested_orders | 1000 | child_tables,sparse | ldf-hoisted | ldf |  | 0.0,0.25,0.5 | 68 | 98.5% | 97.1% | +2 / -1 | 1.00 | 0.55 | 3008 (3208) |
+| claude-sonnet-5-5 | large/nested_orders | 1000 | child_tables,sparse | ldf | ldf | 0.0,0.25,0.5 |  | 68 | 83.8% | 95.6% | +0 / -8 | 0.01 | 0.645 | 2354 (2610) |
+| claude-sonnet-5-5 | large/nested_orders | 1000 | child_tables,sparse | ldf-s75 | ldf | 0.75,1.0 |  | 68 | 85.3% | 95.6% | +0 / -7 | 0.02 | 0.68 | 2668 (2610) |
+| claude-opus-5-5 | large/sparse_events | 1000 | sparse | ldf | ldf | 0.5 | 0.5 | 60 | 95.0% | 93.3% | +3 / -2 | 1.00 | 0.803 | 3164 (2987) |
+| claude-sonnet-5-5 | large/sparse_events | 1000 | sparse | ldf | ldf | 0.5 | 0.5 | 60 | 90.0% | 98.3% | +1 / -6 | 0.12 | 0.803 | 2742 (2667) |
 | claude-opus-5-5 | nested_orders | 50 | child_tables,sparse | json-pretty | other |  |  | 20 | 95.0% | 95.0% | +0 / -0 | 1.00 | 1.772 | 2068 (1972) |
 | claude-opus-5-5 | nested_orders | 50 | child_tables,sparse | jsonl | other |  |  | 20 | 95.0% | 95.0% | +0 / -0 | 1.00 | 1.009 | 1719 (1972) |
 | claude-opus-5-5 | nested_orders | 50 | child_tables,sparse | ldf | ldf | 0.0,0.25,0.5 |  | 20 | 100.0% | 95.0% | +1 / -0 | 1.00 | 0.655 | 2109 (1972) |

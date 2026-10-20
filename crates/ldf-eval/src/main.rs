@@ -1,7 +1,7 @@
 //! `ldf-eval`: build evaluation bundles and score responses.
 //!
 //! ```text
-//! ldf-eval build --input fixtures/small/flat_users.json [--records 50] [--per-kind 3]
+//! ldf-eval build --input fixtures/small/flat_users.json [--records 50] [--per-kind 3] [--kinds a,b]
 //!                [--formats all] [--seed 1] [--extra name=file]... [--candidate name=ID]...
 //!                --out eval/out/flat_users
 //! ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.jsonl
@@ -14,7 +14,7 @@ use std::process::ExitCode;
 use ldf_data::input::{ReadOptions, read_all};
 use ldf_eval::bundle::{BundleInput, Manifest, Tokenizer, write_bundle};
 use ldf_eval::score::{Response, grade, render_markdown};
-use ldf_eval::tasks::{Generator, Task};
+use ldf_eval::tasks::{Generator, Task, TaskKind};
 
 fn flag(args: &[String], name: &str) -> Option<String> {
     args.iter()
@@ -24,7 +24,7 @@ fn flag(args: &[String], name: &str) -> Option<String> {
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  ldf-eval build --input FILE --out DIR [--records N] [--per-kind N] [--formats all|a,b] [--seed N]\n\
+        "usage:\n  ldf-eval build --input FILE --out DIR [--records N] [--per-kind N] [--kinds a,b] [--formats all|a,b] [--seed N]\n\
          \x20     [--extra name=file]... [--candidate name=ID]...\n\
          \x20 ldf-eval score --bundle DIR --responses FILE [--out FILE.md]"
     );
@@ -88,7 +88,20 @@ fn build(args: &[String]) -> ExitCode {
         }
     };
     records.truncate(records_n);
-    let tasks = Generator::new(&records, seed, per_kind).generate();
+    let mut tasks = Generator::new(&records, seed, per_kind).generate();
+    // --kinds a,b: keep only these kinds. Applied after generation, so the
+    // kept questions are the ones a full build asks.
+    if let Some(list) = flag(args, "--kinds") {
+        let wanted: Vec<&str> = list.split(',').map(str::trim).collect();
+        if let Some(bad) = wanted
+            .iter()
+            .find(|w| !TaskKind::all().iter().any(|k| k.name() == **w))
+        {
+            eprintln!("unknown task kind {bad:?}");
+            return ExitCode::from(2);
+        }
+        tasks.retain(|t| wanted.contains(&t.kind.name()));
+    }
     if tasks.is_empty() {
         eprintln!("no tasks could be generated (no usable key field?)");
         return ExitCode::FAILURE;
