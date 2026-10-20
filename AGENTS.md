@@ -211,3 +211,13 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   against 87. Threshold 0.75 passes (-2.1) and is what Sonnet gets on
   nested data with sparse keys; hoisted fails (-6.3, `child_aggregate` 0 of
   10).
+- Large (2026-10-20, `reports/2026-10-20-large/`, $20.72): Opus and Sonnet
+  at 1 000 held-out records, no arithmetic kinds (`ldf-eval build
+  --kinds`). LDF holds for Opus on nested (hoisted 67/68 at 0.47 of JSON),
+  sparse and mixed, and for Sonnet on flat and mixed. Fails: Opus flat
+  (59/64 vs 64, three wrapped `{"final_answer": N}`), Sonnet nested (bare
+  ids again, p=0.01), Sonnet sparse (filter lists one id short over 1 000
+  sparse rows, a real loss). The selector rejects a layout on any failing
+  row whatever its size, so these also withdraw LDF at 200 rows or fewer;
+  size bands (evidence from the smallest measured size at or above the
+  input) are the proposed fix, not built.
