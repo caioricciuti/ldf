@@ -10,11 +10,15 @@
 //!    gives member order no meaning) unless the policy requires key order;
 //! 2. there is evidence for this exact model and this candidate on a
 //!    measured dataset with the same structural traits ([`Traits`]), and
-//!    every such evidence row passes the [`Policy`]: enough questions, no significant
-//!    loss against JSON on the same questions (exact sign test), and an
-//!    accuracy drop no larger than the tolerance;
+//!    every such evidence row in the dataset's size band passes the
+//!    [`Policy`]: enough questions, no significant loss against JSON on the
+//!    same questions (exact sign test), and an accuracy drop no larger than
+//!    the tolerance. The size band is the smallest measured size at or
+//!    above the dataset's row count: 150 rows are judged by evidence at 200
+//!    records, 600 rows by evidence at 1 000, and a loss measured at 1 000
+//!    records does not withdraw LDF from 150;
 //! 3. the dataset is no larger than the largest measured one, unless the
-//!    policy allows extrapolation;
+//!    policy allows extrapolation (then the largest band judges it);
 //! 4. it saves at least `min_saving` of JSON's size on this dataset.
 //!
 //! Among accepted candidates the smallest wins. JSON is the fallback for
@@ -536,8 +540,29 @@ fn check_evidence(
         );
         return false;
     }
+    let measured = rows.iter().map(|e| e.records).max().unwrap_or(0);
     let mut ok = true;
-    for e in &rows {
+    if prof.rows > measured && !policy.extrapolate_rows {
+        notes.push(format!(
+            "{} rows, largest measured dataset has {measured}; extrapolation is off",
+            prof.rows
+        ));
+        ok = false;
+    }
+    let band = rows
+        .iter()
+        .map(|e| e.records)
+        .filter(|&r| r >= prof.rows)
+        .min()
+        .unwrap_or(measured);
+    let other = rows.iter().filter(|e| e.records != band).count();
+    if other > 0 {
+        notes.push(format!(
+            "{other} evidence rows at other sizes not used: {} rows are judged at {band} records",
+            prof.rows
+        ));
+    }
+    for e in rows.iter().filter(|e| e.records == band) {
         match row_passes(e, policy) {
             Ok(()) => notes.push(format!(
                 "ok: {} on {} ({} records, {}): {}/{} vs JSON {}/{}, +{} / -{}, p={:.2}",
@@ -558,14 +583,6 @@ fn check_evidence(
                 ok = false;
             }
         }
-    }
-    let measured = rows.iter().map(|e| e.records).max().unwrap_or(0);
-    if prof.rows > measured && !policy.extrapolate_rows {
-        notes.push(format!(
-            "{} rows, largest measured dataset has {measured}; extrapolation is off",
-            prof.rows
-        ));
-        ok = false;
     }
     ok
 }
@@ -670,6 +687,43 @@ mod tests {
         let d = select(&sparse, "m", &ev, &p);
         assert!(d.profile.traits.sparse);
         assert_eq!(d.choice, Choice::Json);
+    }
+
+    #[test]
+    fn each_size_is_judged_by_its_own_band() {
+        let p = Policy::default();
+        let at = |records: usize, k: usize, losses: usize| Evidence {
+            records,
+            ..row("m", "ldf", &[], k, 90, 0, losses)
+        };
+        // Passes at 200, fails at 1 000.
+        let ev = vec![at(200, 90, 0), at(1000, 80, 10)];
+        let ldf = |n: usize, ev: &[Evidence], p: &Policy| {
+            matches!(select(&flat(n), "m", ev, p).choice, Choice::Ldf { .. })
+        };
+        assert!(ldf(150, &ev, &p), "150 rows: the 200 band");
+        assert!(ldf(200, &ev, &p), "200 rows: the 200 band");
+        assert!(!ldf(201, &ev, &p), "201 rows: the 1 000 band");
+        assert!(!ldf(1000, &ev, &p));
+        assert!(!ldf(1001, &ev, &p), "beyond the largest band");
+        // Fails at 200, passes at 1 000.
+        let ev = vec![at(200, 80, 10), at(1000, 90, 0)];
+        assert!(!ldf(150, &ev, &p));
+        assert!(ldf(600, &ev, &p));
+        let d = select(&flat(600), "m", &ev, &p);
+        let ldf_notes = &d.verdicts[1].notes;
+        assert!(
+            ldf_notes
+                .iter()
+                .any(|n| n.contains("judged at 1000 records")),
+            "{ldf_notes:?}"
+        );
+        // With extrapolation the largest band judges larger inputs.
+        let loose = Policy {
+            extrapolate_rows: true,
+            ..p
+        };
+        assert!(ldf(1500, &ev, &loose));
     }
 }
 

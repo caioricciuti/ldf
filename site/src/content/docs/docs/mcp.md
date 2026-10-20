@@ -49,7 +49,8 @@ each with and without hoisted arrays (spec section 7, rule 2a), round-trips
 all four, and uses LDF only when there is measured evidence for this
 exact model on data with the same traits (child tables, JSON cells,
 sparse keys): at least 50 questions, no more than 3 points below JSON, no
-significant loss, no more rows than measured, and at least 5 percent
+significant loss, judged at the smallest measured size at or above the
+input's row count (200 or 1 000 records; nothing larger than measured), and at least 5 percent
 smaller than the JSON in bytes. Anything else stays JSON, and a stderr line
 says why:
 

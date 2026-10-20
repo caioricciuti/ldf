@@ -7,6 +7,16 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
+### Changed
+
+- `ldf-select` judges an input by size band: only evidence at the smallest
+  measured size at or above the input's row count counts (200 or 1 000
+  records today). Before, any failing row withdrew a layout at every size,
+  so the 1 000-record losses also gave JSON to Opus on flat data and to
+  Sonnet on nested and sparse data at 200 rows or fewer; those get LDF
+  again up to 200 rows. Inputs larger than the largest measured size still
+  get JSON.
+
 ### Added
 
 - Claude Code hook: a command containing `LDF_RAW=1` keeps its JSON
