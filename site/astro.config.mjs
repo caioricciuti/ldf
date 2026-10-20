@@ -18,7 +18,7 @@ export default defineConfig({
     starlight({
       title: "LDF",
       description:
-        "Language Data Format: a lossless, line-oriented text encoding of JSON records that language models read for 35 to 45 percent fewer tokens than JSON.",
+        "Language Data Format: a lossless, line-oriented text encoding of JSON records for language models, measured against JSON model by model.",
       logo: { src: "./src/assets/logo.svg", replacesTitle: false },
       favicon: "/favicon.svg",
       // Page views, cookieless, on the self-hosted Umami. The landing page
@@ -73,7 +73,7 @@ export default defineConfig({
         {
           label: "Reference",
           items: [
-            { label: "Specification (v0.1)", slug: "docs/spec" },
+            { label: "Specification (v0.2)", slug: "docs/spec" },
             { label: "Benchmark methodology", slug: "docs/methodology" },
             { label: "Design candidates", slug: "docs/design" },
             { label: "Research notes", slug: "docs/research" },
@@ -81,7 +81,11 @@ export default defineConfig({
         },
         {
           label: "Results",
-          items: [{ label: "Baseline report (October 2026)", slug: "docs/results/baseline" }],
+          items: [
+            { label: "Bash hook in Claude Code (2026-10-20)", slug: "docs/results/hook" },
+            { label: "Stage C: Opus 5.5, held-out (2026-10-19)", slug: "docs/results/stage-c" },
+            { label: "Baseline report (2026-10-17)", slug: "docs/results/baseline" },
+          ],
         },
         {
           label: "Project",

@@ -15,67 +15,95 @@ const tokenRows = [
   ["deep_nesting", "0.80", "1.82", "n/a"],
 ];
 
-const example = `@records order_id:s,customer.id:i,customer.name:s,items:t,total:f,status:s,note:s?
-ORD-000001,4654,Val Thompson,2,715.94,shipped,context compare
-ORD-000002,50,Sol Ritchie,1,2757.03,cancelled,null
-@records.items order_id:s,sku:s,qty:i,price:f
-ORD-000001,E5,3,28.78
-ORD-000001,C3,4,157.4
-ORD-000002,A1,1,2757.03`;
+// `ldf-mcp convert` output for the JSON below, byte for byte. Token counts
+// are `ldf-bench count` (o200k_base) on the LDF and on the JSON in compact
+// form; the JSON is shown wrapped, one record per line.
+const example = `@records id:s,customer.name:s,items:t,total:f,status:s
+ORD-1,Val Thompson,2,715.94,shipped
+ORD-2,Sol Ritchie,1,2757.03,cancelled
+ORD-3,Kim Abara,2,53.78,shipped
+@records.items id:s,sku:s,qty:i,price:f
+ORD-1,E5,3,28.78
+ORD-1,C3,4,157.4
+ORD-2,A1,1,2757.03
+ORD-3,B2,2,12.5
+ORD-3,E5,1,28.78`;
 
-const json = `[{"order_id":"ORD-000001","customer":{"id":4654,"name":"Val Thompson"},
-  "items":[{"sku":"E5","qty":3,"price":28.78},{"sku":"C3","qty":4,"price":157.4}],
-  "total":715.94,"status":"shipped","note":"context compare"},
- {"order_id":"ORD-000002","customer":{"id":50,"name":"Sol Ritchie"},
+const json = `[{"id":"ORD-1","customer":{"name":"Val Thompson"},
+  "items":[{"sku":"E5","qty":3,"price":28.78},
+           {"sku":"C3","qty":4,"price":157.4}],
+  "total":715.94,"status":"shipped"},
+ {"id":"ORD-2","customer":{"name":"Sol Ritchie"},
   "items":[{"sku":"A1","qty":1,"price":2757.03}],
-  "total":2757.03,"status":"cancelled","note":null}]`;
+  "total":2757.03,"status":"cancelled"},
+ {"id":"ORD-3","customer":{"name":"Kim Abara"},
+  "items":[{"sku":"B2","qty":2,"price":12.5},
+           {"sku":"E5","qty":1,"price":28.78}],
+  "total":53.78,"status":"shipped"}]`;
 
-const mcp = `claude mcp add clickhouse -- ldf-mcp clickhouse --url http://127.0.0.1:8123
-claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
+const install = `cargo install ldf-mcp --locked
+ldf-mcp convert data.json > data.ldf`;
+
+// The server commands as any MCP client takes them (Claude Code, Codex CLI,
+// OpenCode, ...); each client has its own way to register a command.
+const mcp = `ldf-mcp proxy -- <any stdio MCP server> [its args]
+ldf-mcp clickhouse --url http://127.0.0.1:8123
+ldf-mcp files --root ./exports`;
+
+const lib = `let text = ldf::encode(&records);   // &[ldf_data::Value]
+let back = ldf::decode(&text)?;      // the same records`;
+
+const hook = `ldf-mcp install claude-code --hooks --apply`;
 ---
 
 <Landing
   title="LDF: tables a language model can read"
-  description="Language Data Format: a lossless, line-oriented text encoding of JSON records that language models read for 35 to 45 percent fewer tokens than JSON. Measured, not assumed."
+  description="Language Data Format: a lossless text encoding of JSON records for language models. Claude Opus 5.5 answers from it as well as from JSON at 57 to 77 percent of JSON's input tokens. Measured, not assumed."
 >
   <section class="hero">
     <div class="container hero-grid">
       <div class="hero-copy" data-reveal>
-        <p class="eyebrow">Language Data Format, v0.1</p>
+        <p class="eyebrow">Spec v0.2 · ldf-mcp 0.5</p>
         <h1 class="h1">Tables a language model can read.</h1>
         <p class="lead">
           LDF turns JSON records into typed tables: one header, one line per record, child tables for
-          nested arrays. Nothing is lost on the way in or out, and a frontier model reads it as well as
-          JSON for 35 to 45 percent fewer tokens.
+          nested arrays. Nothing is lost on the way in or out, and it works with any model that reads
+          text. Measured on Claude, GPT and DeepSeek: on held-out data Claude Opus 5.5 answers from LDF
+          as well as from JSON, at 57 to 77 percent of JSON's input tokens.
         </p>
+        <div class="sample install">
+          <div class="sample-bar"><span>Install, then convert</span><span class="dim">one binary, no runtime</span></div>
+          <pre><code>{install}</code></pre>
+        </div>
         <div class="cta">
-          <a class="btn btn-light" href="/docs/">Read the docs <span class="arrow">→</span></a>
+          <a class="btn btn-light" href="/docs/">Get started <span class="arrow">→</span></a>
           <a class="btn btn-ghost" href={repo}>Source on GitHub</a>
         </div>
-        <ul class="facts">
-          <li><strong>Lossless.</strong> Byte-exact round trip on ten of twelve benchmark datasets; the two sparse ones come back with keys reordered, nothing lost.</li>
-          <li><strong>Typed.</strong> Integers, floats, strings, booleans, JSON cells and child tables, declared once in the header.</li>
-          <li><strong>Measured.</strong> Four models, three sizes, ten formats. The misses are in the report, not hidden.</li>
-        </ul>
       </div>
       <div class="hero-sample" data-reveal>
         <div class="sample">
-          <div class="sample-bar"><span>orders.ldf</span><span class="dim">2 records, 1 child table</span></div>
+          <div class="sample-bar"><span>orders.ldf</span><span class="dim">143 tokens</span></div>
           <pre><code>{example}</code></pre>
         </div>
         <div class="sample faded">
-          <div class="sample-bar"><span>the same data as JSON</span><span class="dim">1.6x the tokens</span></div>
+          <div class="sample-bar"><span>the same data as JSON</span><span class="dim">169 tokens compact</span></div>
           <pre><code>{json}</code></pre>
         </div>
+        <p class="sample-note">Three records, so the headers weigh a lot. Over hundreds of records LDF lands at 0.4 to 0.8 of JSON's tokens, see the numbers below.</p>
       </div>
     </div>
+    <ul class="container facts" data-reveal>
+      <li><strong>Lossless.</strong> Byte-exact round trip on ten of twelve benchmark datasets; the two sparse ones come back with keys reordered, nothing lost.</li>
+      <li><strong>Chosen per model.</strong> LDF goes only to a model measured reading it as well as JSON on that shape of data. Every other model keeps getting JSON.</li>
+      <li><strong>Measured.</strong> Five models, held-out data, sign tests. The misses are in the reports, not hidden.</li>
+    </ul>
   </section>
 
   <section class="section" id="format">
     <div class="container">
       <div class="section-head" data-reveal>
         <p class="eyebrow">The format</p>
-        <h2 class="h2">Seven rules. <span class="soft">That is the whole spec.</span></h2>
+        <h2 class="h2">Eight rules. <span class="soft">That is the whole spec.</span></h2>
         <p class="lead">A document is a sequence of tables. Each table is a header line and rows. Everything else follows from the data.</p>
       </div>
       <div class="rules" data-reveal>
@@ -84,6 +112,7 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
         <div class="rule"><code>,</code> and <code>null</code><p>An empty cell means the key is absent. <code>null</code> means it is present and null. JSON's distinction survives.</p></div>
         <div class="rule"><code>customer.name:s</code><p>Objects with a stable shape flatten into dotted columns. Irregular ones stay as a JSON cell.</p></div>
         <div class="rule"><code>@records.items</code><p>Arrays of objects become a child table joined on the parent's first column. The parent keeps a count.</p></div>
+        <div class="rule"><code>items:[sku,qty]</code><p>New in v0.2, opt-in: an array of flat objects with one key order stays in its row as lists of values, keys once in the header. 17 percent fewer tokens on nested orders.</p></div>
         <div class="rule"><code>~:j?</code><p>Keys present in fewer than half the rows travel in a small per-row object instead of a mostly empty column. Measured to matter for smaller models.</p></div>
         <div class="rule"><code>1.0</code> stays <code>1.0</code><p>Numbers keep their kind and shortest round-trip text. Integers above 2^53 do not get mangled.</p></div>
       </div>
@@ -112,34 +141,48 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
         </table>
       </div>
       <div class="stats" data-reveal>
-        <div class="stat"><span class="stat-n">131 / 150</span><span class="stat-l">Claude Opus 5.5 at 200 records, zero wrong answers in LDF, the same score as every other format. The misses are an output cap on sums.</span></div>
+        <div class="stat"><span class="stat-n">294 / 297</span><span class="stat-l">Claude Opus 5.5 on held-out data, LDF and JSON alike, with LDF at 57 to 77 percent of JSON's input tokens. <a href="/docs/results/stage-c/">Stage C</a></span></div>
         <div class="stat"><span class="stat-n">53 / 53</span><span class="stat-l">GPT-6.1 Sol on LDF at 50 records, zero-shot: the prompt names the format and shows the data, nothing more.</span></div>
-        <div class="stat"><span class="stat-n">17 / 18</span><span class="stat-l">Claude Haiku 5.5 on 200 sparse events after the v0.1 sparse-key rule, JSON's score at 25 percent fewer tokens. Before the rule it was 13.</span></div>
+        <div class="stat"><span class="stat-n">0.56×</span><span class="stat-l">JSON tool output in real agent sessions (headless Claude Code, Haiku 5.5 and Opus 5.5), in provider-reported tokens, no answer lost. <a href={`${repo}/tree/main/reports/2026-10-20-hook/ab-opus`}>A/B runs</a></span></div>
       </div>
-      <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the report says so. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
+      <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the reports say so. A model without enough evidence gets JSON. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
     </div>
   </section>
 
-  <section class="section" id="mcp">
+  <section class="section" id="agents">
     <div class="container">
       <div class="section-head" data-reveal>
-        <p class="eyebrow">The middle man</p>
+        <p class="eyebrow">Where it plugs in</p>
         <h2 class="h2">Nobody has to adopt a format. <span class="soft">Put it between the data and the model.</span></h2>
         <p class="lead">
-          <code>ldf-mcp</code> is an MCP server. In proxy mode it wraps any stdio MCP server you already use,
-          forwards every message, and re-encodes JSON tool results as LDF when that is shorter. The model
-          keeps calling the same tools and receives cheaper data. In ClickHouse mode it is the server:
-          read-only SQL over the HTTP interface, rows returned as LDF.
+          LDF is plain text in a prompt: no SDK, no model support needed. <code>ldf-mcp</code> puts it
+          where data enters the context, and the tools and scripts on the other side keep seeing JSON.
+          Only the model's copy changes, and only when it comes out shorter.
         </p>
       </div>
-      <div class="sample wide" data-reveal>
-        <div class="sample-bar"><span>Claude Code</span><span class="dim">one line per server</span></div>
-        <pre><code>{mcp}</code></pre>
+      <div class="agent-samples" data-reveal>
+        <div class="sample">
+          <div class="sample-bar"><span>Any MCP client</span><span class="dim">wrap a server, or serve ClickHouse and data files</span></div>
+          <pre><code>{mcp}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>Any pipeline or model API</span><span class="dim">json, jsonl, csv, tsv, parquet in; LDF out</span></div>
+          <pre><code>{install}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>Rust</span><span class="dim">the ldf crate</span></div>
+          <pre><code>{lib}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>Claude Code shell output</span><span class="dim">optional hook, reversible</span></div>
+          <pre><code>{hook}</code></pre>
+        </div>
       </div>
       <div class="mcp-points" data-reveal>
-        <div><strong>Primer once.</strong> The initialize result carries a short description of the format, so the model has read it before it sees any data.</div>
-        <div><strong>Only what helps.</strong> Results under 1 KB, error results and non-text blocks pass through untouched.</div>
-        <div><strong>A/B in the same session.</strong> A passthrough flag forwards JSON unchanged, for comparing answers and cost.</div>
+        <div><strong>Per model.</strong> Give it the model id and it checks the measured evidence. No evidence, no conversion.</div>
+        <div><strong>Primer once.</strong> The model gets a short description of the format the first time, then the data.</div>
+        <div><strong>Only what helps.</strong> Small results, errors, partial output and anything not a complete dataset pass through untouched.</div>
+        <div><strong>Tested clients.</strong> Claude Code, Codex CLI and OpenCode, with what each one does and does not pass through <a href="/docs/agents/">in the guide</a>.</div>
       </div>
     </div>
   </section>
@@ -148,11 +191,12 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
     <div class="container">
       <div class="section-head" data-reveal>
         <p class="eyebrow">Status</p>
-        <h2 class="h2">A v0.1 prototype with its evidence attached.</h2>
+        <h2 class="h2">Spec v0.2, ldf-mcp 0.5. <span class="soft">Evidence attached.</span></h2>
         <p class="lead">
-          One Rust workspace: the format, ten baseline formats implemented faithfully (TOON passes its
-          official conformance suite), a benchmark harness, an evaluation harness and the MCP server.
-          Every dependency pinned, no network calls outside the MCP server's own query.
+          The format has been v0.2 since hoisted arrays; the releases after it changed the tools, not the
+          format. One Rust workspace, published on crates.io: the codec, the per-model selector, <code>ldf-mcp</code>,
+          ten baseline formats implemented faithfully (TOON passes its official
+          conformance suite), and the benchmark and evaluation harnesses. Every dependency pinned.
         </p>
         <div class="cta">
           <a class="btn btn-light" href="/docs/format/">The format in five minutes <span class="arrow">→</span></a>
@@ -191,21 +235,50 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
   }
   .facts {
     list-style: none;
-    padding: 0;
-    margin: 2.5rem 0 0;
+    margin-block: clamp(3rem, 6vw, 4.5rem) 0;
     display: grid;
-    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem 2.5rem;
     color: var(--text-2);
     font-size: 0.95rem;
-    max-width: 34rem;
+  }
+  .facts li {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line-2);
   }
   .facts strong {
+    display: block;
     color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .install {
+    margin-top: 2rem;
+    max-width: 34rem;
+  }
+  .install pre {
+    color: var(--mint);
   }
   .hero-sample {
     display: grid;
     gap: 1rem;
     min-width: 0;
+  }
+  .sample-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .agent-samples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .stat-l a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    white-space: nowrap;
   }
   .sample {
     border: 1px solid var(--line-2);
@@ -223,7 +296,8 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
   .sample-bar {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
     padding: 0.6rem 1rem;
     border-bottom: 1px solid var(--line);
     font-family: var(--mono);
@@ -348,6 +422,11 @@ claude mcp add my-data   -- ldf-mcp proxy -- <any stdio MCP server> [its args]`;
     margin-top: 1.5rem;
     color: var(--text-2);
     font-size: 0.93rem;
+  }
+  .mcp-points a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
   }
   .mcp-points strong {
     color: var(--text);
