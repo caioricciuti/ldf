@@ -7,9 +7,145 @@ How LDF sits between a coding agent and its tools, which agent paths it can
 reach today, and how to set it up. Facts about each agent come from its
 official documentation or, where marked, its source code, checked on
 2026-10-19 (Claude Code 2.1.303, Codex CLI rust-v0.163.0, OpenCode
-v1.19.3).
+v1.19.3); the Bash hook facts on 2026-10-20 against Claude Code 2.1.304.
 
-## Five minutes with Claude Code
+## One command: JSON from shell commands, automatically
+
+```bash
+ldf-mcp install claude-code --hooks          # shows the plan, changes nothing
+ldf-mcp install claude-code --hooks --apply  # adds the hook
+```
+
+From the next Claude Code session on, when a Bash command prints a JSON
+dataset (`gh api`, `curl`, `kubectl -o json`, `cat export.json`), the model
+reads it as LDF. Nothing else changes: you, the command and its exit status
+see the same output as before. `ldf-mcp stats` shows what was converted and
+why the rest was not; `ldf-mcp uninstall claude-code --apply` takes it out
+again.
+
+### How it works
+
+`install --hooks` appends three handler groups to `hooks` in your user
+settings (`~/.claude/settings.json`, or `$CLAUDE_CONFIG_DIR/settings.json`),
+all running `ldf-mcp hook claude-code`:
+
+| event | what the hook does |
+|---|---|
+| `PostToolUse`, matcher `Bash` | reads the tool result; if `stdout` is one complete JSON dataset and LDF is shorter, returns `hookSpecificOutput.updatedToolOutput`: the same result object with only `stdout` replaced, plus a short `additionalContext` note saying the command itself still prints JSON (and, once per context, the LDF primer). Otherwise prints nothing |
+| `SessionStart` | records the session's model for the selector; after `/compact` or `/clear` it forgets that the primer was sent |
+| `PostModelSwitch` | records the new model |
+
+Claude Code checks a replacement against the Bash tool's output schema and
+uses the original when it does not match, discards the output of a hook
+that times out (10 seconds here) or exits with an error, and only runs
+`PostToolUse` for commands that succeeded: a non-zero exit goes to
+`PostToolUseFailure`, which cannot replace output. So the worst a broken
+hook can do is nothing. The hook always exits 0, prints either one whole
+JSON reply or nothing, makes no network calls and starts no processes.
+
+The format is chosen per model from measured accuracy (the same selector as
+`--model` on the MCP servers, [Choosing the format per
+model](/docs/mcp/#choosing-the-format-per-model)). The model comes from
+`SessionStart`, then `PostModelSwitch`, then, when Claude Code did not send
+one (`claude -p` does not), the last `"model"` in the session transcript;
+only that id is read and kept. A model without evidence gets JSON. Today
+that means Opus 5.5 and Haiku 5.5 get LDF on the shapes they were measured
+on, Sonnet 5.5 and GPT models get JSON. `install --hooks --model ID` fixes
+the model instead.
+
+A conversion is made only when LDF plus the note (and the primer, the
+first time) is smaller than the JSON, so small outputs early in a session
+stay JSON.
+
+### What is converted and what is not
+
+Converted: Bash stdout that is, as a whole, a JSON array of objects or an
+object holding one (`{"items": [...]}`), at least 1 024 bytes (`--min-bytes`
+on the hook command), compact or pretty.
+
+Left alone, with the reason code `stats` shows:
+
+| case | reason |
+|---|---|
+| plain text, logs, JSON with a line of prose before or after it, JSONL, truncated JSON | `not_json` |
+| JSON that is not rows of objects (`[1,2,3]`, `{"ok": true}`) | `not_dataset` |
+| under `--min-bytes`, or LDF plus its note not smaller | `small`, `not_shorter` |
+| the selector keeps JSON for this model | `selector` |
+| output over Claude Code's inline limit (30 000 characters by default, `BASH_MAX_OUTPUT_LENGTH`): Claude Code saves it to a file and shows the model a 2 KB preview; the hook sees an incomplete stdout | `persisted` |
+| a non-zero exit Claude Code reported as success (`grep` with no match) | `exit_code` |
+| interrupted, backgrounded, or image output | `interrupted`, `background`, `image` |
+| failed commands | never reach the hook |
+
+Other tools (Read, WebFetch, MCP tools) are not touched by the hook; MCP
+results are covered by `ldf-mcp proxy` below. The two are independent:
+`--hooks` and `--wrap` can be used alone or together.
+
+### Installing next to other hooks
+
+The settings file is parsed and written back with its key order kept;
+other keys and other hooks (an `rtk` or policy hook on `PreToolUse` or
+`PostToolUse`) stay where they are. Before writing, a copy of the file goes
+to the state directory (`settings.json.before-<time>`), and each added group
+is recorded in `installed.json`. Running install again changes nothing.
+`uninstall` removes only groups that are still exactly what install added,
+and leaves anything you edited since alone; settings you changed elsewhere
+in the file survive. An unreadable settings file is refused, unchanged.
+
+Claude Code runs sibling hooks in parallel on the original output and the
+last replacement wins. This hook never returns an unchanged copy, so it
+cannot undo another hook's rewrite; but two hooks that both rewrite Bash
+JSON will race. A `PreToolUse` hook that rewrites the command (rtk turns
+`cat x.json` into `rtk read x.json`) runs first; whatever that command then
+prints is what this hook sees.
+
+### Security and correctness
+
+- stdout is treated as untrusted input: it is parsed, never executed, and
+  input over 16 MiB is not read. A parse failure is a passthrough.
+- The conversion is lossless at the semantic level: the LDF decodes back to
+  the same records, except that keys moved into the sparse `~` object may
+  come back in a different order within a record (`semantic-unordered`,
+  [spec section 7](/docs/spec/)).
+- The model is told in the note that the command prints JSON, so scripts it
+  writes against the command keep parsing JSON. What you see in the
+  terminal transcript is Claude Code's record of the original output.
+- `updatedToolOutput` changes only what the model reads. Telemetry and the
+  transcript record the original (Claude Code documentation).
+- Statistics hold sizes, reason codes, time and the model id; never the
+  command, its arguments, the output or the session id.
+- Per-session state is two small files per session under
+  `claude-code/sessions` in the state directory (the model id, and an empty
+  marker for the primer), removed after 30 days.
+
+### Measured
+
+`python3 -I eval/bench_hook.py` runs the release binary the way Claude
+Code does, one process per call, on the first 20 and 100 records of the
+twelve medium fixtures, printed compact and pretty
+(`reports/2026-10-20-hook/`, Apple M2 Pro). Tokens are exact o200k counts of
+what the model reads, note and primer included; Claude's tokenizer is not
+public, so no Claude counts are claimed.
+
+| model setting | inputs | inline | converted | o200k after / JSON, converted only | later calls | first call (primer) |
+|---|---:|---:|---:|---|---:|---:|
+| Opus 5.5 | 48 | 40 | 20 | 0.31 to 0.89 | 0.58 | 0.66 |
+| Haiku 5.5 | 48 | 40 | 19 | 0.31 to 0.89 | 0.58 | 0.66 |
+| Sonnet 5.5 | 48 | 40 | 0 | | 1.00 | 1.00 |
+| no selector (`LDF when shorter`) | 48 | 40 | 31 | 0.23 to 0.89 | 0.55 | 0.63 |
+
+Examples (Opus 5.5, later calls): 100 users printed pretty, 7 384 to 2 907
+tokens; 20 rows of a wide table, 7 026 to 2 189; 100 sparse events
+compact, 5 565 to 4 397. Each invocation took 4.4 to 8.9 ms wall time with
+process start (p50), 0.1 to 2.6 ms of it inside the hook.
+
+One real session (`claude -p`, Haiku 5.5, `cat users.json`, 60 records):
+Claude Code's debug log reports "replaced tool output", the model quoted
+the LDF header it received and answered both questions about the data
+correctly. That one run is a check that the path works, not a measurement
+of billed usage: no run with and without the hook has been compared on the
+provider's usage counters yet, so no billing saving is claimed.
+
+## Five minutes with Claude Code: MCP servers
 
 1. Get the binary: download `ldf-mcp` for your platform from the
    [latest release](https://github.com/caioricciuti/ldf/releases) and put it
@@ -94,17 +230,17 @@ control) are listed and left alone; wrap them by hand with the same
 | MCP tool results through `ldf-mcp proxy` | yes; `install claude-code` sets it up | partly: when a result carries `structuredContent`, Codex sends that and ignores the text LDF rewrote (source: `codex-rs/protocol/src/models.rs`); works for servers that return text, including `ldf-mcp files` and `clickhouse` | yes; OpenCode ignores `structuredContent` |
 | `ldf-mcp files` / `clickhouse` as a server | yes | yes | yes |
 | Configuration | `claude mcp add-json` / `remove`, scopes local, user, project | `~/.codex/config.toml` `[mcp_servers.NAME]` `command`, `args`; `codex mcp add NAME -- CMD` | `opencode.json` `"mcp": {"NAME": {"type": "local", "command": [...]}}` |
-| A hook that can replace tool output | yes: `PostToolUse` returning `hookSpecificOutput.updatedToolOutput`, for MCP and built-in tools; built-in output must keep the tool's shape (Bash: `stdout`, `stderr`, `interrupted`, `isImage`) or it is ignored | no: `updatedMCPToolOutput` is documented as not supported yet; only `decision: "block"` replaces output, as blocked feedback capped near 2 500 tokens | yes: plugin hook `tool.execute.after`; for MCP tools the runtime object is the raw result (change `content[i].text`), for built-in tools `output.output` |
-| Shell command output (curl, psql, `cat x.json`) | possible through the hook above (not built yet) | only by rewriting the command before it runs (`PreToolUse` `updatedInput`), which changes exit codes and stderr; not recommended | possible through the plugin hook (not built yet) |
+| A hook that can replace tool output | yes: `PostToolUse` returning `hookSpecificOutput.updatedToolOutput`, for MCP and built-in tools; a built-in replacement must pass the tool's output schema or it is ignored. Bash's result carries more than the documented `stdout`, `stderr`, `interrupted`, `isImage` (also `returnCodeInterpretation`, `noOutputExpected`, `backgroundTaskId`, `persistedOutputPath` and others, source), so the hook copies it whole and replaces `stdout` | no: `updatedMCPToolOutput` is documented as not supported yet; only `decision: "block"` replaces output, as blocked feedback capped near 2 500 tokens | yes: plugin hook `tool.execute.after`; for MCP tools the runtime object is the raw result (change `content[i].text`), for built-in tools `output.output` |
+| Shell command output (curl, psql, `cat x.json`) | yes: `install claude-code --hooks` (JSON datasets in Bash stdout, inline size only) | only by rewriting the command before it runs (`PreToolUse` `updatedInput`), which changes exit codes and stderr; not recommended | possible through the plugin hook (not built yet) |
 | Built-in file read | the hook fires, but Read's output shape is not documented and a wrong shape is silently ignored: needs a test before use | no | possible through the plugin hook (not built yet) |
 | Web fetch | as for file read | no (hooks do not fire on hosted tools) | possible through the plugin hook (not built yet) |
-| Active model visible to LDF | no: pass `--model` at install | undocumented: `tools/call` `_meta` carries `x-codex-turn-metadata.model` (source) | no for MCP servers; plugins can look it up |
+| Active model visible to LDF | MCP: no, pass `--model` at install. Hooks: `SessionStart` input carries `model` (not in `-p`), `PostModelSwitch` carries `to_model`, the transcript names it | undocumented: `tools/call` `_meta` carries `x-codex-turn-metadata.model` (source) | no for MCP servers; plugins can look it up |
 | Real usage counters | OpenTelemetry `claude_code.token.usage`, status line JSON | `TokenCount` events in `~/.codex/sessions/` | `opencode stats`, `opencode export` |
 
 No integration intercepts every tool call. Through MCP, LDF sees only the
-MCP servers it fronts or serves. Covering shell output, file reads and web
-fetches needs each agent's hook or plugin system, which Codex does not offer
-for output today.
+MCP servers it fronts or serves; the Claude Code hook covers Bash. File
+reads and web fetches need each agent's hook or plugin system, which Codex
+does not offer for output today.
 
 ## Codex CLI and OpenCode by hand
 
@@ -161,12 +297,18 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
 
 ## Limitations
 
-- Only MCP traffic is covered. Shell output, file reads and web fetches
-  reach the model unchanged.
+- Claude Code: MCP results (proxy) and Bash stdout (hook) are covered. File
+  reads, web fetches and Bash output over the inline limit reach the model
+  unchanged. Other agents: MCP only.
+- The hook converts only output Claude Code shows inline (30 000
+  characters by default). Larger output is saved to a file by Claude Code
+  before the hook runs and stays JSON; the model later reads that file
+  with Read, which the hook does not touch.
 - `install` supports Claude Code only, wraps only stdio servers without env
   or credential-like arguments, and does not touch `.mcp.json`.
 - Claude Code does not tell an MCP server which model is in use; `--model`
-  is fixed at install and does not follow `/model`.
+  is fixed at install and does not follow `/model`. The hook does follow
+  it.
 - Codex reads `structuredContent` when present, so a proxied server that
   sends it gets no saving there.
 - Release binaries cover macOS and Linux (arm64, x86-64) and Windows
@@ -175,16 +317,15 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
   your PATH.
 - The token estimate in `stats` is bytes / 4; exact counts need a tokenizer
   (`ldf-bench count`) and real usage needs the agent's own counters.
-- No model has been run through these integrations yet, so there is no
-  measured end-to-end usage saving; the eval results in `reports/`
-  measure accuracy and tokens on prepared prompts, not agent sessions.
+- One headless Claude Code session has run through the hook (a check that
+  it works, not a measurement); there is no measured end-to-end usage
+  saving yet. The eval results in `reports/` measure accuracy and tokens
+  on prepared prompts, not agent sessions.
 
 ## Next milestone
 
-1. A Claude Code `PostToolUse` hook (`ldf-mcp hook claude-code`) for Bash
-   output that is a JSON dataset, keeping Bash's output shape, after a
-   test of what Claude Code accepts; then Read and WebFetch if their shapes
-   can be pinned.
+1. Read and WebFetch through the same hook, if their output shapes can be
+   pinned against the binary as Bash's was.
 2. `install codex` and `install opencode` writing the entries above, with
    the same record and rollback, and an OpenCode plugin file with no
    dependencies for built-in tool output.

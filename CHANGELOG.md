@@ -7,7 +7,27 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
-Nothing yet.
+Automatic Bash output for Claude Code. The specification stays v0.2.
+
+### Added
+
+- `ldf-mcp hook claude-code`: a Claude Code command hook. On `PostToolUse`
+  for Bash it replaces `stdout` with LDF when stdout is one complete JSON
+  dataset and LDF plus its note is smaller (and the selector agrees for the
+  session's model), keeping every other field of the tool result; in every
+  other case it prints nothing, so the original stays. `SessionStart` and
+  `PostModelSwitch` record the model (with the transcript as fallback), and
+  the LDF primer goes once per context. Always exits 0; no network, no
+  child processes; input over 16 MiB is not read.
+- `ldf-mcp install claude-code --hooks [--apply]` adds it to the user
+  `settings.json` with key order and other hooks kept, a copy of the file in
+  the state directory, and a record in `installed.json`; `uninstall` removes
+  only the groups that are still as installed. Independent of `--wrap`.
+- `doctor` reports whether the hook is installed; `stats` labels the hook's
+  reason codes (`persisted`, `exit_code`, `interrupted`, `background`,
+  `image`, `bad_input`, `too_large`).
+- `eval/bench_hook.py` and `reports/2026-10-20-hook/`: exact o200k counts and
+  per-call timing of the hook on the medium fixtures.
 
 ## 0.4.0 (2026-10-20)
 
