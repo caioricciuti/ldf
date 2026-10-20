@@ -7,7 +7,13 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
-Automatic Bash output for Claude Code. The specification stays v0.2.
+Nothing yet.
+
+## 0.5.0 (2026-10-20)
+
+Automatic Bash output for Claude Code: `ldf-mcp install claude-code --hooks
+--apply`, and JSON datasets that shell commands print reach the model as
+LDF. The specification stays v0.2.
 
 ### Added
 
@@ -30,9 +36,10 @@ Automatic Bash output for Claude Code. The specification stays v0.2.
   per-call timing of the hook on the medium fixtures.
 - `eval/ab_hook.py` (spend-gated) and `reports/2026-10-20-hook/ab-haiku/`:
   the same headless Claude Code task with and without the hook, on
-  provider-reported usage. Haiku 5.5, 36 runs: tool results cost 0.56 of
-  the JSON tokens overall (0.41 to 0.65 where converted), 36 of 36 answers
-  correct in both arms.
+  provider-reported usage. Haiku 5.5 and Opus 5.5, 36 runs each: tool
+  results cost 0.56 of the JSON tokens overall on both (0.41 to 0.65 where
+  converted), 36 of 36 answers correct in both arms
+  (`reports/2026-10-20-hook/ab-haiku/`, `ab-opus/`).
 
 ## 0.4.0 (2026-10-20)
 
