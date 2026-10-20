@@ -138,12 +138,29 @@ tokens; 20 rows of a wide table, 7 026 to 2 189; 100 sparse events
 compact, 5 565 to 4 397. Each invocation took 4.4 to 8.9 ms wall time with
 process start (p50), 0.1 to 2.6 ms of it inside the hook.
 
-One real session (`claude -p`, Haiku 5.5, `cat users.json`, 60 records):
-Claude Code's debug log reports "replaced tool output", the model quoted
-the LDF header it received and answered both questions about the data
-correctly. That one run is a check that the path works, not a measurement
-of billed usage: no run with and without the hook has been compared on the
-provider's usage counters yet, so no billing saving is claimed.
+On provider-reported usage, `python3 -I eval/ab_hook.py` runs the same
+headless Claude Code task with and without the hook: `cat data.json`, then
+two questions with answers computed from the data, three repeats per case
+(`reports/2026-10-20-hook/ab-haiku/`, Haiku 5.5, 36 runs, $0.076). "Added"
+is what the tool call put into the next request's prompt, in Claude tokens
+as Anthropic reported them (tool result, note and primer included):
+
+| case | JSON bytes | added, JSON | added, hook | hook / JSON | correct, JSON | correct, hook |
+|---|---:|---:|---:|---:|---:|---:|
+| 100 users, pretty | 19 206 | 9 478 | 4 580 | 0.48 | 6/6 | 6/6 |
+| 100 log lines, pretty | 19 353 | 9 114 | 4 622 | 0.51 | 6/6 | 6/6 |
+| 20 wide rows, pretty | 15 810 | 8 055 | 3 324 | 0.41 | 6/6 | 6/6 |
+| 100 sparse events, pretty | 20 927 | 10 367 | 6 452 | 0.62 | 6/6 | 6/6 |
+| 100 unicode rows, compact | 12 950 | 6 810 | 4 395 | 0.65 | 6/6 | 6/6 |
+| 20 nested orders (selector keeps JSON) | 5 998 | 3 083 | 3 083 | 1.00 | 6/6 | 6/6 |
+| all | | 46 907 | 26 456 | 0.56 | 36/36 | 36/36 |
+
+These are the first billed-usage numbers: on these tasks the hook cut the
+tokens a tool result costs by 35 to 59 percent, with no answer lost. The
+per-run cost was lower with the hook too, but run order affects prompt
+caching (the JSON arm ran first), so the cost column is not a clean
+comparison; the token columns are. One model, short tasks, small n: it
+shows the mechanism pays, not a general saving for every session.
 
 ## Five minutes with Claude Code: MCP servers
 
@@ -317,9 +334,8 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
   your PATH.
 - The token estimate in `stats` is bytes / 4; exact counts need a tokenizer
   (`ldf-bench count`) and real usage needs the agent's own counters.
-- One headless Claude Code session has run through the hook (a check that
-  it works, not a measurement); there is no measured end-to-end usage
-  saving yet. The eval results in `reports/` measure accuracy and tokens
+- The usage A/B covers Haiku 5.5 on six short tasks; Opus and long
+  sessions are not measured yet. The eval results in `reports/` measure accuracy and tokens
   on prepared prompts, not agent sessions.
 
 ## Next milestone

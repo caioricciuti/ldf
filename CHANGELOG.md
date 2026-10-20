@@ -28,6 +28,11 @@ Automatic Bash output for Claude Code. The specification stays v0.2.
   `image`, `bad_input`, `too_large`).
 - `eval/bench_hook.py` and `reports/2026-10-20-hook/`: exact o200k counts and
   per-call timing of the hook on the medium fixtures.
+- `eval/ab_hook.py` (spend-gated) and `reports/2026-10-20-hook/ab-haiku/`:
+  the same headless Claude Code task with and without the hook, on
+  provider-reported usage. Haiku 5.5, 36 runs: tool results cost 0.56 of
+  the JSON tokens overall (0.41 to 0.65 where converted), 36 of 36 answers
+  correct in both arms.
 
 ## 0.4.0 (2026-10-20)
 
