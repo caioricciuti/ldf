@@ -13,7 +13,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.5.1"
+version = "0.5.2"
 edition = "2024"
 rust-version = "1.98"
 license = "MIT OR Apache-2.0"
@@ -22,14 +22,14 @@ repository = "https://github.com/caioricciuti/ldf"
 # Every external dependency is pinned to an exact version. Transitive versions
 # are pinned by Cargo.lock, which is committed. See AGENTS.md for the policy.
 [workspace.dependencies]
-ldf-data = { path = "crates/ldf-data", version = "0.5.1" }
+ldf-data = { path = "crates/ldf-data", version = "0.5.2" }
 ldf-fixtures = { path = "crates/ldf-fixtures" }
 ldf-formats = { path = "crates/ldf-formats" }
 ldf-eval = { path = "crates/ldf-eval" }
 ldf-bench = { path = "crates/ldf-bench" }
 ldf-discover = { path = "crates/ldf-discover" }
-ldf = { path = "crates/ldf", version = "0.5.1" }
-ldf-select = { path = "crates/ldf-select", version = "0.5.1" }
+ldf = { path = "crates/ldf", version = "0.5.2" }
+ldf-select = { path = "crates/ldf-select", version = "0.5.2" }
 
 serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }
