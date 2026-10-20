@@ -53,6 +53,8 @@ pub enum Kept {
     Selector(String),
     /// The result is flagged `isError`: never touched.
     IsError,
+    /// A reason only the Claude Code hook has (`crate::hook`), as its code.
+    Hook(&'static str),
 }
 
 impl Kept {
@@ -64,6 +66,7 @@ impl Kept {
             Kept::NotShorter => "not_shorter",
             Kept::Selector(_) => "selector",
             Kept::IsError => "is_error",
+            Kept::Hook(code) => code,
         }
     }
 }

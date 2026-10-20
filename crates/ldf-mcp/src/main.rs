@@ -34,15 +34,20 @@ fn usage() -> ExitCode {
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
          \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
          \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
+         \x20 ldf-mcp hook claude-code [--min-bytes N] [--model ID [--evidence FILE]] [--no-stats]\n\
+         \x20     a Claude Code command hook (PostToolUse on Bash, SessionStart, PostModelSwitch): JSON datasets\n\
+         \x20     in Bash stdout reach the model as LDF when shorter and the selector agrees for the session's\n\
+         \x20     model; anything else prints nothing, which keeps the original output. Always exits 0\n\
          \x20 ldf-mcp stats [--days N] [--json] [--file PATH]\n\
          \x20     summarize the local statistics: responses, LDF or JSON and why, bytes, conversion time;\n\
          \x20     the file is LDF_STATS_FILE or ldf/events.jsonl under XDG_STATE_HOME, ~/.local/state or LOCALAPPDATA\n\
-         \x20 ldf-mcp install claude-code [--wrap NAME]... [--wrap-all] [--add-files DIR [--files-name NAME] [--scope local|user]]\n\
-         \x20                             [--model ID] [--apply]\n\
-         \x20     put stdio MCP servers of Claude Code behind ldf-mcp proxy, or add a files server, through\n\
+         \x20 ldf-mcp install claude-code [--hooks] [--wrap NAME]... [--wrap-all] [--add-files DIR [--files-name NAME]\n\
+         \x20                             [--scope local|user]] [--model ID] [--apply]\n\
+         \x20     --hooks adds the Bash output hook (ldf-mcp hook claude-code) to Claude Code's user settings.json;\n\
+         \x20     --wrap and --add-files put stdio MCP servers behind ldf-mcp proxy, or add a files server, through\n\
          \x20     `claude mcp`; without --apply only prints the plan. Every change is recorded for uninstall\n\
          \x20 ldf-mcp uninstall claude-code [--apply]\n\
-         \x20     restore what install changed, where the entry is still the one install wrote\n\
+         \x20     restore what install changed (servers and hooks), where it is still what install wrote\n\
          \x20 ldf-mcp doctor\n\
          \x20     this binary, the statistics file, agents on PATH, Claude Code servers and their state\n\
          \x20 ldf-mcp --version\n\
@@ -60,6 +65,7 @@ fn main() -> ExitCode {
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("files") => run_files(&args[1..]),
         Some("stats") => run_stats(&args[1..]),
+        Some("hook") => run_hook(&args[1..]),
         Some("install") => run_install(&args[1..]),
         Some("uninstall") => run_uninstall(&args[1..]),
         Some("doctor") => match install::Env::detect() {
@@ -364,6 +370,7 @@ fn run_install(args: &[String]) -> ExitCode {
     while let Some(arg) = it.next() {
         match arg.as_str() {
             "--apply" => a.apply = true,
+            "--hooks" => a.hooks = true,
             "--wrap-all" => a.wrap_all = true,
             "--wrap" | "--add-files" | "--files-name" | "--model" | "--scope" => {
                 let Some(v) = it.next() else { return usage() };
@@ -382,7 +389,21 @@ fn run_install(args: &[String]) -> ExitCode {
             _ => return usage(),
         }
     }
-    match install::Env::detect().and_then(|env| install::install(&env, &a)) {
+    let mcp = !a.wrap.is_empty() || a.wrap_all || a.add_files.is_some();
+    let run = |env: install::Env| -> Result<String, String> {
+        let mut text = String::new();
+        if a.hooks {
+            text.push_str(&install::install_hooks(&env, &a)?);
+        }
+        if mcp || !a.hooks {
+            if a.hooks {
+                text.push('\n');
+            }
+            text.push_str(&install::install(&env, &a)?);
+        }
+        Ok(text)
+    };
+    match install::Env::detect().and_then(run) {
         Ok(text) => {
             print!("{text}");
             ExitCode::SUCCESS
@@ -404,6 +425,58 @@ fn run_uninstall(args: &[String]) -> ExitCode {
         }
         Err(e) => fail("ldf-mcp uninstall", e),
     }
+}
+
+fn run_hook(args: &[String]) -> ExitCode {
+    // Exit 2 would put stderr in front of the model on PostToolUse; a
+    // usage error here exits 1, which Claude Code shows to the user only.
+    let bad = || {
+        eprintln!(
+            "ldf-mcp hook: usage: ldf-mcp hook claude-code [--min-bytes N] [--model ID [--evidence FILE]] [--no-stats]"
+        );
+        ExitCode::from(1)
+    };
+    if args.first().map(String::as_str) != Some("claude-code") {
+        return bad();
+    }
+    let mut cfg = ldf_mcp::hook::Config {
+        min_bytes: 1024,
+        model: None,
+        evidence: None,
+        sessions: stats::ldf_state_dir().map(|d| d.join("claude-code").join("sessions")),
+    };
+    let mut sel = SelectFlags::default();
+    let mut st = StatsFlags::default();
+    let mut it = args[1..].iter();
+    while let Some(a) = it.next() {
+        if st.take(a, &mut it) {
+            continue;
+        }
+        match a.as_str() {
+            "--model" | "--evidence" => match it.next() {
+                Some(v) => sel.set(a, v),
+                None => return bad(),
+            },
+            "--min-bytes" => match it.next().and_then(|v| v.parse().ok()) {
+                Some(n) => cfg.min_bytes = n,
+                None => return bad(),
+            },
+            _ => return bad(),
+        }
+    }
+    if st.bad {
+        return bad();
+    }
+    if let Some(s) = sel.build().unwrap_or(None) {
+        cfg.model = Some(s.model);
+        cfg.evidence = Some(s.evidence);
+    }
+    let stats_path = if st.off { None } else { stats::default_path() };
+    // Whatever happens, Claude Code gets either a whole reply or nothing,
+    // and nothing keeps the original tool output.
+    std::panic::set_hook(Box::new(|_| {}));
+    let _ = std::panic::catch_unwind(|| ldf_mcp::hook::run(&cfg, stats_path));
+    ExitCode::SUCCESS
 }
 
 fn fail(who: &str, e: String) -> ExitCode {
