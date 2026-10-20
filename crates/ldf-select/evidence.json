@@ -4241,6 +4241,39 @@
   "mean_output_tokens": 173
  },
  {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/flat_users",
+  "dataset": "flat_users",
+  "records": 200,
+  "traits": [],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "format": "ldf",
+  "n": 65,
+  "k": 64,
+  "json_k": 62,
+  "wins": 2,
+  "losses": 0,
+  "p": 0.5,
+  "tokens_ratio": 0.608,
+  "mean_latency_ms": 2426,
+  "json_mean_latency_ms": 2273,
+  "mean_output_tokens": 173
+ },
+ {
   "model": "claude-opus-5-5",
   "run": "stage-c10/mixed_types",
   "dataset": "mixed_types",
@@ -4269,6 +4302,36 @@
   "mean_latency_ms": 1795,
   "json_mean_latency_ms": 1643,
   "mean_output_tokens": 9
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/mixed_types",
+  "dataset": "mixed_types",
+  "records": 200,
+  "traits": [
+   "json_cells",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5,
+   0.75
+  ],
+  "hoist_thresholds": [
+   0.5,
+   0.75
+  ],
+  "format": "ldf",
+  "n": 57,
+  "k": 57,
+  "json_k": 57,
+  "wins": 0,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.73,
+  "mean_latency_ms": 1637,
+  "json_mean_latency_ms": 1557,
+  "mean_output_tokens": 13
  },
  {
   "model": "claude-opus-5-5",
@@ -4354,6 +4417,89 @@
   "mean_output_tokens": 184
  },
  {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5
+  ],
+  "hoist_thresholds": [],
+  "format": "ldf",
+  "n": 95,
+  "k": 80,
+  "json_k": 87,
+  "wins": 3,
+  "losses": 10,
+  "p": 0.0923,
+  "tokens_ratio": 0.647,
+  "mean_latency_ms": 2731,
+  "json_mean_latency_ms": 2797,
+  "mean_output_tokens": 233
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5
+  ],
+  "format": "ldf-hoisted",
+  "n": 95,
+  "k": 81,
+  "json_k": 87,
+  "wins": 1,
+  "losses": 7,
+  "p": 0.0703,
+  "tokens_ratio": 0.552,
+  "mean_latency_ms": 2996,
+  "json_mean_latency_ms": 2797,
+  "mean_output_tokens": 249
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [],
+  "format": "ldf-s75",
+  "n": 95,
+  "k": 85,
+  "json_k": 87,
+  "wins": 5,
+  "losses": 7,
+  "p": 0.7744,
+  "tokens_ratio": 0.681,
+  "mean_latency_ms": 2675,
+  "json_mean_latency_ms": 2797,
+  "mean_output_tokens": 236
+ },
+ {
   "model": "claude-opus-5-5",
   "run": "stage-c10/sparse_events",
   "dataset": "sparse_events",
@@ -4408,5 +4554,61 @@
   "mean_latency_ms": 2315,
   "json_mean_latency_ms": 2247,
   "mean_output_tokens": 111
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5
+  ],
+  "hoist_thresholds": [
+   0.5
+  ],
+  "format": "ldf",
+  "n": 80,
+  "k": 77,
+  "json_k": 78,
+  "wins": 1,
+  "losses": 2,
+  "p": 1.0,
+  "tokens_ratio": 0.801,
+  "mean_latency_ms": 2274,
+  "json_mean_latency_ms": 2401,
+  "mean_output_tokens": 135
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "stage-c10/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.75,
+   1.0
+  ],
+  "format": "ldf-s75",
+  "n": 80,
+  "k": 75,
+  "json_k": 78,
+  "wins": 0,
+  "losses": 3,
+  "p": 0.25,
+  "tokens_ratio": 0.888,
+  "mean_latency_ms": 2415,
+  "json_mean_latency_ms": 2401,
+  "mean_output_tokens": 130
  }
 ]

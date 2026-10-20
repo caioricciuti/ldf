@@ -202,3 +202,12 @@ tiktoken-rs, yaml-rust2 (decode only, default features off), criterion
   exit 2 on PostToolUse shows stderr to the model, so the hook's usage
   error exits 1. The primer (about 440 o200k) makes small outputs not pay
   on the first conversion of a session.
+- Stage C on Sonnet 5.5 (2026-10-20, `reports/2026-10-20-stage-c-sonnet/`,
+  same 864 prompts as Opus, $4.41): LDF v0.1 ties or beats JSON on flat,
+  sparse and mixed-type data at 57 to 77 percent of its Claude tokens, so
+  the selector now gives Sonnet LDF there. Nested orders: v0.1 is 7.4
+  points below JSON (+3 / -10, p=0.09), but 8 of its misses are bare ids
+  (`compare`, LDF shows strings unquoted); with bare counted right it is 88
+  against 87. Threshold 0.75 passes (-2.1) and is what Sonnet gets on
+  nested data with sparse keys; hoisted fails (-6.3, `child_aggregate` 0 of
+  10).
