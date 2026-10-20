@@ -34,7 +34,7 @@ fn usage() -> ExitCode {
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
          \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
          \x20     --block N streams FILE through the block encoder N records at a time (bounded memory)\n\
-         \x20 ldf-mcp hook claude-code [--min-bytes N] [--model ID [--evidence FILE]] [--no-stats]\n\
+         \x20 ldf-mcp hook claude-code [--min-bytes N] [--model ID] [--evidence FILE] [--no-stats]\n\
          \x20     a Claude Code command hook (PostToolUse on Bash, SessionStart, PostModelSwitch): JSON datasets\n\
          \x20     in Bash stdout reach the model as LDF when shorter and the selector agrees for the session's\n\
          \x20     model; anything else prints nothing, which keeps the original output. Always exits 0\n\
@@ -432,7 +432,7 @@ fn run_hook(args: &[String]) -> ExitCode {
     // usage error here exits 1, which Claude Code shows to the user only.
     let bad = || {
         eprintln!(
-            "ldf-mcp hook: usage: ldf-mcp hook claude-code [--min-bytes N] [--model ID [--evidence FILE]] [--no-stats]"
+            "ldf-mcp hook: usage: ldf-mcp hook claude-code [--min-bytes N] [--model ID] [--evidence FILE] [--no-stats]"
         );
         ExitCode::from(1)
     };
@@ -467,7 +467,12 @@ fn run_hook(args: &[String]) -> ExitCode {
     if st.bad {
         return bad();
     }
-    if let Some(s) = sel.build().unwrap_or(None) {
+    // The hook learns the model from the session, so unlike the server
+    // modes it takes --evidence on its own. A file that cannot be read
+    // leaves the built-in evidence: the hook never fails the tool call.
+    if sel.model.is_none() {
+        cfg.evidence = sel.evidence.as_deref().and_then(|p| load_evidence(p).ok());
+    } else if let Some(s) = sel.build().unwrap_or(None) {
         cfg.model = Some(s.model);
         cfg.evidence = Some(s.evidence);
     }
@@ -482,6 +487,13 @@ fn run_hook(args: &[String]) -> ExitCode {
 fn fail(who: &str, e: String) -> ExitCode {
     eprintln!("{who}: {e}");
     ExitCode::from(1)
+}
+
+fn load_evidence(p: &str) -> Result<Vec<ldf_select::Evidence>, String> {
+    std::fs::read(p)
+        .map_err(|e| e.to_string())
+        .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
+        .map_err(|e| format!("{p}: {e}"))
 }
 
 /// `--model` and `--evidence`, shared by the three server modes.
@@ -506,15 +518,7 @@ impl SelectFlags {
                 None => Ok(None),
             };
         };
-        let evidence = match self.evidence {
-            Some(p) => Some(
-                std::fs::read(&p)
-                    .map_err(|e| e.to_string())
-                    .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
-                    .map_err(|e| format!("{p}: {e}"))?,
-            ),
-            None => None,
-        };
+        let evidence = self.evidence.as_deref().map(load_evidence).transpose()?;
         let sel = Selector::new(&model, evidence);
         if !sel.knows_model() {
             eprintln!(

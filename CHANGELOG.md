@@ -7,7 +7,11 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
-Nothing yet.
+### Fixed
+
+- `ldf-mcp hook claude-code --evidence FILE` without `--model` was ignored
+  silently and the built-in evidence used; the hook now reads the file and
+  keeps taking the model from the session.
 
 ## 0.5.1 (2026-10-20)
 
