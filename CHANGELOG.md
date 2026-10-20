@@ -7,8 +7,26 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
+### Added
+
+- Claude Code hook: a command containing `LDF_RAW=1` keeps its JSON
+  (reason `raw`); the conversion note tells the model so.
+- `install claude-code --hooks` and `doctor` warn when another
+  `PostToolUse` hook matches Bash: Claude Code keeps the last rewrite, so
+  a redacting hook can lose to the LDF rewrite.
+
 ### Fixed
 
+- Claude Code hook in subagents: a subagent's calls carry the parent's
+  session id, so it shared the main thread's primer flag (LDF without the
+  primer in the subagent's context) and model (the selector asked about
+  the wrong model). Each subagent now has its own primer flag, and its
+  model comes from `--model` or its own transcript; otherwise its output
+  passes through (reason `subagent`).
+- Claude Code hook: the primer was marked as sent before the reply was
+  written; it is now marked only after a whole write.
+- `install` and `uninstall` replaced a symlinked `settings.json` with a
+  plain file; they now write through the link.
 - `ldf-mcp hook claude-code --evidence FILE` without `--model` was ignored
   silently and the built-in evidence used; the hook now reads the file and
   keeps taking the model from the session.

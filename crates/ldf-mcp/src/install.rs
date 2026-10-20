@@ -687,8 +687,16 @@ fn read_settings(path: &Path) -> Result<Ordered, String> {
 }
 
 /// Writes through a temporary file and a rename, keeping the file's
-/// permissions.
+/// permissions. A symlinked settings file (dotfiles) is written where the
+/// link points, so the link stays a link.
 fn write_settings(path: &Path, v: &Ordered) -> Result<(), String> {
+    let resolved;
+    let path = if fs::symlink_metadata(path).is_ok_and(|m| m.file_type().is_symlink()) {
+        resolved = fs::canonicalize(path).map_err(|e| format!("{}: {e}", path.display()))?;
+        resolved.as_path()
+    } else {
+        path
+    };
     if let Some(dir) = path.parent() {
         fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
     }
@@ -746,6 +754,44 @@ fn handler_commands(settings: &Ordered, event: &str) -> Vec<String> {
         .collect()
 }
 
+/// Handlers of other `PostToolUse` groups whose matcher can match `Bash`.
+/// Claude Code runs them in parallel with ours on the original output and
+/// keeps the last rewrite, so one that redacts Bash output can be undone.
+fn bash_siblings(settings: &Ordered) -> Vec<String> {
+    let groups = settings
+        .get("hooks")
+        .and_then(|h| h.get("PostToolUse"))
+        .and_then(Ordered::as_array);
+    groups
+        .into_iter()
+        .flatten()
+        .filter(|g| !is_our_group(g))
+        .filter(|g| match g.get("matcher").and_then(Ordered::as_str) {
+            None => true,
+            Some(m) => m.is_empty() || m == "*" || m.contains("Bash") || m.contains(".*"),
+        })
+        .flat_map(|g| {
+            g.get("hooks")
+                .and_then(Ordered::as_array)
+                .into_iter()
+                .flatten()
+        })
+        .map(|h| {
+            h.get("command")
+                .and_then(Ordered::as_str)
+                .map(|c| c.split_whitespace().next().unwrap_or(c).to_string())
+                .unwrap_or_else(|| {
+                    h.get("type")
+                        .and_then(Ordered::as_str)
+                        .unwrap_or("?")
+                        .to_string()
+                })
+        })
+        .collect()
+}
+
+const SIBLING_NOTE: &str = "Claude Code runs PostToolUse hooks in parallel on the original output and keeps the last rewrite: if one of these rewrites Bash output (redaction), the LDF rewrite can undo it";
+
 fn is_our_group(g: &Ordered) -> bool {
     g.get("hooks")
         .and_then(Ordered::as_array)
@@ -794,6 +840,13 @@ pub fn install_hooks(env: &Env, a: &InstallArgs) -> Result<String, String> {
                 "  {event}: keeps {} existing handler(s): {}\n",
                 others.len(),
                 others.join(", ")
+            ));
+        }
+        let siblings = bash_siblings(&settings);
+        if event == "PostToolUse" && !siblings.is_empty() {
+            o.push_str(&format!(
+                "  warning: other PostToolUse hooks match Bash ({}). {SIBLING_NOTE}.\n",
+                siblings.join(", ")
             ));
         }
         plan.push((event, want));
@@ -1144,6 +1197,24 @@ pub fn doctor(env: &Env) -> String {
                 ok(false),
                 p.display()
             )),
+        }
+        let claude = env.project.join(".claude");
+        for f in [
+            p.clone(),
+            claude.join("settings.json"),
+            claude.join("settings.local.json"),
+        ] {
+            let siblings = read_settings(&f)
+                .map(|s| bash_siblings(&s))
+                .unwrap_or_default();
+            if !siblings.is_empty() {
+                o.push_str(&format!(
+                    "{}other PostToolUse hooks match Bash in {}: {}\n      {SIBLING_NOTE}\n",
+                    ok(false),
+                    f.display(),
+                    siblings.join(", ")
+                ));
+            }
         }
     }
     if let Some(m) = &env.manifest {

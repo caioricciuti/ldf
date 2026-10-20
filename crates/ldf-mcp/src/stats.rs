@@ -325,6 +325,8 @@ fn reason_text(code: &str) -> &str {
         "interrupted" => "Bash command interrupted",
         "image" => "Bash output is an image",
         "background" => "Bash command moved to the background",
+        "raw" => "LDF_RAW=1 in the command",
+        "subagent" => "subagent whose model the hook cannot tell",
         "bad_input" => "hook input not understood",
         "too_large" => "hook input over 16 MiB",
         other => other,

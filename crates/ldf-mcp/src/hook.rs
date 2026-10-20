@@ -24,8 +24,19 @@
 //! no output, which is the original result. It makes no network calls and
 //! starts no processes.
 //!
-//! Per-session state is two small files under `claude-code/sessions` in
-//! [`crate::stats::ldf_state_dir`]: `<id>.model` and `<id>.primed`.
+//! A subagent's tool calls carry the parent's `session_id` plus an
+//! `agent_id`. The subagent has its own context and may run another model,
+//! so it gets its own primer flag, and its model comes from `--model` or its
+//! own transcript, never from the main thread; when neither names it, its
+//! output passes through.
+//!
+//! A command that contains `LDF_RAW=1` (`LDF_RAW=1 gh api ...`) is left
+//! alone, for when the exact JSON text is needed.
+//!
+//! Per-session state is small files under `claude-code/sessions` in
+//! [`crate::stats::ldf_state_dir`]: `<id>.model`, `<id>.primed` and
+//! `<id>.<agent_id>.primed`. A primer flag is written only after the reply
+//! carrying the primer was written whole.
 
 use std::fs;
 use std::io::Read;
@@ -62,6 +73,19 @@ pub struct Outcome {
     pub event: Option<(usize, usize, Option<Kept>)>,
     /// The model the selector was asked about, for the statistics.
     pub model: Option<String>,
+    /// The primer flag to create once `output` has been written.
+    pub primes: Option<PathBuf>,
+}
+
+impl Outcome {
+    /// Records that the primer in `output` was delivered.
+    pub fn delivered(&self) {
+        if let Some(p) = &self.primes
+            && p.parent().is_some_and(|d| fs::create_dir_all(d).is_ok())
+        {
+            let _ = fs::write(p, b"");
+        }
+    }
 }
 
 /// Runs one hook invocation on `input`, the JSON Claude Code wrote to
@@ -71,18 +95,20 @@ pub fn handle(input: &[u8], cfg: &Config) -> Outcome {
         return Outcome {
             output: None,
             event: Some((input.len(), input.len(), Some(Kept::Hook("bad_input")))),
-            model: None,
+            ..Outcome::default()
         };
     };
     let session = ev
         .get("session_id")
         .and_then(Json::as_str)
         .filter(|s| valid_id(s));
+    // A subagent id that cannot be used in a path still marks a subagent.
+    let agent = ev.get("agent_id").and_then(Json::as_str);
     let files = cfg
         .sessions
         .as_deref()
         .zip(session)
-        .map(|(dir, id)| SessionFiles::new(dir, id));
+        .map(|(dir, id)| SessionFiles::new(dir, id, agent.filter(|a| valid_id(a))));
     match ev.get("hook_event_name").and_then(Json::as_str) {
         Some("SessionStart") => {
             if let Some(f) = &files {
@@ -100,7 +126,7 @@ pub fn handle(input: &[u8], cfg: &Config) -> Outcome {
             Outcome::default()
         }
         Some("PostToolUse") if ev.get("tool_name").and_then(Json::as_str) == Some("Bash") => {
-            post_bash(&ev, cfg, files.as_ref())
+            post_bash(&ev, cfg, files.as_ref(), session, agent)
         }
         _ => Outcome::default(),
     }
@@ -110,6 +136,8 @@ fn post_bash(
     ev: &serde_json::Map<String, Json>,
     cfg: &Config,
     files: Option<&SessionFiles>,
+    session: Option<&str>,
+    agent: Option<&str>,
 ) -> Outcome {
     let Some(resp) = ev.get("tool_response").and_then(Json::as_object) else {
         return kept(0, "bad_input");
@@ -138,22 +166,42 @@ fn post_bash(
     if set("returnCodeInterpretation") {
         return kept(n, "exit_code");
     }
-    let model = cfg
-        .model
-        .clone()
-        .or_else(|| files.and_then(SessionFiles::model))
-        .or_else(|| {
-            // `claude -p` sends SessionStart without a model; the
-            // transcript names it on every assistant line.
-            let m = ev
-                .get("transcript_path")
-                .and_then(Json::as_str)
-                .and_then(|p| transcript_model(Path::new(p)))?;
-            if let Some(f) = files {
-                f.set_model(&m);
-            }
-            Some(m)
+    let command = ev
+        .get("tool_input")
+        .and_then(|t| t.get("command"))
+        .and_then(Json::as_str);
+    if command.is_some_and(|c| c.contains("LDF_RAW=1")) {
+        return kept(n, "raw");
+    }
+    let transcript = ev
+        .get("transcript_path")
+        .and_then(Json::as_str)
+        .map(Path::new);
+    let model = if let Some(agent) = agent {
+        // Without a usable id there is no flag of its own to keep.
+        let usable = valid_id(agent) && session.is_some();
+        let m = cfg.model.clone().filter(|_| usable).or_else(|| {
+            let (t, s) = transcript.zip(session).filter(|_| usable)?;
+            transcript_model(&agent_transcript(t, s, agent))
         });
+        if m.is_none() {
+            return kept(n, "subagent");
+        }
+        m
+    } else {
+        cfg.model
+            .clone()
+            .or_else(|| files.and_then(SessionFiles::model))
+            .or_else(|| {
+                // `claude -p` sends SessionStart without a model; the
+                // transcript names it on every assistant line.
+                let m = transcript.and_then(transcript_model)?;
+                if let Some(f) = files {
+                    f.set_model(&m);
+                }
+                Some(m)
+            })
+    };
     let sel = model
         .as_deref()
         .map(|m| Selector::new(m, cfg.evidence.clone()));
@@ -161,15 +209,16 @@ fn post_bash(
         Ok(ldf) => ldf,
         Err(why) => {
             return Outcome {
-                output: None,
                 event: Some((n, n, Some(why))),
                 model,
+                ..Outcome::default()
             };
         }
     };
     let mut note = format!(
         "ldf-mcp: this command printed {n} bytes of JSON; it is shown re-encoded as LDF \
-         ({} bytes, lossless). The command itself still prints JSON, so parse it as JSON in scripts.",
+         ({} bytes, lossless). The command itself still prints JSON, so parse it as JSON in scripts; \
+         run it with LDF_RAW=1 in front to see the JSON text.",
         ldf.len()
     );
     let primer = files.is_none_or(|f| !f.primed.exists());
@@ -181,13 +230,10 @@ fn post_bash(
     let out_bytes = ldf.len() + note.len();
     if out_bytes >= n {
         return Outcome {
-            output: None,
             event: Some((n, n, Some(Kept::NotShorter))),
             model,
+            ..Outcome::default()
         };
-    }
-    if primer && let Some(f) = files {
-        f.mark_primed();
     }
     let mut replaced = resp.clone();
     replaced.insert("stdout".into(), Json::String(ldf));
@@ -202,6 +248,7 @@ fn post_bash(
         output: Some(out.to_string()),
         event: Some((n, out_bytes, None)),
         model,
+        primes: files.filter(|_| primer).map(|f| f.primed.clone()),
     }
 }
 
@@ -209,8 +256,17 @@ fn kept(n: usize, code: &'static str) -> Outcome {
     Outcome {
         output: None,
         event: Some((n, n, Some(Kept::Hook(code)))),
-        model: None,
+        ..Outcome::default()
     }
+}
+
+/// Where Claude Code keeps a subagent's transcript: next to the session's,
+/// `<session>/subagents/agent-<agent_id>.jsonl`.
+fn agent_transcript(session_transcript: &Path, session: &str, agent: &str) -> PathBuf {
+    session_transcript
+        .with_file_name(session)
+        .join("subagents")
+        .join(format!("agent-{agent}.jsonl"))
 }
 
 /// Claude Code session ids are UUIDs; anything else is not used in a path.
@@ -264,11 +320,14 @@ struct SessionFiles {
 }
 
 impl SessionFiles {
-    fn new(dir: &Path, id: &str) -> Self {
+    fn new(dir: &Path, id: &str, agent: Option<&str>) -> Self {
         SessionFiles {
             dir: dir.to_path_buf(),
             model: dir.join(format!("{id}.model")),
-            primed: dir.join(format!("{id}.primed")),
+            primed: match agent {
+                Some(a) => dir.join(format!("{id}.{a}.primed")),
+                None => dir.join(format!("{id}.primed")),
+            },
         }
     }
 
@@ -295,14 +354,6 @@ impl SessionFiles {
             .ok()
             .map(|s| s.trim().to_string())
             .filter(|s| !s.is_empty())
-    }
-
-    /// Records that this context has the primer. Two parallel calls may
-    /// both send it; that costs tokens once, never correctness.
-    fn mark_primed(&self) {
-        if fs::create_dir_all(&self.dir).is_ok() {
-            let _ = fs::write(&self.primed, b"");
-        }
     }
 }
 
@@ -338,7 +389,7 @@ pub fn run(cfg: &Config, stats: Option<PathBuf>) {
         Ok(_) if input.len() as u64 > MAX_INPUT => Outcome {
             output: None,
             event: Some((input.len(), input.len(), Some(Kept::Hook("too_large")))),
-            model: None,
+            ..Outcome::default()
         },
         Ok(_) => handle(&input, cfg),
         Err(_) => return,
@@ -348,7 +399,16 @@ pub fn run(cfg: &Config, stats: Option<PathBuf>) {
         let mut so = std::io::stdout().lock();
         // A reply that cannot be written whole is no reply: Claude Code
         // treats invalid JSON as a non-blocking error and keeps the original.
-        let _ = so.write_all(out.as_bytes()).and_then(|()| so.flush());
+        // Two parallel calls may both send the primer; that costs tokens
+        // once, never correctness. Marking it before the write could cost
+        // correctness: a context with LDF and no primer.
+        if so
+            .write_all(out.as_bytes())
+            .and_then(|()| so.flush())
+            .is_ok()
+        {
+            outcome.delivered();
+        }
     }
     if let Some((inb, outb, why)) = outcome.event {
         let micros = start.elapsed().as_micros() as u64;
@@ -509,6 +569,7 @@ mod tests {
             "claude-opus-5-5"
         );
         let note = |o: Outcome| {
+            o.delivered();
             let out: Json = serde_json::from_str(&o.output.unwrap()).unwrap();
             out["hookSpecificOutput"]["additionalContext"]
                 .as_str()
@@ -518,8 +579,43 @@ mod tests {
         assert!(note(handle(&bash(&rows(80), json!({})), &c)).contains("@records order_id"));
         assert!(!note(handle(&bash(&rows(80), json!({})), &c)).contains("@records order_id"));
         start("claude-opus-5-5", "compact");
+        // A reply that was never written leaves the primer unsent.
+        let o = handle(&bash(&rows(80), json!({})), &c);
+        assert!(o.output.is_some() && o.primes.is_some());
+        drop(o);
         assert!(note(handle(&bash(&rows(80), json!({})), &c)).contains("@records order_id"));
+
+        // A subagent has its own context: its own primer, and its model from
+        // its own transcript, never the main thread's.
+        let tr = dir.join("s1.jsonl");
+        fs::write(&tr, "").unwrap();
+        let sub = |agent: &str| {
+            let mut ev: Json = serde_json::from_slice(&bash(&rows(80), json!({}))).unwrap();
+            ev["agent_id"] = json!(agent);
+            ev["transcript_path"] = json!(tr.to_str().unwrap());
+            handle(ev.to_string().as_bytes(), &c)
+        };
+        assert_eq!(sub("a1").event.unwrap().2.unwrap().code(), "subagent");
+        let at = agent_transcript(&tr, "s1", "a1");
+        fs::create_dir_all(at.parent().unwrap()).unwrap();
+        fs::write(&at, "{\"message\":{\"model\":\"gpt-6.1-sol\"}}\n").unwrap();
+        assert_eq!(sub("a1").event.unwrap().2.unwrap().code(), "selector");
+        fs::write(&at, "{\"message\":{\"model\":\"claude-opus-5-5\"}}\n").unwrap();
+        assert!(note(sub("a1")).contains("@records order_id"));
+        assert!(!note(sub("a1")).contains("@records order_id"));
+        assert_eq!(sub("../x").event.unwrap().2.unwrap().code(), "subagent");
+        // The main thread's flag was not touched by the subagent's.
+        assert!(!note(handle(&bash(&rows(80), json!({})), &c)).contains("@records order_id"));
         fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn ldf_raw_in_the_command_keeps_the_json() {
+        let mut ev: Json = serde_json::from_slice(&bash(&rows(80), json!({}))).unwrap();
+        ev["tool_input"]["command"] = json!("LDF_RAW=1 gh api x");
+        let o = handle(ev.to_string().as_bytes(), &cfg(None));
+        assert!(o.output.is_none());
+        assert_eq!(o.event.unwrap().2.unwrap().code(), "raw");
     }
 
     #[test]
