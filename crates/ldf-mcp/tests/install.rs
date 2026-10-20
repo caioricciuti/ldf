@@ -335,6 +335,10 @@ fn hooks_plan_alone_changes_nothing() {
         "{text}"
     );
     assert!(
+        text.contains("warning: other PostToolUse hooks match Bash (rtk)"),
+        "{text}"
+    );
+    assert!(
         !text.contains("rows (local)"),
         "--hooks alone leaves MCP out"
     );
@@ -413,6 +417,10 @@ fn hooks_install_keeps_everything_else_runs_and_uninstall_restores_the_file() {
     assert_eq!(w.settings_text(), after, "idempotent");
     let doctor = w.ok(&["doctor"]);
     assert!(doctor.contains("Bash output hook: installed"), "{doctor}");
+    assert!(
+        doctor.contains("other PostToolUse hooks match Bash in") && doctor.contains(": rtk\n"),
+        "{doctor}"
+    );
 
     let plan = w.ok(&["uninstall", "claude-code"]);
     assert!(plan.contains("hook PostToolUse: remove"), "{plan}");
@@ -508,4 +516,30 @@ fn unreadable_settings_are_refused_untouched() {
     let out = w.run(&["install", "claude-code", "--hooks", "--apply"], None);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("not a list"));
+}
+
+#[cfg(unix)]
+#[test]
+fn a_symlinked_settings_file_stays_a_link() {
+    let w = World::new("hooks-link");
+    let real = w.root.join("dotfiles-settings.json");
+    std::fs::write(&real, SETTINGS).unwrap();
+    std::fs::create_dir_all(w.home.join(".claude")).unwrap();
+    std::os::unix::fs::symlink(&real, w.settings_path()).unwrap();
+    w.ok(&["install", "claude-code", "--hooks", "--apply"]);
+    let link = std::fs::symlink_metadata(w.settings_path()).unwrap();
+    assert!(link.file_type().is_symlink());
+    assert!(
+        std::fs::read_to_string(&real)
+            .unwrap()
+            .contains("claude-code")
+    );
+    w.ok(&["uninstall", "claude-code", "--apply"]);
+    assert!(
+        std::fs::symlink_metadata(w.settings_path())
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+    assert_eq!(std::fs::read_to_string(&real).unwrap(), SETTINGS);
 }

@@ -74,7 +74,19 @@ Left alone, with the reason code `stats` shows:
 | output over Claude Code's inline limit (30 000 characters by default, `BASH_MAX_OUTPUT_LENGTH`): Claude Code saves it to a file and shows the model a 2 KB preview; the hook sees an incomplete stdout | `persisted` |
 | a non-zero exit Claude Code reported as success (`grep` with no match) | `exit_code` |
 | interrupted, backgrounded, or image output | `interrupted`, `background`, `image` |
+| a command containing `LDF_RAW=1` (`LDF_RAW=1 gh api repos/x/y`), for when the exact JSON text is needed | `raw` |
+| a subagent whose model neither `--model` nor its own transcript names | `subagent` |
 | failed commands | never reach the hook |
+
+The note that comes with every conversion tells the model about
+`LDF_RAW=1`, so it can ask for the JSON text itself when it has to copy
+bytes exactly.
+
+Subagents have their own context and may run another model than the main
+thread (an Explore agent on Haiku under an Opus session). Their tool calls
+carry the parent's `session_id` plus an `agent_id`, so the hook keeps a
+separate primer flag per subagent and takes the subagent's model from
+`--model` or the subagent's own transcript, never from the main thread.
 
 Other tools (Read, WebFetch, MCP tools) are not touched by the hook; MCP
 results are covered by `ldf-mcp proxy` below. The two are independent:
@@ -93,8 +105,11 @@ in the file survive. An unreadable settings file is refused, unchanged.
 
 Claude Code runs sibling hooks in parallel on the original output and the
 last replacement wins. This hook never returns an unchanged copy, so it
-cannot undo another hook's rewrite; but two hooks that both rewrite Bash
-JSON will race. A `PreToolUse` hook that rewrites the command (rtk turns
+cannot undo another hook's rewrite when it does not convert; but when it
+does convert, its LDF is made from the original output, and a sibling hook
+that redacts Bash output can lose the race. `install --hooks` and `doctor`
+warn when another `PostToolUse` group in the user or project settings
+matches Bash; hooks from plugins are not visible to them. A `PreToolUse` hook that rewrites the command (rtk turns
 `cat x.json` into `rtk read x.json`) runs first; whatever that command then
 prints is what this hook sees.
 
@@ -113,9 +128,16 @@ prints is what this hook sees.
   transcript record the original (Claude Code documentation).
 - Statistics hold sizes, reason codes, time and the model id; never the
   command, its arguments, the output or the session id.
-- Per-session state is two small files per session under
-  `claude-code/sessions` in the state directory (the model id, and an empty
-  marker for the primer), removed after 30 days.
+- Per-session state is small files under `claude-code/sessions` in the
+  state directory (the model id, and an empty marker for the primer per
+  context: the main thread and each subagent), removed after 30 days. The
+  marker is written only after the reply carrying the primer was written
+  whole. The primer travels in `additionalContext`, which Claude Code
+  delivers even when another hook's rewrite wins, and which it replays
+  when a session is resumed; after compaction the marker is dropped and
+  the primer sent again.
+- A symlinked `settings.json` (dotfiles) is written where the link points;
+  the link stays.
 
 ### Measured
 
