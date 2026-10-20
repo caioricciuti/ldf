@@ -102,6 +102,10 @@ where not" with a cheap switch.
   `install claude-code --hooks`, JSON in Bash stdout as LDF
   (`reports/2026-10-20-hook`); provider-usage A/B on Haiku 5.5 and Opus
   5.5: tool results at 0.56 of JSON's tokens, no answer lost.
+- Done 2026-10-20: Stage C on Sonnet 5.5 (`reports/2026-10-20-stage-c-sonnet`):
+  the selector gives Sonnet LDF on flat, sparse and mixed-type data, and
+  threshold 0.75 or JSON on nested orders, where most of v0.1's misses are
+  ids answered without quotes.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.

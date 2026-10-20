@@ -19,6 +19,7 @@
 #   eval/plan.sh stage-c-opus           Opus 5.5 on them, distinct renderings only (~$9-17, cap $17)
 #   eval/plan.sh stage-c10-build        Stage C at 10 questions per kind (free)
 #   eval/plan.sh stage-c10-opus         Opus 5.5 on it, JSON and LDF variants only (~$5.00-6.60, cap $7)
+#   eval/plan.sh stage-c10-sonnet       Sonnet 5.5 on it, same prompts (~$4.30-6.50, cap $7)
 #   eval/plan.sh stage-c-sonnet         Sonnet 5.5 on them (~$7.50-11.50, cap $12)
 #   eval/plan.sh stage-c-gpt            GPT on them; needs GPT_MODEL and GPT_PRICE_IN/CACHED/OUT set (cap $GPT_BUDGET)
 #   eval/plan.sh all           the first four stages above, in that order
@@ -142,14 +143,19 @@ STAGE_C10=(
   "sparse_events json,ldf,ldf-s75 0.27"
   "mixed_types json,ldf 0.10"
 )
-stage_stage_c10_opus() {
-  local total=7
+stage_c10() {
+  local total=$1; shift
   for entry in "${STAGE_C10[@]}"; do
     read -r b formats share <<< "$entry"
-    run --bundle "eval/out/stage-c10/$b" "${OPUS[@]}" --formats "$formats" --max-tokens 4096 \
+    run --bundle "eval/out/stage-c10/$b" "$@" --formats "$formats" --max-tokens 4096 \
       --budget "$(python3 -c "print(round($total * $share, 2))")"
   done
 }
+stage_stage_c10_opus() { stage_c10 7 "${OPUS[@]}"; }
+# Sonnet 5.5 on the same 864 prompts (2026-10-20). The Opus run's own usage
+# repriced at Sonnet rates is $4.26; cache reads cost the same on both, so
+# the spread is output length and tokenizer: about $4.30-6.50, cap $7.
+stage_stage_c10_sonnet() { stage_c10 7 "${SONNET[@]}"; }
 stage_stage_c_sonnet() { stage_c eval/out/stage-c 12 "${SONNET[@]}"; }
 stage_stage_c_gpt() {
   : "${GPT_MODEL:?set GPT_MODEL}" "${GPT_PRICE_IN:?set GPT_PRICE_IN (USD per M input)}" \
@@ -195,6 +201,7 @@ for stage in "$@"; do
     stage-c-opus) stage_stage_c_opus ;;
     stage-c10-build) stage_c_build 10 eval/out/stage-c10 ;;
     stage-c10-opus) stage_stage_c10_opus ;;
+    stage-c10-sonnet) stage_stage_c10_sonnet ;;
     stage-c-sonnet) stage_stage_c_sonnet ;;
     stage-c-gpt) stage_stage_c_gpt ;;
     sparse-sweep-deepseek) stage_sparse_sweep_deepseek ;;
