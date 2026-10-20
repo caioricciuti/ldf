@@ -49,8 +49,15 @@ better than another, and the report says so.
 
 ## Use it
 
-With a coding agent (Claude Code: `ldf-mcp install claude-code`, then `ldf-mcp stats`), see
-[site/src/content/docs/docs/agents.md](site/src/content/docs/docs/agents.md): setup in five minutes, what is intercepted and what is not, Codex and OpenCode by hand.
+With Claude Code, one command makes JSON that shell commands print reach the model as LDF:
+
+```bash
+ldf-mcp install claude-code --hooks --apply   # without --apply: the plan only
+ldf-mcp stats                                 # what was converted, and why the rest was not
+```
+
+MCP servers can be wrapped too (`--wrap-all`). See
+[site/src/content/docs/docs/agents.md](site/src/content/docs/docs/agents.md): how it works, what is intercepted and what is not, Codex and OpenCode by hand.
 
 ### As a middle man: `ldf-mcp`
 

@@ -1,6 +1,10 @@
 //! Local statistics: one JSON line per tool response, appended to a file on
 //! this machine, and the summary `ldf-mcp stats` prints from it.
 //!
+//! The Claude Code hook (`ldf-mcp hook claude-code`) writes the same lines
+//! with mode `hook`, server `claude-code` and tool `Bash`; its `convert_us`
+//! is the whole invocation after process start, reading the input included.
+//!
 //! A line holds the time, the mode and server label, the tool name, the
 //! outcome and its reason code, byte counts and timings. It never holds a
 //! response body, tool arguments, environment values or anything else the
@@ -316,6 +320,13 @@ fn reason_text(code: &str) -> &str {
         "is_error" => "error result, never touched",
         "passthrough" => "--passthrough",
         "no_text" => "no text content",
+        "persisted" => "Bash output too large to show inline; Claude Code saved it to a file",
+        "exit_code" => "non-zero exit Claude Code read as success",
+        "interrupted" => "Bash command interrupted",
+        "image" => "Bash output is an image",
+        "background" => "Bash command moved to the background",
+        "bad_input" => "hook input not understood",
+        "too_large" => "hook input over 16 MiB",
         other => other,
     }
 }

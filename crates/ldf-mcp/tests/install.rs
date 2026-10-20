@@ -77,7 +77,8 @@ impl World {
             .env("LDF_STATE_DIR", self.root.join("state"))
             .env("LDF_STATS", "0")
             .env("LDF_CLAUDE", exe())
-            .env("LDF_FAKE_CLAUDE", "1");
+            .env("LDF_FAKE_CLAUDE", "1")
+            .env_remove("CLAUDE_CONFIG_DIR");
         if let Some(f) = fail_on {
             c.env("LDF_FAKE_CLAUDE_FAIL", f);
         }
@@ -255,4 +256,256 @@ fn wrapping_a_server_that_cannot_be_wrapped_is_refused() {
     let out = w.run(&["install", "claude-code", "--wrap", "nope"], None);
     assert!(!out.status.success());
     assert_eq!(w.config(), w.original());
+}
+
+/// A user settings.json as people have them: keys in no particular order,
+/// other hooks on the same events, 2-space pretty JSON.
+const SETTINGS: &str = r#"{
+  "permissions": {
+    "deny": [
+      "Read(./.env)"
+    ],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"/home/me/.claude/hooks/vet-deps.py\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude-post"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "includeCoAuthoredBy": false
+}
+"#;
+
+impl World {
+    fn settings_path(&self) -> PathBuf {
+        self.home.join(".claude").join("settings.json")
+    }
+
+    fn write_settings(&self, text: &str) {
+        std::fs::create_dir_all(self.home.join(".claude")).unwrap();
+        std::fs::write(self.settings_path(), text).unwrap();
+    }
+
+    fn settings_text(&self) -> String {
+        std::fs::read_to_string(self.settings_path()).unwrap()
+    }
+
+    fn settings(&self) -> Json {
+        serde_json::from_str(&self.settings_text()).unwrap()
+    }
+}
+
+fn top_keys(text: &str) -> Vec<String> {
+    let v: ldf_data::Value = serde_json::from_str(text).unwrap();
+    v.as_object()
+        .unwrap()
+        .iter()
+        .map(|(k, _)| k.clone())
+        .collect()
+}
+
+#[test]
+fn hooks_plan_alone_changes_nothing() {
+    let w = World::new("hooks-plan");
+    w.write_settings(SETTINGS);
+    let text = w.ok(&["install", "claude-code", "--hooks"]);
+    assert!(text.contains("Would add 3 hook group(s)"), "{text}");
+    assert!(
+        text.contains("PostToolUse: keeps 1 existing handler(s): rtk"),
+        "{text}"
+    );
+    assert!(
+        !text.contains("rows (local)"),
+        "--hooks alone leaves MCP out"
+    );
+    assert_eq!(w.settings_text(), SETTINGS);
+    assert!(!w.root.join("state/installed.json").exists());
+}
+
+#[test]
+fn hooks_install_keeps_everything_else_runs_and_uninstall_restores_the_file() {
+    let w = World::new("hooks-apply");
+    w.write_settings(SETTINGS);
+    let text = w.ok(&["install", "claude-code", "--hooks", "--apply"]);
+    assert!(text.contains("done."), "{text}");
+    let after = w.settings_text();
+    assert_eq!(
+        top_keys(&after),
+        ["permissions", "hooks", "theme", "includeCoAuthoredBy"]
+    );
+    let s = w.settings();
+    assert_eq!(s["permissions"]["defaultMode"], "auto");
+    assert_eq!(s["hooks"]["PreToolUse"].as_array().unwrap().len(), 1);
+    let post = s["hooks"]["PostToolUse"].as_array().unwrap();
+    assert_eq!(post.len(), 2);
+    assert_eq!(post[0]["hooks"][0]["command"], "rtk hook claude-post");
+    assert_eq!(post[1]["matcher"], "Bash");
+    let handler = post[1]["hooks"][0].clone();
+    assert_eq!(handler["args"], json!(["hook", "claude-code"]));
+    assert_eq!(handler["timeout"], 10);
+    assert!(s["hooks"]["SessionStart"][0]["matcher"].is_null());
+    assert_eq!(s["hooks"]["PostModelSwitch"].as_array().unwrap().len(), 1);
+    // The original went to the state directory first.
+    let copies: Vec<_> = std::fs::read_dir(w.root.join("state"))
+        .unwrap()
+        .flatten()
+        .filter(|e| {
+            e.file_name()
+                .to_string_lossy()
+                .starts_with("settings.json.before-")
+        })
+        .collect();
+    assert_eq!(copies.len(), 1);
+    assert_eq!(std::fs::read_to_string(copies[0].path()).unwrap(), SETTINGS);
+
+    // The installed handler, run the way Claude Code runs it.
+    let rows: Vec<Json> = (0..50)
+        .map(|i| json!({"id": i, "name": format!("n{i}"), "ok": i % 2 == 0}))
+        .collect();
+    let input = json!({"session_id": "s", "hook_event_name": "PostToolUse", "tool_name": "Bash",
+        "tool_input": {"command": "cat x.json"},
+        "tool_response": {"stdout": serde_json::to_string_pretty(&rows).unwrap(), "stderr": "", "interrupted": false, "isImage": false}});
+    let mut child = Command::new(handler["command"].as_str().unwrap())
+        .args(["hook", "claude-code"])
+        .env("LDF_STATE_DIR", w.root.join("state"))
+        .env("LDF_STATS", "0")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(input.to_string().as_bytes())
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    let reply: Json = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(
+        reply["hookSpecificOutput"]["updatedToolOutput"]["stdout"]
+            .as_str()
+            .unwrap()
+            .starts_with("@records id:i,name:s,ok:b\n")
+    );
+
+    let again = w.ok(&["install", "claude-code", "--hooks", "--apply"]);
+    assert!(again.contains("Nothing to change"), "{again}");
+    assert_eq!(w.settings_text(), after, "idempotent");
+    let doctor = w.ok(&["doctor"]);
+    assert!(doctor.contains("Bash output hook: installed"), "{doctor}");
+
+    let plan = w.ok(&["uninstall", "claude-code"]);
+    assert!(plan.contains("hook PostToolUse: remove"), "{plan}");
+    assert!(plan.contains("Nothing changed"), "{plan}");
+    assert_eq!(w.settings_text(), after);
+    w.ok(&["uninstall", "claude-code", "--apply"]);
+    assert_eq!(w.settings_text(), SETTINGS, "byte for byte");
+    let rest = w.ok(&["uninstall", "claude-code", "--apply"]);
+    assert!(rest.contains("Nothing installed"), "{rest}");
+}
+
+#[test]
+fn uninstall_keeps_edits_made_after_install() {
+    let w = World::new("hooks-edits");
+    w.write_settings(SETTINGS);
+    w.ok(&["install", "claude-code", "--hooks", "--apply"]);
+    let mut s = w.settings();
+    s["permissions"]["deny"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!("Read(~/.ssh/**)"));
+    s["hooks"]["SessionStart"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"hooks": [{"type": "command", "command": "echo hi"}]}));
+    // The user tuned the PostModelSwitch handler: that one is theirs now.
+    s["hooks"]["PostModelSwitch"][0]["hooks"][0]["timeout"] = json!(30);
+    s["model"] = json!("opus");
+    w.write_settings(&serde_json::to_string_pretty(&s).unwrap());
+
+    let text = w.ok(&["uninstall", "claude-code", "--apply"]);
+    assert!(
+        text.contains("hook PostModelSwitch: changed since install; left alone"),
+        "{text}"
+    );
+    let s = w.settings();
+    assert_eq!(s["model"], "opus");
+    assert_eq!(s["permissions"]["deny"].as_array().unwrap().len(), 2);
+    assert_eq!(s["hooks"]["PostToolUse"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        s["hooks"]["SessionStart"][0]["hooks"][0]["command"],
+        "echo hi"
+    );
+    assert_eq!(s["hooks"]["SessionStart"].as_array().unwrap().len(), 1);
+    assert_eq!(s["hooks"]["PostModelSwitch"][0]["hooks"][0]["timeout"], 30);
+    // Its record stays, so a later uninstall still knows about it.
+    let manifest: Json =
+        serde_json::from_slice(&std::fs::read(w.root.join("state/installed.json")).unwrap())
+            .unwrap();
+    assert_eq!(manifest["changes"].as_array().unwrap().len(), 1);
+}
+
+#[test]
+fn hooks_and_wrapping_are_independent_and_undo_together() {
+    let w = World::new("hooks-both");
+    // No settings.json yet: install creates one with only the hooks.
+    w.ok(&["install", "claude-code", "--wrap", "rows", "--apply"]);
+    assert!(
+        !w.settings_path().exists(),
+        "wrapping alone writes no hooks"
+    );
+    w.ok(&[
+        "install",
+        "claude-code",
+        "--hooks",
+        "--model",
+        "claude-opus-5-5",
+        "--apply",
+    ]);
+    let s = w.settings();
+    assert_eq!(
+        s["hooks"]["PostToolUse"][0]["hooks"][0]["args"],
+        json!(["hook", "claude-code", "--model", "claude-opus-5-5"])
+    );
+    assert_eq!(w.local("rows")["args"][0], "proxy");
+    let done = w.ok(&["uninstall", "claude-code", "--apply"]);
+    assert!(
+        done.contains("undone: rows") && done.contains("hook SessionStart: remove"),
+        "{done}"
+    );
+    assert_eq!(w.config(), w.original());
+    assert_eq!(w.settings(), json!({}));
+}
+
+#[test]
+fn unreadable_settings_are_refused_untouched() {
+    let w = World::new("hooks-bad");
+    w.write_settings("{ \"theme\": \"dark\", }");
+    let out = w.run(&["install", "claude-code", "--hooks", "--apply"], None);
+    assert!(!out.status.success());
+    assert_eq!(w.settings_text(), "{ \"theme\": \"dark\", }");
+    w.write_settings(r#"{"hooks": {"PostToolUse": {"matcher": "Bash"}}}"#);
+    let out = w.run(&["install", "claude-code", "--hooks", "--apply"], None);
+    assert!(!out.status.success());
+    assert!(String::from_utf8_lossy(&out.stderr).contains("not a list"));
 }

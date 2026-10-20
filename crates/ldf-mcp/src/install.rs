@@ -15,6 +15,14 @@
 //! with the original entry, so `uninstall` puts back exactly what was
 //! there, and only where the entry is still the one `install` wrote.
 //! Without `--apply` both commands only print what they would do.
+//!
+//! Hooks (`install claude-code --hooks`) have no `claude` subcommand, so
+//! they are the one thing written to a Claude Code file directly: three
+//! handler groups appended to `hooks` in the user `settings.json`
+//! ([`claude_settings`]), parsed and written with key order kept, every
+//! other key and hook left as it was. A copy of the file as it was goes
+//! to the state directory first; `uninstall` removes only the groups that
+//! are still exactly what `install` added.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -404,6 +412,8 @@ fn swap(
 /// What `install` was asked to do.
 #[derive(Debug, Default)]
 pub struct InstallArgs {
+    /// `--hooks`: the Bash output hook, independent of the MCP options.
+    pub hooks: bool,
     pub wrap: Vec<String>,
     pub wrap_all: bool,
     pub add_files: Option<PathBuf>,
@@ -415,6 +425,8 @@ pub struct InstallArgs {
 
 pub struct Env {
     pub exe: PathBuf,
+    /// Claude Code's user `settings.json`, where hooks go.
+    pub settings: Option<PathBuf>,
     pub project: PathBuf,
     pub config: Option<PathBuf>,
     pub cli: Option<PathBuf>,
@@ -430,6 +442,7 @@ impl Env {
         let project = std::env::current_dir().map_err(|e| e.to_string())?;
         Ok(Env {
             exe,
+            settings: claude_settings(),
             project,
             config: claude_json(),
             cli: claude_cli(),
@@ -544,7 +557,7 @@ pub fn install(env: &Env, a: &InstallArgs) -> Result<String, String> {
     if plan.is_empty() {
         o.push_str("\nNothing to change.");
         if a.wrap.is_empty() && !a.wrap_all && a.add_files.is_none() {
-            o.push_str(" Choose with --wrap NAME, --wrap-all or --add-files DIR.");
+            o.push_str(" Choose with --hooks, --wrap NAME, --wrap-all or --add-files DIR.");
         }
         o.push('\n');
         return Ok(o);
@@ -609,12 +622,348 @@ pub fn install(env: &Env, a: &InstallArgs) -> Result<String, String> {
     Ok(o)
 }
 
+/// Claude Code's user settings: `$CLAUDE_CONFIG_DIR/settings.json` when
+/// set, else `~/.claude/settings.json`.
+pub fn claude_settings() -> Option<PathBuf> {
+    std::env::var_os("CLAUDE_CONFIG_DIR")
+        .filter(|v| !v.is_empty())
+        .map(PathBuf::from)
+        .or_else(|| home().map(|h| h.join(".claude")))
+        .map(|d| d.join("settings.json"))
+}
+
+/// The events the hook serves and the matcher each group gets.
+const HOOK_EVENTS: [(&str, Option<&str>); 3] = [
+    ("PostToolUse", Some("Bash")),
+    ("SessionStart", None),
+    ("PostModelSwitch", None),
+];
+
+/// Seconds Claude Code waits for the hook; it keeps the original output
+/// after that.
+const HOOK_TIMEOUT: u64 = 10;
+
+/// The handler group `install --hooks` adds for `event`, in exec form
+/// (`command` plus `args`), so no shell parses the binary's path.
+pub fn hook_group(exe: &Path, event: &str, model: Option<&str>) -> Json {
+    let mut args = vec!["hook".to_string(), AGENT.to_string()];
+    if let Some(m) = model {
+        args.push("--model".into());
+        args.push(m.to_string());
+    }
+    let handler = json!({
+        "type": "command",
+        "command": exe.to_string_lossy(),
+        "args": args,
+        "timeout": HOOK_TIMEOUT,
+    });
+    let mut group = json!({"hooks": [handler]});
+    if let Some(m) = HOOK_EVENTS
+        .iter()
+        .find(|(e, _)| *e == event)
+        .and_then(|(_, m)| *m)
+    {
+        group["matcher"] = json!(m);
+    }
+    group
+}
+
+type Ordered = ldf_data::Value;
+
+fn ordered(v: &Json) -> Ordered {
+    serde_json::from_value(v.clone()).unwrap_or(Ordered::Null)
+}
+
+fn read_settings(path: &Path) -> Result<Ordered, String> {
+    match fs::read(path) {
+        Ok(b) => match serde_json::from_slice::<Ordered>(&b) {
+            Ok(v @ Ordered::Object(_)) => Ok(v),
+            Ok(_) => Err(format!("{}: not a JSON object", path.display())),
+            Err(e) => Err(format!("{}: {e}; fix it before installing", path.display())),
+        },
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(Ordered::Object(Vec::new())),
+        Err(e) => Err(format!("{}: {e}", path.display())),
+    }
+}
+
+/// Writes through a temporary file and a rename, keeping the file's
+/// permissions.
+fn write_settings(path: &Path, v: &Ordered) -> Result<(), String> {
+    if let Some(dir) = path.parent() {
+        fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    }
+    let text = serde_json::to_string_pretty(v).map_err(|e| e.to_string())? + "\n";
+    let tmp = path.with_extension("json.ldf-tmp");
+    fs::write(&tmp, text).map_err(|e| format!("{}: {e}", tmp.display()))?;
+    if let Ok(m) = fs::metadata(path) {
+        let _ = fs::set_permissions(&tmp, m.permissions());
+    }
+    fs::rename(&tmp, path).map_err(|e| format!("{}: {e}", path.display()))
+}
+
+/// The array of groups for `event` under `hooks`, created when absent.
+/// `None` when `hooks` or that entry is there but not the expected shape.
+fn event_groups<'a>(settings: &'a mut Ordered, event: &str) -> Option<&'a mut Vec<Ordered>> {
+    let Ordered::Object(top) = settings else {
+        return None;
+    };
+    if !top.iter().any(|(k, _)| k == "hooks") {
+        top.push(("hooks".into(), Ordered::Object(Vec::new())));
+    }
+    let (_, Ordered::Object(hooks)) = top.iter_mut().find(|(k, _)| k == "hooks")? else {
+        return None;
+    };
+    if !hooks.iter().any(|(k, _)| k == event) {
+        hooks.push((event.to_string(), Ordered::Array(Vec::new())));
+    }
+    match hooks.iter_mut().find(|(k, _)| k == event)? {
+        (_, Ordered::Array(groups)) => Some(groups),
+        _ => None,
+    }
+}
+
+/// Every hook handler command in `settings` for `event`, for the plan.
+fn handler_commands(settings: &Ordered, event: &str) -> Vec<String> {
+    settings
+        .get("hooks")
+        .and_then(|h| h.get(event))
+        .and_then(Ordered::as_array)
+        .into_iter()
+        .flatten()
+        .flat_map(|g| {
+            g.get("hooks")
+                .and_then(Ordered::as_array)
+                .into_iter()
+                .flatten()
+        })
+        .filter_map(|h| h.get("command").and_then(Ordered::as_str))
+        .map(|c| {
+            let first = c.split_whitespace().next().unwrap_or(c);
+            Path::new(first.trim_matches('"'))
+                .file_name()
+                .map_or_else(|| first.to_string(), |f| f.to_string_lossy().into_owned())
+        })
+        .collect()
+}
+
+fn is_our_group(g: &Ordered) -> bool {
+    g.get("hooks")
+        .and_then(Ordered::as_array)
+        .into_iter()
+        .flatten()
+        .any(|h| {
+            h.get("command")
+                .and_then(Ordered::as_str)
+                .is_some_and(is_ldf_mcp)
+                && h.get("args")
+                    .and_then(Ordered::as_array)
+                    .and_then(|a| a.first())
+                    .and_then(Ordered::as_str)
+                    == Some("hook")
+        })
+}
+
+/// Runs `install --hooks`; returns the text to print.
+pub fn install_hooks(env: &Env, a: &InstallArgs) -> Result<String, String> {
+    let path = env.settings.as_deref().ok_or("no home directory")?;
+    let mut settings = read_settings(path)?;
+    let mut o = format!("Claude Code hooks, {}\n", path.display());
+    let mut plan: Vec<(&str, Json)> = Vec::new();
+    for (event, _) in HOOK_EVENTS {
+        let want = hook_group(&env.exe, event, a.model.as_deref());
+        let others = handler_commands(&settings, event);
+        let groups = event_groups(&mut settings.clone(), event)
+            .ok_or_else(|| format!("{}: hooks.{event} is not a list", path.display()))?
+            .clone();
+        let ours: Vec<&Ordered> = groups.iter().filter(|g| is_our_group(g)).collect();
+        if ours
+            .iter()
+            .any(|g| g.semantic_eq_unordered(&ordered(&want)))
+        {
+            o.push_str(&format!("  {event}: already installed\n"));
+            continue;
+        }
+        if !ours.is_empty() {
+            return Err(format!(
+                "{}: hooks.{event} already runs a different ldf-mcp hook; run `ldf-mcp uninstall claude-code --apply` or edit it by hand",
+                path.display()
+            ));
+        }
+        if !others.is_empty() {
+            o.push_str(&format!(
+                "  {event}: keeps {} existing handler(s): {}\n",
+                others.len(),
+                others.join(", ")
+            ));
+        }
+        plan.push((event, want));
+    }
+    if plan.is_empty() {
+        o.push_str("\nNothing to change.\n");
+        return Ok(o);
+    }
+    o.push_str(&format!(
+        "\n{} {} hook group(s):\n",
+        if a.apply { "Adding" } else { "Would add" },
+        plan.len()
+    ));
+    for (event, g) in &plan {
+        o.push_str(&format!("  {event}: {g}\n"));
+    }
+    if env.exe.components().any(|c| c.as_os_str() == "target") {
+        o.push_str("  note: this binary is in a build directory; a rebuild replaces it under Claude Code\n");
+    }
+    if !a.apply {
+        o.push_str(
+            "\nNothing changed. Run again with --apply to add these hooks;\n\
+             `ldf-mcp uninstall claude-code` removes them. New Claude Code sessions pick them up.\n",
+        );
+        return Ok(o);
+    }
+    let manifest = env
+        .manifest
+        .as_deref()
+        .ok_or("no state directory for the change record")?;
+    let mut records = read_manifest(manifest)?;
+    if path.exists() {
+        let ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        let backup = manifest.with_file_name(format!("settings.json.before-{ts}"));
+        if let Some(dir) = backup.parent() {
+            fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+        }
+        fs::copy(path, &backup).map_err(|e| format!("{}: {e}", backup.display()))?;
+        o.push_str(&format!(
+            "  copy of the file as it was: {}\n",
+            backup.display()
+        ));
+    }
+    for (event, g) in &plan {
+        event_groups(&mut settings, event)
+            .ok_or_else(|| format!("hooks.{event} is not a list"))?
+            .push(ordered(g));
+    }
+    write_settings(path, &settings)?;
+    for (event, g) in &plan {
+        records.push(json!({
+            "agent": AGENT,
+            "kind": "hook",
+            "settings": path.to_string_lossy(),
+            "event": event,
+            "installed": g,
+        }));
+    }
+    write_manifest(manifest, &records)?;
+    o.push_str(&format!(
+        "  done. Recorded in {}. New Claude Code sessions pick the hooks up.\n",
+        manifest.display()
+    ));
+    Ok(o)
+}
+
+/// Removes the hook groups `install --hooks` recorded and returns the
+/// records left (other kinds, and groups that changed since install).
+fn uninstall_hooks(records: Vec<Json>, apply: bool, o: &mut String) -> Result<Vec<Json>, String> {
+    let (hooks, mut rest): (Vec<Json>, Vec<Json>) = records.into_iter().partition(|r| {
+        r.get("agent").and_then(Json::as_str) == Some(AGENT)
+            && r.get("kind").and_then(Json::as_str) == Some("hook")
+    });
+    let mut by_file: Vec<(PathBuf, Vec<Json>)> = Vec::new();
+    for r in hooks {
+        let Some(p) = r.get("settings").and_then(Json::as_str).map(PathBuf::from) else {
+            rest.push(r);
+            continue;
+        };
+        match by_file.iter_mut().find(|(f, _)| *f == p) {
+            Some((_, v)) => v.push(r),
+            None => by_file.push((p, vec![r])),
+        }
+    }
+    for (path, recs) in by_file {
+        let mut settings = match read_settings(&path) {
+            Ok(s) => s,
+            Err(e) => {
+                o.push_str(&format!("  hooks in {e}; left alone\n"));
+                rest.extend(recs);
+                continue;
+            }
+        };
+        let mut changed = false;
+        for r in recs {
+            let event = r.get("event").and_then(Json::as_str).unwrap_or("");
+            let want = ordered(r.get("installed").unwrap_or(&Json::Null));
+            let groups = settings
+                .get("hooks")
+                .and_then(|h| h.get(event))
+                .and_then(Ordered::as_array);
+            match groups.and_then(|g| g.iter().position(|g| g.semantic_eq_unordered(&want))) {
+                Some(i) => {
+                    o.push_str(&format!("  hook {event}: remove\n"));
+                    if let Some(g) = event_groups(&mut settings, event) {
+                        g.remove(i);
+                        changed = true;
+                    }
+                }
+                None if groups.is_some_and(|g| g.iter().any(is_our_group)) => {
+                    o.push_str(&format!(
+                        "  hook {event}: changed since install; left alone\n"
+                    ));
+                    rest.push(r);
+                }
+                None => o.push_str(&format!(
+                    "  hook {event}: no longer configured; record dropped\n"
+                )),
+            }
+        }
+        if changed {
+            tidy_hooks(&mut settings);
+            if apply {
+                write_settings(&path, &settings)?;
+                o.push_str(&format!("  updated {}\n", path.display()));
+            }
+        }
+    }
+    Ok(rest)
+}
+
+/// Drops event lists left empty, and `hooks` itself when nothing is left.
+fn tidy_hooks(settings: &mut Ordered) {
+    let Ordered::Object(top) = settings else {
+        return;
+    };
+    if let Some((_, Ordered::Object(hooks))) = top.iter_mut().find(|(k, _)| k == "hooks") {
+        hooks.retain(|(_, v)| !matches!(v, Ordered::Array(a) if a.is_empty()));
+    }
+    top.retain(|(k, v)| !(k == "hooks" && matches!(v, Ordered::Object(h) if h.is_empty())));
+}
+
+/// Whether the Bash hook is in `settings`, for `doctor`.
+fn hooks_installed(path: &Path) -> Option<bool> {
+    let s = read_settings(path).ok()?;
+    Some(
+        s.get("hooks")
+            .and_then(|h| h.get("PostToolUse"))
+            .and_then(Ordered::as_array)
+            .is_some_and(|g| g.iter().any(is_our_group)),
+    )
+}
+
 /// Runs `uninstall`; returns the text to print.
 pub fn uninstall(env: &Env, apply: bool) -> Result<String, String> {
     let manifest = env.manifest.as_deref().ok_or("no state directory")?;
-    let records = read_manifest(manifest)?;
-    let config = env.read_config()?;
+    let all = read_manifest(manifest)?;
+    let had_hooks = all
+        .iter()
+        .any(|r| r.get("kind").and_then(Json::as_str) == Some("hook"));
     let mut o = String::new();
+    let records = uninstall_hooks(all.clone(), apply, &mut o)?;
+    let hooks_done = had_hooks && records.len() < all.len();
+    if apply && hooks_done {
+        write_manifest(manifest, &records)?;
+    }
+    let config = env.read_config()?;
     let mut keep: Vec<Json> = Vec::new();
     let mut todo: Vec<(Change, Json)> = Vec::new();
     for r in records {
@@ -657,6 +1006,8 @@ pub fn uninstall(env: &Env, apply: bool) -> Result<String, String> {
     if todo.is_empty() {
         if o.is_empty() {
             o.push_str("Nothing installed by ldf-mcp for Claude Code.\n");
+        } else if !apply && hooks_done {
+            o.push_str("\nNothing changed. Run again with --apply to undo these.\n");
         }
         if apply {
             write_manifest(manifest, &keep)?;
@@ -776,6 +1127,24 @@ pub fn doctor(env: &Env) -> String {
             }
         }
         Err(e) => o.push_str(&format!("{}Claude Code config: {e}\n", ok(false))),
+    }
+    if let Some(p) = &env.settings {
+        match hooks_installed(p) {
+            Some(true) => o.push_str(&format!(
+                "{}Bash output hook: installed in {}\n",
+                ok(true),
+                p.display()
+            )),
+            Some(false) => o.push_str(&format!(
+                "{}Bash output hook: not installed (ldf-mcp install claude-code --hooks)\n",
+                ok(false)
+            )),
+            None => o.push_str(&format!(
+                "{}Claude Code settings: {} unreadable\n",
+                ok(false),
+                p.display()
+            )),
+        }
     }
     if let Some(m) = &env.manifest {
         let n = read_manifest(m).map(|r| r.len()).unwrap_or(0);

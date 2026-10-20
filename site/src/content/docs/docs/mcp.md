@@ -147,8 +147,10 @@ ldf-clickhouse`.
 
 ## Local statistics
 
-Every mode (`proxy`, `files`, `clickhouse`) appends one line per tool
-response to a file on this machine, and `ldf-mcp stats` summarises it:
+Every mode (`proxy`, `files`, `clickhouse`, and the Claude Code hook,
+`ldf-mcp hook claude-code`, as server `claude-code`, tool `Bash`) appends
+one line per tool response to a file on this machine, and `ldf-mcp stats`
+summarises it:
 
 ```text
 tool responses     3
@@ -165,7 +167,10 @@ conversion time    p50 2.1 ms, p95 6.4 ms, max 6.4 ms per response
 A line holds the time, mode, server label (`--name NAME`, default the
 downstream command's file name), tool name, outcome (`ldf` or `json`), the
 reason code when it stayed JSON (`small`, `not_json`, `not_dataset`,
-`not_shorter`, `selector`, `is_error`, `passthrough`, `no_text`), bytes in
+`not_shorter`, `selector`, `is_error`, `passthrough`, `no_text`, and for the
+hook `persisted`, `exit_code`, `interrupted`, `background`, `image`,
+`bad_input`, `too_large`), bytes in (for the hook, out includes the note it
+adds)
 and out, conversion time and, in proxy mode, request-to-reply time and the
 `--model` given. It never holds response content, tool arguments or
 environment values, and nothing is sent anywhere.
