@@ -82,6 +82,12 @@ Above 1 000 rows every model still gets JSON. Whether a failure at 1 000
 records should also withdraw LDF from inputs of 200 or fewer, where the
 same model passed, is a policy question this report does not settle.
 
+**Update, same day: size bands.** The selector now judges an input only by
+evidence at the smallest measured size at or above its row count. With the
+same evidence: Opus gets LDF on flat data up to 200 rows and JSON from 201;
+Sonnet gets LDF 0.75 on nested and LDF on sparse data up to 200 rows and
+JSON from 201. The other cells are unchanged.
+
 **Limits.** Two models, one size, 52 to 68 questions per cell (one answer
 moves a cell by 1.5 to 2 points). Arithmetic kinds are not measured at this
 size in any format.

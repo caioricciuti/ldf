@@ -109,8 +109,10 @@ where not" with a cheap switch.
 - Done 2026-10-20: Opus and Sonnet at 1 000 records
   (`reports/2026-10-20-large`): the selector now has evidence up to 1 000
   rows.
-- Next: size bands in the selector, so a failure at 1 000 rows does not
-  withdraw LDF from inputs where the same model passed at 200.
+- Done 2026-10-20: size bands in the selector: an input is judged by
+  evidence at the smallest measured size at or above its row count, so a
+  failure at 1 000 rows does not withdraw LDF from inputs of 200 or fewer
+  where the same model passed.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
