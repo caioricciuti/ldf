@@ -1,5 +1,6 @@
 ---
 import Landing from "../layouts/Landing.astro";
+import EvidenceChart from "../components/EvidenceChart.astro";
 
 const repo = "https://github.com/caioricciuti/ldf";
 
@@ -144,6 +145,10 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
         <div class="stat"><span class="stat-n">294 / 297</span><span class="stat-l">Claude Opus 5.5 on held-out data, LDF and JSON alike, with LDF at 57 to 77 percent of JSON's input tokens. <a href="/docs/results/stage-c/">Stage C</a></span></div>
         <div class="stat"><span class="stat-n">53 / 53</span><span class="stat-l">GPT-6.1 Sol on LDF at 50 records, zero-shot: the prompt names the format and shows the data, nothing more.</span></div>
         <div class="stat"><span class="stat-n">0.56×</span><span class="stat-l">JSON tool output in real agent sessions (headless Claude Code, Haiku 5.5 and Opus 5.5), in provider-reported tokens, no answer lost. <a href={`${repo}/tree/main/reports/2026-10-20-hook/ab-opus`}>A/B runs</a></span></div>
+      </div>
+      <div class="chart-wrap" data-reveal>
+        <h3 class="chart-title">Same questions, JSON against LDF</h3>
+        <EvidenceChart dark />
       </div>
       <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the reports say so. A model without enough evidence gets JSON. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
     </div>
@@ -414,6 +419,18 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
     color: var(--text);
     text-decoration: underline;
     text-decoration-color: var(--line-2);
+  }
+  .chart-wrap {
+    margin-top: 2.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-1);
+  }
+  .chart-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
   }
   .mcp-points {
     display: grid;

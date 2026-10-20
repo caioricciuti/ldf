@@ -1,0 +1,37 @@
+---
+title: Evidence at a glance
+description: How each model scores on LDF against JSON, on the same questions, and what the selector does with it.
+---
+
+import EvidenceChart from "../../../components/EvidenceChart.astro";
+
+Every dot pair below is one model answering the same questions twice: once
+with the data as compact JSON, once as LDF v0.1. The chart is built from
+`reports/evidence/evidence.json`, the table the selector ships with, so it
+shows exactly what `ldf-mcp --model` and the Claude Code hook decide from.
+
+<EvidenceChart />
+
+How to read it:
+
+* **Close dots** mean the format makes no difference to that model on that
+  data, and LDF saves the tokens on the right.
+* **An orange dot well left of the blue one** is a loss. The selector's
+  rule is at least 50 questions, at most 3 points below JSON and not
+  significantly worse (sign test); a model that fails it on some shape of
+  data keeps getting JSON there.
+* **Held-out** rows use records and questions that were not seen when the
+  layouts were chosen. Stage B rows (Haiku, DeepSeek) use the same 200
+  records as the design work.
+
+Grading is strict: an answer with the right value but without its JSON
+quotes, or wrapped in an object, counts as wrong. Most of Sonnet's losses on
+nested orders are ids answered without quotes; the reports say so cell by
+cell:
+
+* [Stage C, Opus 5.5](/docs/results/stage-c/) and the
+  [Sonnet 5.5 run](https://github.com/caioricciuti/ldf/tree/main/reports/2026-10-20-stage-c-sonnet)
+  at 200 held-out records.
+* [1 000 records, Opus and Sonnet](https://github.com/caioricciuti/ldf/tree/main/reports/2026-10-20-large).
+* The [methodology](/docs/methodology/) for how questions are generated and
+  graded.
