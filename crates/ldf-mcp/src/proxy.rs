@@ -32,6 +32,8 @@ pub struct Config {
     pub plain: bool,
     /// Text blocks shorter than this many bytes are never converted.
     pub min_bytes: usize,
+    /// Convert `columns` + `rows` results too (`rewrite::columnar_frame`).
+    pub columnar: bool,
     /// One stderr line per converted result.
     pub log: bool,
     /// Pick JSON or LDF per result for one model; `None` converts whenever
@@ -276,18 +278,19 @@ fn rewrite_line(line: &str, pending: &Pending, cfg: &Config) -> Option<String> {
     let result = msg.get_mut("result")?;
     let tool = req.tool.as_deref().unwrap_or("?");
     match req.method.as_str() {
-        "initialize" if cfg.primed() => rewrite_initialize(result),
+        "initialize" if cfg.primed() => rewrite_initialize(result, cfg.columnar),
         "tools/list" if cfg.primed() => rewrite_tools_list(result),
         "tools/call" => {
             let call_ms = Some(req.at.elapsed().as_millis() as u64);
             if cfg.passthrough {
                 // Measure what passes, change nothing: with no size large
                 // enough to convert, the rewrite only counts the blocks.
-                let done = rewrite_tool_result(result, usize::MAX, None);
+                let done = rewrite_tool_result(result, usize::MAX, None, false);
                 cfg.stats.record(tool, &done, true, call_ms);
                 return None;
             }
-            let done = rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref());
+            let done =
+                rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref(), cfg.columnar);
             cfg.stats.record(tool, &done, false, call_ms);
             if cfg.log {
                 for b in &done.blocks {
@@ -329,6 +332,7 @@ mod tests {
             passthrough: false,
             plain: false,
             min_bytes: 0,
+            columnar: false,
             log: false,
             selector: None,
             stats: Arc::new(Recorder::off()),

@@ -321,6 +321,8 @@ fn reason_text(code: &str) -> &str {
         "not_shorter" => "LDF would not be shorter",
         "selector" => "selector kept JSON for the model",
         "is_error" => "error result, never touched",
+        "out_of_domain" => "a number LDF's value model cannot hold exactly",
+        "not_lossless" => "columnar frame would not decode to the same result",
         "passthrough" => "--passthrough",
         "no_text" => "no text content",
         "persisted" => "Bash output too large to show inline; Claude Code saved it to a file",

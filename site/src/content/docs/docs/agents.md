@@ -243,8 +243,9 @@ description, and re-encodes the text of a `tools/call` result when that text
 is a JSON dataset (an array of objects, or an object holding one) and LDF is
 shorter, or, with `--model`, when the selector accepts it for that model.
 Everything else passes through byte for byte: errors, `isError` results,
-images and other non-text content, `structuredContent`, notifications,
-server-to-client requests, lines that are not JSON. A conversion that fails
+images and other non-text content, `structuredContent` (except FastMCP's
+`{"result": S}` wrapping of the same text, which follows the rewritten
+text), notifications, server-to-client requests, lines that are not JSON. A conversion that fails
 or would not be shorter leaves the original text. `ldf-mcp files` and
 `ldf-mcp clickhouse` are MCP servers of their own that read the data
 directly and answer in LDF.
@@ -271,7 +272,7 @@ control) are listed and left alone; wrap them by hand with the same
 
 | Path to the model | Claude Code | Codex CLI | OpenCode |
 |---|---|---|---|
-| MCP tool results through `ldf-mcp proxy` | yes; `install claude-code` sets it up | partly: when a result carries `structuredContent`, Codex sends that and ignores the text LDF rewrote (source: `codex-rs/protocol/src/models.rs`); works for servers that return text, including `ldf-mcp files` and `clickhouse` | yes; OpenCode ignores `structuredContent` |
+| MCP tool results through `ldf-mcp proxy` | yes; `install claude-code` sets it up. Claude Code also shows the model `structuredContent` when present (seen in 2.1.306 transcripts), so a server whose `structuredContent` is not FastMCP's `{"result": S}` wrapping gets no saving | partly: when a result carries `structuredContent`, Codex sends that and ignores the text LDF rewrote (source: `codex-rs/protocol/src/models.rs`); works for servers that return text, including `ldf-mcp files` and `clickhouse` | yes; OpenCode ignores `structuredContent` |
 | `ldf-mcp files` / `clickhouse` as a server | yes | yes | yes |
 | Configuration | `claude mcp add-json` / `remove`, scopes local, user, project | `~/.codex/config.toml` `[mcp_servers.NAME]` `command`, `args`; `codex mcp add NAME -- CMD` | `opencode.json` `"mcp": {"NAME": {"type": "local", "command": [...]}}` |
 | A hook that can replace tool output | yes: `PostToolUse` returning `hookSpecificOutput.updatedToolOutput`, for MCP and built-in tools; a built-in replacement must pass the tool's output schema or it is ignored. Bash's result carries more than the documented `stdout`, `stderr`, `interrupted`, `isImage` (also `returnCodeInterpretation`, `noOutputExpected`, `backgroundTaskId`, `persistedOutputPath` and others, source), so the hook copies it whole and replaces `stdout` | no: `updatedMCPToolOutput` is documented as not supported yet; only `decision: "block"` replaces output, as blocked feedback capped near 2 500 tokens | yes: plugin hook `tool.execute.after`; for MCP tools the runtime object is the raw result (change `content[i].text`), for built-in tools `output.output` |
@@ -353,8 +354,9 @@ OpenAI's tokenizer. They are not model usage: no agent and no model ran.
 - Claude Code does not tell an MCP server which model is in use; `--model`
   is fixed at install and does not follow `/model`. The hook does follow
   it.
-- Codex reads `structuredContent` when present, so a proxied server that
-  sends it gets no saving there.
+- Codex and Claude Code read `structuredContent` when present. The proxy
+  rewrites it only in FastMCP's `{"result": S}` form; a server that sends
+  any other `structuredContent` gets no saving there.
 - Release binaries cover macOS and Linux (arm64, x86-64) and Windows
   x86-64 (a zip; Windows on Arm runs it under emulation). There is no
   install script yet: download, check the `.sha256`, and put the binary on
