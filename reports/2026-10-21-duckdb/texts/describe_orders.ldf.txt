@@ -1,0 +1,10 @@
+@records success:b,database:s,schema:s,table:s,objectType:s,columns:t,columnCount:i
+true,ldf,main,orders,table,7,7
+@records.columns success:b,name:s,type:s,nullable:b,~:j?
+true,order_id,VARCHAR,true,{"comment":null}
+true,customer,"STRUCT(id BIGINT, \"name\" VARCHAR, address STRUCT(city VARCHAR, country VARCHAR, zip VARCHAR))",true,{"comment":null}
+true,items,"STRUCT(sku VARCHAR, qty BIGINT, price DOUBLE)[]",true,{"comment":null}
+true,total,DOUBLE,true,{"comment":null}
+true,status,VARCHAR,true,{"comment":null}
+true,shipped,BOOLEAN,true,{"comment":null}
+true,note,VARCHAR,true,{"comment":null}

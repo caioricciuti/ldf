@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "database": "ldf",
+  "schema": "all",
+  "tables": [
+    {
+      "schema": "main",
+      "name": "events",
+      "type": "table",
+      "comment": null
+    },
+    {
+      "schema": "main",
+      "name": "logs",
+      "type": "table",
+      "comment": null
+    },
+    {
+      "schema": "main",
+      "name": "orders",
+      "type": "table",
+      "comment": null
+    },
+    {
+      "schema": "main",
+      "name": "users",
+      "type": "table",
+      "comment": null
+    },
+    {
+      "schema": "main",
+      "name": "wide",
+      "type": "table",
+      "comment": null
+    }
+  ],
+  "tableCount": 5,
+  "viewCount": 0
+}
