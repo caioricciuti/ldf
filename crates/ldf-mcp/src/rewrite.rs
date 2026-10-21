@@ -902,9 +902,9 @@ mod tests {
             thresholds: vec![0.5, 0.75],
             hoist_thresholds: vec![0.5, 0.75],
             format: "ldf".into(),
-            n: 80,
-            k: 70,
-            json_k: 70,
+            n: 400,
+            k: 350,
+            json_k: 350,
             wins: 1,
             losses: 1,
             p: 1.0,
@@ -1276,7 +1276,9 @@ mod tests {
         // GPT runs have under 50 questions per cell: not enough to count.
         let sel = Selector::new("gpt-6.1-sol", None);
         assert!(!sel.knows_model());
-        assert!(Selector::new("claude-haiku-5-5", None).knows_model());
+        // Haiku has evidence, but none that rules out a 3-point loss
+        // (reports/2026-10-21-ni-study), so it gets JSON and no primer.
+        assert!(!Selector::new("claude-haiku-5-5", None).knows_model());
         assert!(Selector::new("claude-opus-5-5", None).knows_model());
         assert!(convert(&rows(50), 0, Some(&sel)).is_err());
     }

@@ -1,10 +1,10 @@
 [
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "flat_users",
     "model": "claude-haiku-5-5",
     "records": 200,
-    "tokens_ratio": 0.61
+    "tokens_ratio": 1.0
   },
   {
     "choice": "ldf (sparse threshold 0.5)",
@@ -21,11 +21,11 @@
     "tokens_ratio": 0.61
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "flat_users",
     "model": "deepseek-chat",
     "records": 200,
-    "tokens_ratio": 0.61
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",
@@ -49,11 +49,11 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "flat_users",
     "model": "claude-sonnet-5-5",
     "records": 1000,
-    "tokens_ratio": 0.61
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",
@@ -75,27 +75,27 @@
     "model": "claude-haiku-5-5",
     "records": 200,
     "tokens_ratio": 1.0
-  },
-  {
-    "choice": "ldf (sparse threshold 0.5, hoisted)",
-    "dataset": "nested_orders",
-    "model": "claude-opus-5-5",
-    "records": 200,
-    "tokens_ratio": 0.55
   },
   {
     "choice": "ldf (sparse threshold 0.75)",
     "dataset": "nested_orders",
-    "model": "claude-sonnet-5-5",
+    "model": "claude-opus-5-5",
     "records": 200,
     "tokens_ratio": 0.68
   },
   {
-    "choice": "ldf (sparse threshold 0.5, hoisted)",
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "claude-sonnet-5-5",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
     "dataset": "nested_orders",
     "model": "deepseek-chat",
     "records": 200,
-    "tokens_ratio": 0.55
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",
@@ -112,11 +112,11 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5, hoisted)",
+    "choice": "json",
     "dataset": "nested_orders",
     "model": "claude-opus-5-5",
     "records": 1000,
-    "tokens_ratio": 0.55
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",
@@ -140,11 +140,11 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "sparse_events",
     "model": "claude-haiku-5-5",
     "records": 200,
-    "tokens_ratio": 0.78
+    "tokens_ratio": 1.0
   },
   {
     "choice": "ldf (sparse threshold 0.5)",
@@ -154,11 +154,11 @@
     "tokens_ratio": 0.78
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "sparse_events",
     "model": "claude-sonnet-5-5",
     "records": 200,
-    "tokens_ratio": 0.78
+    "tokens_ratio": 1.0
   },
   {
     "choice": "ldf (sparse threshold 0.75)",
@@ -182,11 +182,11 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "sparse_events",
     "model": "claude-opus-5-5",
     "records": 1000,
-    "tokens_ratio": 0.8
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",
@@ -210,11 +210,11 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "mixed_types",
     "model": "claude-haiku-5-5",
     "records": 200,
-    "tokens_ratio": 0.73
+    "tokens_ratio": 1.0
   },
   {
     "choice": "ldf (sparse threshold 0.5)",
@@ -252,18 +252,18 @@
     "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "mixed_types",
     "model": "claude-opus-5-5",
     "records": 1000,
-    "tokens_ratio": 0.73
+    "tokens_ratio": 1.0
   },
   {
-    "choice": "ldf (sparse threshold 0.5)",
+    "choice": "json",
     "dataset": "mixed_types",
     "model": "claude-sonnet-5-5",
     "records": 1000,
-    "tokens_ratio": 0.73
+    "tokens_ratio": 1.0
   },
   {
     "choice": "json",

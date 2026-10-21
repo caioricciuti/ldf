@@ -548,8 +548,8 @@ mod tests {
         // hook's wiring, not whatever evidence the release ships.
         let row = json!({"model": "claude-opus-5-5", "run": "t/flat", "dataset": "flat", "records": 200,
             "traits": [], "family": "ldf", "thresholds": [0.0, 0.25, 0.5, 0.75, 1.0],
-            "hoist_thresholds": [0.0, 0.25, 0.5, 0.75, 1.0], "format": "ldf", "n": 60, "k": 60,
-            "json_k": 60, "wins": 0, "losses": 0, "p": 1.0, "tokens_ratio": 0.6});
+            "hoist_thresholds": [0.0, 0.25, 0.5, 0.75, 1.0], "format": "ldf", "n": 300, "k": 300,
+            "json_k": 300, "wins": 0, "losses": 0, "p": 1.0, "tokens_ratio": 0.6});
         let c = Config {
             evidence: Some(vec![serde_json::from_value(row).unwrap()]),
             ..cfg(Some(&dir))

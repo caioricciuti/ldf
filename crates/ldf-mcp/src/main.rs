@@ -549,8 +549,7 @@ impl SelectFlags {
         let sel = Selector::new(&model, evidence);
         if !sel.knows_model() {
             eprintln!(
-                "ldf-mcp: no evidence for model {model} with at least {} questions; every result stays JSON",
-                sel.policy.min_n
+                "ldf-mcp: no measured data shape gets {model} LDF under the selector's policy; every result stays JSON"
             );
         }
         Ok(Some(sel))
