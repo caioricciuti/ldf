@@ -7,7 +7,8 @@ description: "LDF between a data source and the model: the proxy and the ClickHo
 receives LDF instead of JSON. Three modes:
 
 * `ldf-mcp proxy -- <server command>` wraps any stdio MCP server and
-  re-encodes its JSON tool results (README, "MCP proxy").
+  re-encodes its JSON tool results (README, "MCP proxy"). A result
+  that stays JSON goes out minified if it was pretty-printed.
 * `ldf-mcp clickhouse` is an MCP server of its own over ClickHouse's HTTP
   interface. Most of this page is about that mode and a local setup to try
   it.

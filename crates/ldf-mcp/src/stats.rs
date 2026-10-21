@@ -171,6 +171,9 @@ impl Recorder {
         if let Some(r) = reason {
             ev["reason"] = json!(r);
         }
+        if !passthrough && done.minified() {
+            ev["minified"] = json!(true);
+        }
         if let Some(m) = &self.model {
             ev["model"] = json!(m);
         }

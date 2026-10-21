@@ -5,6 +5,17 @@ Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `site/src/content/docs/docs/spec.md`.
 
+## Unreleased
+
+- `ldf-mcp proxy`: a JSON result that stays JSON (not a dataset, LDF not
+  shorter, or the selector's choice) now goes out minified when it was
+  pretty-printed. Tokens are kept byte for byte, so the JSON is
+  semantically equal. Small, error and non-JSON results are untouched,
+  `--passthrough` sends the original, and the stats event carries
+  `"minified": true`. MotherDuck's DuckDB server answers in pretty
+  columnar JSON, which LDF does not convert; this takes it to 0.40 to 0.58
+  of its bytes (`reports/2026-10-21-duckdb/minified`, bench_mcp.py --mode duckdb after this change).
+
 ## 0.5.2 (2026-10-20)
 
 Selector evidence at 1 000 records, size bands, and Claude Code hook
