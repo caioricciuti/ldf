@@ -1,0 +1,52 @@
+{
+  "success": true,
+  "database": "ldf",
+  "schema": "main",
+  "table": "orders",
+  "objectType": "table",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "VARCHAR",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "customer",
+      "type": "STRUCT(id BIGINT, \"name\" VARCHAR, address STRUCT(city VARCHAR, country VARCHAR, zip VARCHAR))",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "items",
+      "type": "STRUCT(sku VARCHAR, qty BIGINT, price DOUBLE)[]",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "total",
+      "type": "DOUBLE",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "shipped",
+      "type": "BOOLEAN",
+      "nullable": true,
+      "comment": null
+    },
+    {
+      "name": "note",
+      "type": "VARCHAR",
+      "nullable": true,
+      "comment": null
+    }
+  ],
+  "columnCount": 7
+}

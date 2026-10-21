@@ -49,7 +49,7 @@ const chRows = [
 const servers = `ldf-mcp clickhouse --url http://127.0.0.1:8123 --user reader
 ldf-mcp files --root ./exports       # csv, tsv, json, jsonl, parquet`;
 
-const proxy = `ldf-mcp proxy --model claude-opus-5-5 -- <your database MCP server> [its args]`;
+const proxy = `ldf-mcp proxy --model claude-opus-5-5 -- <an MCP server> [its args]`;
 
 const convert = `ldf-mcp convert export.parquet > export.ldf`;
 
@@ -196,7 +196,7 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
           <pre><code>{servers}</code></pre>
         </div>
         <div class="sample">
-          <div class="sample-bar"><span>In front of any database MCP server</span><span class="dim">stdio proxy</span></div>
+          <div class="sample-bar"><span>In front of another MCP server</span><span class="dim">converts arrays of records</span></div>
           <pre><code>{proxy}</code></pre>
         </div>
         <div class="sample">
@@ -250,7 +250,7 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
           One Rust workspace, published on crates.io: the codec, the per-model selector,
           <code>ldf-mcp</code>, ten baseline formats implemented faithfully (TOON passes its official
           conformance suite), and the benchmark and evaluation harnesses. Every dependency pinned.
-          ClickHouse and data files are supported directly; other databases through the proxy.
+          ClickHouse and data files are supported directly. The proxy converts servers that return arrays of records and passes other shapes through untouched: MotherDuck's DuckDB server returns columns and rows, so it gains nothing yet (<a href={`${repo}/tree/main/reports/2026-10-21-duckdb`}>DuckDB check</a>).
         </p>
         <p class="consult">
           Putting a model on top of your own database? Caio Ricciuti, who builds LDF, helps teams wire
@@ -532,6 +532,11 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
   }
   .mcp-points strong {
     color: var(--text);
+  }
+  .lead a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
   }
   .lead code {
     font-size: 0.9em;

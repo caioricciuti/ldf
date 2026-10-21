@@ -12,6 +12,7 @@ Standard library only. The ClickHouse password is read by ldf-mcp from
 CLICKHOUSE_PASSWORD in the environment; this script never reads or prints it.
 
     python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files
+    python3 -I eval/bench_mcp.py --mode duckdb --db results/mcp-duckdb/ldf.duckdb --out results/mcp-duckdb
     python3 -I eval/bench_mcp.py --mode clickhouse --url http://127.0.0.1:8124 --user ldf --out results/mcp-clickhouse
 """
 import argparse, json, os, statistics, subprocess, sys, time
@@ -32,6 +33,22 @@ CLICKHOUSE = [
     ('logs_errors_500', 'run_select', {'sql': "SELECT * FROM logs WHERE level IN ('ERROR', 'WARN') ORDER BY ts DESC LIMIT 500"}),
     ('wide_1000', 'run_select', {'sql': 'SELECT * FROM wide ORDER BY id LIMIT 1000'}),
     ('logs_10000', 'run_select', {'sql': 'SELECT * FROM logs'}),
+]
+# The same session against DuckDB through a third-party MCP server
+# (MotherDuck's, pinned, wheels only, nothing newer than the date) behind
+# `ldf-mcp proxy`.
+DUCKDB_SERVER = ['uvx', '--exclude-newer', '2026-10-14', '--no-build', '--from',
+                 'mcp-server-motherduck==1.1.0', 'mcp-server-motherduck']
+DUCKDB = [
+    ('list_tables', 'list_tables', {}),
+    ('describe_orders', 'list_columns', {'table': 'orders'}),
+    ('users_50', 'execute_query', {'sql': 'SELECT * FROM users ORDER BY id LIMIT 50'}),
+    ('users_by_country', 'execute_query', {'sql': 'SELECT country, count(*) AS n, round(avg(score), 2) AS avg_score FROM users GROUP BY country ORDER BY n DESC, country'}),
+    ('events_200', 'execute_query', {'sql': 'SELECT * FROM events ORDER BY event_id LIMIT 200'}),
+    ('orders_100', 'execute_query', {'sql': 'SELECT * FROM orders ORDER BY order_id LIMIT 100'}),
+    ('logs_errors_500', 'execute_query', {'sql': "SELECT * FROM logs WHERE level IN ('ERROR', 'WARN') ORDER BY ts DESC LIMIT 500"}),
+    ('wide_1000', 'execute_query', {'sql': 'SELECT * FROM wide ORDER BY id LIMIT 1000'}),
+    ('logs_10000', 'execute_query', {'sql': 'SELECT * FROM logs'}),
 ]
 FILES = [
     ('list_files', 'list_files', {}),
@@ -70,22 +87,30 @@ class Server:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--mode', choices=['clickhouse', 'files'], required=True)
+    ap.add_argument('--mode', choices=['clickhouse', 'files', 'duckdb'], required=True)
     ap.add_argument('--url', default='http://127.0.0.1:8124')
     ap.add_argument('--user', default='default')
     ap.add_argument('--root', default='fixtures/medium')
+    ap.add_argument('--db', help='DuckDB file for --mode duckdb')
     ap.add_argument('--max-rows', type=int, default=10000)
     ap.add_argument('--repeats', type=int, default=20)
     ap.add_argument('--warmup', type=int, default=3)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
     os.makedirs(os.path.join(a.out, 'texts'), exist_ok=True)
-    base = [MCP, a.mode, '--max-rows', str(a.max_rows), '--quiet']
-    base += ['--url', a.url, '--user', a.user] if a.mode == 'clickhouse' else ['--root', a.root]
-    queries = CLICKHOUSE if a.mode == 'clickhouse' else FILES
+    if a.mode == 'duckdb':
+        # --max-chars well above the largest result, so the server never truncates.
+        upstream = DUCKDB_SERVER + ['--db-path', a.db, '--max-rows', str(a.max_rows), '--max-chars', '100000000']
+        argv = lambda extra: [MCP, 'proxy', '--quiet'] + extra + ['--'] + upstream
+        queries = DUCKDB
+    else:
+        base = [MCP, a.mode, '--max-rows', str(a.max_rows), '--quiet']
+        base += ['--url', a.url, '--user', a.user] if a.mode == 'clickhouse' else ['--root', a.root]
+        argv = lambda extra: base + extra
+        queries = CLICKHOUSE if a.mode == 'clickhouse' else FILES
     results = {q[0]: {'tool': q[1], 'arguments': q[2]} for q in queries}
     for variant, extra in [('ldf', []), ('json', ['--passthrough'])]:
-        srv = Server(base + extra)
+        srv = Server(argv(extra))
         for name, tool, args in queries:
             times = []
             for i in range(a.warmup + a.repeats):
