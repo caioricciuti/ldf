@@ -5,10 +5,19 @@ Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `site/src/content/docs/docs/spec.md`.
 
-## Unreleased
+## 0.5.2 (2026-10-20)
+
+Selector evidence at 1 000 records, size bands, and Claude Code hook
+fixes. The specification stays v0.2.
 
 ### Changed
 
+- The evidence built into `ldf-select` now has Opus 5.5 and Sonnet 5.5 at
+  1 000 held-out records (`reports/2026-10-20-large`). From 201 to 1 000
+  rows: Opus gets LDF on nested (hoisted), sparse and mixed-type data and
+  JSON on flat data; Sonnet gets LDF on flat and mixed-type data and JSON
+  on nested and sparse data. Haiku and DeepSeek have no evidence above 200
+  rows and get JSON there. Above 1 000 rows every model gets JSON.
 - `ldf-select` judges an input by size band: only evidence at the smallest
   measured size at or above the input's row count counts (200 or 1 000
   records today). Before, any failing row withdrew a layout at every size,
@@ -19,6 +28,7 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ### Added
 
+- `ldf-eval build --kinds` limits a bundle to the listed task kinds.
 - Claude Code hook: a command containing `LDF_RAW=1` keeps its JSON
   (reason `raw`); the conversion note tells the model so.
 - `install claude-code --hooks` and `doctor` warn when another
