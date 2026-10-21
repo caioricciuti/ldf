@@ -1,0 +1,117 @@
+---
+// What `ldf-mcp --model` sends, per model and data shape, from
+// reports/evidence/verdicts.json (`ldf-discover verdicts`, copied to
+// src/data by sync-docs.mjs). A cell is LDF's o200k tokens as a share of
+// JSON's where the selector picks LDF, and JSON where it does not.
+import verdicts from "../data/verdicts.json";
+
+interface Row {
+  model: string;
+  dataset: string;
+  records: number;
+  choice: string;
+  tokens_ratio: number;
+}
+
+const rows = verdicts as Row[];
+
+const models: [string, string][] = [
+  ["claude-opus-5-5", "Claude Opus 5.5"],
+  ["claude-sonnet-5-5", "Claude Sonnet 5.5"],
+  ["claude-haiku-5-5", "Claude Haiku 5.5"],
+  ["deepseek-chat", "DeepSeek"],
+  ["gpt-6.1-sol", "GPT-6.1 Sol"],
+];
+const shapes: [string, string][] = [
+  ["flat_users", "flat"],
+  ["nested_orders", "nested"],
+  ["sparse_events", "sparse"],
+  ["mixed_types", "mixed types"],
+];
+
+const cell = (model: string, dataset: string, records: number) => {
+  const r = rows.find((v) => v.model === model && v.dataset === dataset && v.records === records);
+  if (!r || r.choice === "json") return null;
+  return `${r.tokens_ratio.toFixed(2)}×`;
+};
+---
+
+<div class="grid-wrap">
+  <table class="verdicts">
+    <thead>
+      <tr>
+        <th></th>
+        {shapes.map(([, label]) => <th>{label}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {models.map(([id, name]) => (
+        <tr>
+          <th scope="row">{name}</th>
+          {shapes.map(([ds]) => {
+            const small = cell(id, ds, 200);
+            const large = cell(id, ds, 1000);
+            return (
+              <td>
+                <span class:list={["v", small ? "ldf" : "json"]}>{small ? `LDF ${small}` : "JSON"}</span>
+                <span class="v2">to 1 000 rows: {large ? `LDF ${large}` : "JSON"}</span>
+              </td>
+            );
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .grid-wrap {
+    margin-top: 2.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-1);
+  }
+  .verdicts {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .verdicts th,
+  .verdicts td {
+    text-align: left;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .verdicts thead th {
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .verdicts tbody th {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .verdicts tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  .v {
+    display: block;
+    font-weight: 600;
+  }
+  .v.ldf {
+    color: var(--mint);
+  }
+  .v.json {
+    color: var(--muted);
+  }
+  .v2 {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--dim);
+  }
+</style>

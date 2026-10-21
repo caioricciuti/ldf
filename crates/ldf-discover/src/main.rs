@@ -51,8 +51,9 @@ fn main() -> ExitCode {
         Some("stage-a") => cmd_stage_a(&args),
         Some("profile") => cmd_profile(&args),
         Some("select") => cmd_select(&args),
+        Some("verdicts") => cmd_verdicts(&args),
         _ => Err(
-            "usage: ldf-discover space | show --id ID --input F | stage-a [...] | profile --input F | select --model M --input F"
+            "usage: ldf-discover space | show --id ID --input F | stage-a [...] | profile --input F | select --model M --input F | verdicts --root DIR --out F"
                 .into(),
         ),
     };
@@ -128,6 +129,63 @@ fn cmd_select(args: &[String]) -> Result<(), String> {
         }
     }
     println!("choice: {}", d.choice.name());
+    Ok(())
+}
+
+/// What `ldf-mcp --model` sends, per model, benchmark shape and size: the
+/// selector over JSON and LDF on the first 200 and 1 000 records of each
+/// dataset, in o200k tokens. The site's landing grid reads this file.
+fn cmd_verdicts(args: &[String]) -> Result<(), String> {
+    use ldf_discover::select::{Evidence, LDF_CANDIDATES, Policy, select_among};
+    const DATASETS: [&str; 4] = [
+        "flat_users",
+        "nested_orders",
+        "sparse_events",
+        "mixed_types",
+    ];
+    const SIZES: [usize; 2] = [200, 1000];
+    let root = flag(args, "--root").unwrap_or("fixtures/medium");
+    let out = flag(args, "--out").ok_or("--out required")?;
+    let ev_path = flag(args, "--evidence").unwrap_or("reports/evidence/evidence.json");
+    let evidence: Vec<Evidence> =
+        serde_json::from_slice(&fs::read(ev_path).map_err(|e| format!("{ev_path}: {e}"))?)
+            .map_err(|e| format!("{ev_path}: {e}"))?;
+    let mut models: Vec<&str> = evidence.iter().map(|e| e.model.as_str()).collect();
+    models.sort_unstable();
+    models.dedup();
+    let policy = Policy::default();
+    let tk = ldf_bench::tokens::Tokenizers::new(&["o200k_base"])?;
+    let count = |s: &str| tk.count(s)[0].tokens;
+    let mut rows = Vec::new();
+    for dataset in DATASETS {
+        let all = load(&Path::new(root).join(format!("{dataset}.json")), usize::MAX)?;
+        for size in SIZES {
+            let recs = &all[..size.min(all.len())];
+            for &model in &models {
+                let d = select_among(recs, model, &evidence, &policy, &LDF_CANDIDATES, &count);
+                let size_of = |c| {
+                    d.verdicts
+                        .iter()
+                        .find(|v| v.choice == c)
+                        .and_then(|v| v.tokens)
+                };
+                let ratio = match (size_of(d.choice), size_of(LDF_CANDIDATES[0])) {
+                    (Some(t), Some(j)) if j > 0 => t as f64 / j as f64,
+                    _ => 1.0,
+                };
+                rows.push(serde_json::json!({
+                    "model": model,
+                    "dataset": dataset,
+                    "records": recs.len(),
+                    "choice": d.choice.name(),
+                    "tokens_ratio": (ratio * 100.0).round() / 100.0,
+                }));
+            }
+        }
+    }
+    let text = serde_json::to_string_pretty(&rows).map_err(|e| e.to_string())? + "\n";
+    fs::write(out, text).map_err(|e| format!("{out}: {e}"))?;
+    println!("{} verdicts -> {out}", rows.len());
     Ok(())
 }
 

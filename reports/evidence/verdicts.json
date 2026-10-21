@@ -1,0 +1,282 @@
+[
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "flat_users",
+    "model": "claude-haiku-5-5",
+    "records": 200,
+    "tokens_ratio": 0.61
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "flat_users",
+    "model": "claude-opus-5-5",
+    "records": 200,
+    "tokens_ratio": 0.61
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "flat_users",
+    "model": "claude-sonnet-5-5",
+    "records": 200,
+    "tokens_ratio": 0.61
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "flat_users",
+    "model": "deepseek-chat",
+    "records": 200,
+    "tokens_ratio": 0.61
+  },
+  {
+    "choice": "json",
+    "dataset": "flat_users",
+    "model": "gpt-6.1-sol",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "flat_users",
+    "model": "claude-haiku-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "flat_users",
+    "model": "claude-opus-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "flat_users",
+    "model": "claude-sonnet-5-5",
+    "records": 1000,
+    "tokens_ratio": 0.61
+  },
+  {
+    "choice": "json",
+    "dataset": "flat_users",
+    "model": "deepseek-chat",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "flat_users",
+    "model": "gpt-6.1-sol",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "claude-haiku-5-5",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5, hoisted)",
+    "dataset": "nested_orders",
+    "model": "claude-opus-5-5",
+    "records": 200,
+    "tokens_ratio": 0.55
+  },
+  {
+    "choice": "ldf (sparse threshold 0.75)",
+    "dataset": "nested_orders",
+    "model": "claude-sonnet-5-5",
+    "records": 200,
+    "tokens_ratio": 0.68
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5, hoisted)",
+    "dataset": "nested_orders",
+    "model": "deepseek-chat",
+    "records": 200,
+    "tokens_ratio": 0.55
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "gpt-6.1-sol",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "claude-haiku-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5, hoisted)",
+    "dataset": "nested_orders",
+    "model": "claude-opus-5-5",
+    "records": 1000,
+    "tokens_ratio": 0.55
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "claude-sonnet-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "deepseek-chat",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "nested_orders",
+    "model": "gpt-6.1-sol",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "sparse_events",
+    "model": "claude-haiku-5-5",
+    "records": 200,
+    "tokens_ratio": 0.78
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "sparse_events",
+    "model": "claude-opus-5-5",
+    "records": 200,
+    "tokens_ratio": 0.78
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "sparse_events",
+    "model": "claude-sonnet-5-5",
+    "records": 200,
+    "tokens_ratio": 0.78
+  },
+  {
+    "choice": "ldf (sparse threshold 0.75)",
+    "dataset": "sparse_events",
+    "model": "deepseek-chat",
+    "records": 200,
+    "tokens_ratio": 0.89
+  },
+  {
+    "choice": "json",
+    "dataset": "sparse_events",
+    "model": "gpt-6.1-sol",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "sparse_events",
+    "model": "claude-haiku-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "sparse_events",
+    "model": "claude-opus-5-5",
+    "records": 1000,
+    "tokens_ratio": 0.8
+  },
+  {
+    "choice": "json",
+    "dataset": "sparse_events",
+    "model": "claude-sonnet-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "sparse_events",
+    "model": "deepseek-chat",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "sparse_events",
+    "model": "gpt-6.1-sol",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "claude-haiku-5-5",
+    "records": 200,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "claude-opus-5-5",
+    "records": 200,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "claude-sonnet-5-5",
+    "records": 200,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "deepseek-chat",
+    "records": 200,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "json",
+    "dataset": "mixed_types",
+    "model": "gpt-6.1-sol",
+    "records": 200,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "mixed_types",
+    "model": "claude-haiku-5-5",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "claude-opus-5-5",
+    "records": 1000,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "ldf (sparse threshold 0.5)",
+    "dataset": "mixed_types",
+    "model": "claude-sonnet-5-5",
+    "records": 1000,
+    "tokens_ratio": 0.73
+  },
+  {
+    "choice": "json",
+    "dataset": "mixed_types",
+    "model": "deepseek-chat",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  },
+  {
+    "choice": "json",
+    "dataset": "mixed_types",
+    "model": "gpt-6.1-sol",
+    "records": 1000,
+    "tokens_ratio": 1.0
+  }
+]

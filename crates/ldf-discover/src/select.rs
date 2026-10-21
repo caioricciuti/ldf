@@ -8,8 +8,8 @@ use ldf_data::Value;
 use ldf_formats::Format;
 use ldf_formats::ldf::LdfFormat;
 pub use ldf_select::{
-    CANDIDATES, Choice, Decision, Evidence, Measured, Policy, Profile, SPARSE_FILL, Traits,
-    Verdict, profile, sign_test,
+    CANDIDATES, Choice, Decision, Evidence, LDF_CANDIDATES, Measured, Policy, Profile, SPARSE_FILL,
+    Traits, Verdict, profile, sign_test,
 };
 
 fn format_of(choice: Choice) -> Box<dyn Format> {
@@ -40,7 +40,20 @@ pub fn select(
     policy: &Policy,
     count: &dyn Fn(&str) -> u64,
 ) -> Decision {
-    ldf_select::decide(records, model, evidence, policy, &CANDIDATES, &mut |c| {
+    select_among(records, model, evidence, policy, &CANDIDATES, count)
+}
+
+/// [`select`] over other `candidates` (starting with JSON), such as
+/// [`LDF_CANDIDATES`], the set `ldf-mcp` chooses from.
+pub fn select_among(
+    records: &[Value],
+    model: &str,
+    evidence: &[Evidence],
+    policy: &Policy,
+    candidates: &[Choice],
+    count: &dyn Fn(&str) -> u64,
+) -> Decision {
+    ldf_select::decide(records, model, evidence, policy, candidates, &mut |c| {
         let fmt = format_of(c);
         let rt = roundtrip::check(fmt.as_ref(), records);
         let lossless = match rt.level {
