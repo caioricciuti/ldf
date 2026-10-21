@@ -67,9 +67,14 @@ result (members, their order, and integer or float kind) and it is shorter
 than the original minified; otherwise the minified JSON goes out. Duplicate
 column names, ragged rows, an empty result, and any number outside the
 value model (an integer beyond u64, as DuckDB's `HUGEINT` can send, or a
-decimal f64 cannot hold) stay JSON. `isError` results and
-`structuredContent` are never touched, so a client that reads
-`structuredContent` still gets the server's original. The primer gains
+decimal f64 cannot hold) stay JSON. `isError` results are never touched.
+MotherDuck's server, like any FastMCP tool that returns a string, also
+sends the text as `structuredContent` `{"result": "..."}`, and Claude Code
+shows the model that copy rather than the text block. When
+`structuredContent` is exactly `{"result": S}` with `S` the original text,
+the proxy puts the rewritten text (frame or minified JSON) there as well,
+so both copies agree; any other `structuredContent` is left as it is. The
+primer gains
 one paragraph describing the frame. With `--model`, columnar results stay
 JSON: no model has been graded on a frame yet.
 
@@ -79,6 +84,32 @@ the tokens on most tables; the frame removes a further 1 to 7 percent on
 flat tables and 13 to 28 percent where the rows have structs, lists or
 mixed types. NULL-heavy results stay JSON, because the sparse-key rule
 writes their NULLs as `"key":null` pairs.
+
+## Capping result size
+
+`ldf-mcp proxy --max-result-bytes N` (opt-in) bounds what one tool result
+can put in the model's context. When a result's text, after the rewrite
+above, is still longer than `N` bytes and holds rows (a top-level array of
+objects, the `rows` of a columnar result, or the single member of an object
+that is an array of objects), the proxy keeps the longest leading run of
+rows that fits and adds a text block after it:
+
+```text
+Result cut by ldf-mcp: showing the first 288 of 10000 rows, to stay under 20000 bytes; the other rows were not sent. Narrow the query with WHERE, aggregate with GROUP BY, or page with LIMIT and OFFSET.
+```
+
+Every other member of the result (`rowCount`, `truncated`, column types)
+stays as the server sent it, so a count the server reports still says how
+many rows exist. FastMCP's wrapped `structuredContent` gets the cut text
+followed by the note, since that is the copy Claude Code shows. Errors,
+results without rows, results that already fit, and results holding a
+number outside the value model are never cut. A byte budget is exact where
+a token estimate is not: LDF runs at about 2.2 bytes per o200k token and
+JSON at about 3, so 20 000 bytes is roughly 7 000 to 9 000 tokens.
+
+Through MotherDuck's server, `SELECT * FROM logs` (10 000 rows, 683 KB
+after the columnar rewrite) comes back as 288 rows in 19 931 bytes, 89 ms
+p50 against 66 ms uncapped.
 
 ## Choosing the format per model
 

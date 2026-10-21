@@ -14,7 +14,9 @@ use std::time::{Duration, Instant};
 
 use serde_json::Value as Json;
 
-use crate::rewrite::{Kept, Selector, rewrite_initialize, rewrite_tool_result, rewrite_tools_list};
+use crate::rewrite::{
+    Kept, Rules, Selector, rewrite_initialize, rewrite_tool_result, rewrite_tools_list,
+};
 use crate::stats::Recorder;
 
 /// How long the child gets to exit after the client closed our stdin (and
@@ -34,6 +36,9 @@ pub struct Config {
     pub min_bytes: usize,
     /// Convert `columns` + `rows` results too (`rewrite::columnar_frame`).
     pub columnar: bool,
+    /// Cut rows from results still longer than this many bytes
+    /// (`rewrite::cap_rows`).
+    pub max_bytes: Option<usize>,
     /// One stderr line per converted result.
     pub log: bool,
     /// Pick JSON or LDF per result for one model; `None` converts whenever
@@ -285,12 +290,20 @@ fn rewrite_line(line: &str, pending: &Pending, cfg: &Config) -> Option<String> {
             if cfg.passthrough {
                 // Measure what passes, change nothing: with no size large
                 // enough to convert, the rewrite only counts the blocks.
-                let done = rewrite_tool_result(result, usize::MAX, None, false);
+                let rules = Rules {
+                    min_bytes: usize::MAX,
+                    ..Rules::default()
+                };
+                let done = rewrite_tool_result(result, &rules, None);
                 cfg.stats.record(tool, &done, true, call_ms);
                 return None;
             }
-            let done =
-                rewrite_tool_result(result, cfg.min_bytes, cfg.selector.as_ref(), cfg.columnar);
+            let rules = Rules {
+                min_bytes: cfg.min_bytes,
+                columnar: cfg.columnar,
+                max_bytes: cfg.max_bytes,
+            };
+            let done = rewrite_tool_result(result, &rules, cfg.selector.as_ref());
             cfg.stats.record(tool, &done, false, call_ms);
             if cfg.log {
                 for b in &done.blocks {
@@ -333,6 +346,7 @@ mod tests {
             plain: false,
             min_bytes: 0,
             columnar: false,
+            max_bytes: None,
             log: false,
             selector: None,
             stats: Arc::new(Recorder::off()),
