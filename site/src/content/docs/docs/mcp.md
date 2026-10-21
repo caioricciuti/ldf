@@ -85,6 +85,32 @@ flat tables and 13 to 28 percent where the rows have structs, lists or
 mixed types. NULL-heavy results stay JSON, because the sparse-key rule
 writes their NULLs as `"key":null` pairs.
 
+## Capping result size
+
+`ldf-mcp proxy --max-result-bytes N` (opt-in) bounds what one tool result
+can put in the model's context. When a result's text, after the rewrite
+above, is still longer than `N` bytes and holds rows (a top-level array of
+objects, the `rows` of a columnar result, or the single member of an object
+that is an array of objects), the proxy keeps the longest leading run of
+rows that fits and adds a text block after it:
+
+```text
+Result cut by ldf-mcp: showing the first 288 of 10000 rows, to stay under 20000 bytes; the other rows were not sent. Narrow the query with WHERE, aggregate with GROUP BY, or page with LIMIT and OFFSET.
+```
+
+Every other member of the result (`rowCount`, `truncated`, column types)
+stays as the server sent it, so a count the server reports still says how
+many rows exist. FastMCP's wrapped `structuredContent` gets the cut text
+followed by the note, since that is the copy Claude Code shows. Errors,
+results without rows, results that already fit, and results holding a
+number outside the value model are never cut. A byte budget is exact where
+a token estimate is not: LDF runs at about 2.2 bytes per o200k token and
+JSON at about 3, so 20 000 bytes is roughly 7 000 to 9 000 tokens.
+
+Through MotherDuck's server, `SELECT * FROM logs` (10 000 rows, 683 KB
+after the columnar rewrite) comes back as 288 rows in 19 931 bytes, 89 ms
+p50 against 66 ms uncapped.
+
 ## Choosing the format per model
 
 `--model ID`, in all three modes, hands the JSON-or-LDF decision to the

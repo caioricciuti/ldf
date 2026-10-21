@@ -5,7 +5,7 @@ use std::time::Instant;
 use ldf_data::Value;
 use ldf_data::input::{JsonEngine, parse_json_value};
 use ldf_select::{Choice, Evidence, Policy};
-use serde_json::Value as Json;
+use serde_json::{Value as Json, json};
 
 /// What the model is told once, at `initialize`, about the format it will
 /// receive. Kept to the rules a reader needs; the full spec is
@@ -414,6 +414,8 @@ pub struct Block {
     pub out_bytes: usize,
     /// `None` when the block was replaced by LDF.
     pub kept: Option<Kept>,
+    /// Rows shown and rows in the result, when [`cap_rows`] cut it.
+    pub rows: Option<(usize, usize)>,
 }
 
 /// What [`rewrite_tool_result`] did to one result.
@@ -464,21 +466,29 @@ pub fn minify_json(text: &str) -> Option<String> {
     (out.len() < text.len()).then_some(out)
 }
 
+/// How [`rewrite_tool_result`] treats a result.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Rules {
+    /// Text blocks shorter than this are left alone.
+    pub min_bytes: usize,
+    /// Convert `columns` + `rows` results too ([`columnar_frame`]).
+    pub columnar: bool,
+    /// Cut rows from a result whose text would still be longer than this
+    /// many bytes ([`cap_rows`]), and say so in a note.
+    pub max_bytes: Option<usize>,
+}
+
 /// Rewrites the text content blocks of a `tools/call` result in place: LDF
-/// where [`convert_with`] gives it (`columnar` turns on the columnar
-/// adapter), otherwise JSON that parsed goes out minified. Results flagged
-/// `isError`, blocks under `min_bytes` and non-text blocks are left alone.
-/// `structuredContent` is left alone too, except when it is exactly
-/// `{"result": S}` with `S` the text of a rewritten block, which is how
-/// FastMCP wraps a tool that returns a string: then `S` is replaced by the
-/// same rewritten text, so both copies still agree. Claude Code shows the
-/// model `structuredContent` when it is present, not the text block.
-pub fn rewrite_tool_result(
-    result: &mut Json,
-    min_bytes: usize,
-    sel: Option<&Selector>,
-    columnar: bool,
-) -> Rewritten {
+/// where [`convert_with`] gives it, otherwise JSON that parsed goes out
+/// minified; with `rules.max_bytes`, rows are cut to fit and a note block
+/// follows the cut block. Results flagged `isError`, blocks under
+/// `min_bytes` and non-text blocks are left alone. `structuredContent` is
+/// left alone too, except when it is exactly `{"result": S}` with `S` the
+/// text of a rewritten block, which is how FastMCP wraps a tool that
+/// returns a string: then `S` is replaced by the same rewritten text (and
+/// the note, after a blank line). Claude Code shows the model
+/// `structuredContent` when it is present, not the text block.
+pub fn rewrite_tool_result(result: &mut Json, rules: &Rules, sel: Option<&Selector>) -> Rewritten {
     let start = Instant::now();
     let mut done = Rewritten::default();
     let is_error = result.get("isError").and_then(Json::as_bool) == Some(true);
@@ -490,8 +500,9 @@ pub fn rewrite_tool_result(
         .and_then(Json::as_str)
         .map(str::to_string);
     let mut rewrapped: Option<String> = None;
+    let mut notes: Vec<(usize, String)> = Vec::new();
     if let Some(content) = result.get_mut("content").and_then(Json::as_array_mut) {
-        for block in content.iter_mut() {
+        for (i, block) in content.iter_mut().enumerate() {
             if block.get("type").and_then(Json::as_str) != Some("text") {
                 continue;
             }
@@ -502,20 +513,10 @@ pub fn rewrite_tool_result(
             let converted = if is_error {
                 Err(Kept::IsError)
             } else {
-                convert_with(text, min_bytes, sel, columnar)
+                convert_with(text, rules.min_bytes, sel, rules.columnar)
             };
-            match converted {
-                Ok(ldf) => {
-                    done.blocks.push(Block {
-                        in_bytes: text.len(),
-                        out_bytes: ldf.len(),
-                        kept: None,
-                    });
-                    if mirrored {
-                        rewrapped = Some(ldf.clone());
-                    }
-                    block["text"] = Json::String(ldf);
-                }
+            let (mut out, kept) = match converted {
+                Ok(ldf) => (Some(ldf), None),
                 Err(why) => {
                     // Parsed as JSON but stays JSON: at least drop the
                     // pretty-printing.
@@ -527,20 +528,50 @@ pub fn rewrite_tool_result(
                             | Kept::OutOfDomain
                             | Kept::NotLossless
                     );
-                    let mini = if parsed { minify_json(text) } else { None };
-                    done.blocks.push(Block {
-                        in_bytes: text.len(),
-                        out_bytes: mini.as_ref().map_or(text.len(), String::len),
-                        kept: Some(why),
-                    });
-                    if let Some(mini) = mini {
-                        if mirrored {
-                            rewrapped = Some(mini.clone());
-                        }
-                        block["text"] = Json::String(mini);
-                    }
+                    (if parsed { minify_json(text) } else { None }, Some(why))
                 }
+            };
+            let mut rows = None;
+            let len = out.as_ref().map_or(text.len(), String::len);
+            if let Some(max) = rules.max_bytes
+                && !is_error
+                && len > max
+                && let Some(cut) = cap_rows(text, max, rules, sel)
+            {
+                notes.push((i, cut.note()));
+                rows = Some((cut.shown, cut.total));
+                out = Some(cut.text);
             }
+            let in_bytes = text.len();
+            if let Some(out) = out {
+                if mirrored {
+                    let note = notes
+                        .last()
+                        .filter(|(j, _)| *j == i)
+                        .map(|(_, n)| n.as_str());
+                    rewrapped = Some(match note {
+                        Some(n) => format!("{out}\n\n{n}"),
+                        None => out.clone(),
+                    });
+                }
+                done.blocks.push(Block {
+                    in_bytes,
+                    out_bytes: out.len(),
+                    kept,
+                    rows,
+                });
+                block["text"] = Json::String(out);
+            } else {
+                done.blocks.push(Block {
+                    in_bytes,
+                    out_bytes: in_bytes,
+                    kept,
+                    rows,
+                });
+            }
+        }
+        for (i, note) in notes.into_iter().rev() {
+            content.insert(i + 1, json!({"type": "text", "text": note}));
         }
     }
     if let Some(text) = rewrapped {
@@ -548,6 +579,105 @@ pub fn rewrite_tool_result(
     }
     done.micros = start.elapsed().as_micros() as u64;
     done
+}
+
+/// A result with rows cut by [`cap_rows`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Cut {
+    /// The first `shown` rows, rewritten as the rules say.
+    pub text: String,
+    pub shown: usize,
+    pub total: usize,
+    pub max_bytes: usize,
+}
+
+impl Cut {
+    /// The note the model gets next to the cut result.
+    pub fn note(&self) -> String {
+        format!(
+            "Result cut by ldf-mcp: showing the first {} of {} rows, to stay under {} bytes; \
+             the other rows were not sent. Narrow the query with WHERE, aggregate with GROUP BY, \
+             or page with LIMIT and OFFSET.",
+            self.shown, self.total, self.max_bytes
+        )
+    }
+}
+
+/// Keeps the most leading rows of a JSON result whose rewritten text fits
+/// in `max_bytes`: a top-level array of objects, the `rows` of a columnar
+/// result, or the one member of an object that is an array of objects.
+/// Every other member is kept as it is. `None` when the result has no such
+/// rows, did not parse, or holds a number outside the value model (cutting
+/// re-serializes the JSON).
+pub fn cap_rows(
+    text: &str,
+    max_bytes: usize,
+    rules: &Rules,
+    sel: Option<&Selector>,
+) -> Option<Cut> {
+    let mut bytes = text.as_bytes().to_vec();
+    let root = parse_json_value(&mut bytes, JsonEngine::SerdeJson).ok()?;
+    if !numbers_in_domain(text) {
+        return None;
+    }
+    let records = |v: &Value| matches!(v, Value::Array(a) if !a.is_empty() && a.iter().all(|r| r.as_object().is_some()));
+    // `None` is the root array, `Some(i)` the object member holding the rows.
+    let place: Option<usize> = match &root {
+        Value::Array(_) if records(&root) => None,
+        Value::Object(o) => {
+            let at = if columnar_shape(&root).is_some() {
+                o.iter().position(|(k, _)| k == "rows")
+            } else {
+                let found: Vec<usize> = (0..o.len()).filter(|&i| records(&o[i].1)).collect();
+                (found.len() == 1).then(|| found[0])
+            };
+            Some(at?)
+        }
+        _ => return None,
+    };
+    let rows: &Vec<Value> = match (place, &root) {
+        (None, Value::Array(a)) => a,
+        (Some(i), Value::Object(o)) => o[i].1.as_array()?,
+        _ => return None,
+    };
+    let total = rows.len();
+    let render = |k: usize| {
+        let cut = Value::Array(rows[..k].to_vec());
+        let v = match (place, &root) {
+            (Some(i), Value::Object(o)) => {
+                let mut o = o.clone();
+                o[i].1 = cut;
+                Value::Object(o)
+            }
+            _ => cut,
+        };
+        let mut s = String::new();
+        ldf::text::push_json_value(&v, &mut s);
+        convert_with(&s, rules.min_bytes, sel, rules.columnar).unwrap_or(s)
+    };
+    // The largest k whose text fits; 0 when not even one row does. Rows
+    // are of similar size, so start from twice the share that fits and
+    // widen only if even that fits: each step encodes k rows, not all.
+    let guess = (total as u128 * max_bytes as u128 / text.len().max(1) as u128) as usize;
+    let mut hi = (2 * guess + 16).min(total - 1);
+    if render(hi).len() <= max_bytes {
+        hi = total - 1;
+    }
+    let mut lo = 0usize;
+    while lo < hi {
+        let mid = (lo + hi).div_ceil(2);
+        if render(mid).len() <= max_bytes {
+            lo = mid;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    Some(Cut {
+        text: render(lo),
+        shown: lo,
+        total,
+        max_bytes,
+    })
 }
 
 /// Appends [`TOOL_NOTE`] to every tool description of a `tools/list` result.
@@ -655,7 +785,7 @@ mod tests {
         let pretty =
             "{\n  \"columns\": [\n    \"id\"\n  ],\n  \"rows\": [\n    [\n      1\n    ]\n  ]\n}";
         let mut result = json!({"content": [{"type": "text", "text": pretty}]});
-        let done = rewrite_tool_result(&mut result, 0, None, false);
+        let done = rewrite_tool_result(&mut result, &Rules::default(), None);
         assert!(!done.converted() && done.minified());
         assert_eq!(
             result["content"][0]["text"],
@@ -664,12 +794,23 @@ mod tests {
 
         // Errors, small blocks and text that is not JSON stay byte for byte.
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": pretty}]});
-        assert!(!rewrite_tool_result(&mut err, 0, None, false).minified());
+        assert!(!rewrite_tool_result(&mut err, &Rules::default(), None).minified());
         assert_eq!(err["content"][0]["text"], pretty);
         let mut small = json!({"content": [{"type": "text", "text": pretty}]});
-        assert!(!rewrite_tool_result(&mut small, 10_000, None, false).minified());
+        assert!(
+            !rewrite_tool_result(
+                &mut small,
+                &Rules {
+                    min_bytes: 10_000,
+                    columnar: false,
+                    ..Rules::default()
+                },
+                None
+            )
+            .minified()
+        );
         let mut prose = json!({"content": [{"type": "text", "text": "{ not json }"}]});
-        assert!(!rewrite_tool_result(&mut prose, 0, None, false).minified());
+        assert!(!rewrite_tool_result(&mut prose, &Rules::default(), None).minified());
         assert_eq!(prose["content"][0]["text"], "{ not json }");
     }
 
@@ -696,7 +837,7 @@ mod tests {
             {"type": "text", "text": "done"},
             {"type": "image", "data": "AAAA", "mimeType": "image/png"}
         ]});
-        let done = rewrite_tool_result(&mut ok, 0, None, false);
+        let done = rewrite_tool_result(&mut ok, &Rules::default(), None);
         assert!(done.converted());
         assert_eq!(done.blocks.len(), 2, "text blocks only");
         assert_eq!(done.blocks[1].kept, Some(Kept::NotJson));
@@ -709,7 +850,7 @@ mod tests {
         assert_eq!(ok["content"][1]["text"], "done");
 
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": ROWS}]});
-        let done = rewrite_tool_result(&mut err, 0, None, false);
+        let done = rewrite_tool_result(&mut err, &Rules::default(), None);
         assert!(!done.converted());
         assert_eq!(done.blocks[0].kept, Some(Kept::IsError));
         assert_eq!(err["content"][0]["text"], ROWS);
@@ -918,7 +1059,15 @@ mod tests {
         );
         assert_eq!(convert_with(&text, 0, None, true), Err(Kept::NotShorter));
         let mut result = json!({"content": [{"type": "text", "text": text}]});
-        let done = rewrite_tool_result(&mut result, 0, None, true);
+        let done = rewrite_tool_result(
+            &mut result,
+            &Rules {
+                min_bytes: 0,
+                columnar: true,
+                ..Rules::default()
+            },
+            None,
+        );
         assert_eq!(done.blocks[0].kept, Some(Kept::NotShorter));
     }
 
@@ -929,7 +1078,18 @@ mod tests {
         let text = duck(&rows, "");
         let structured = json!({"result": text});
         let mut result = json!({"content": [{"type": "text", "text": text}], "isError": false, "structuredContent": structured});
-        assert!(rewrite_tool_result(&mut result, 0, None, true).converted());
+        assert!(
+            rewrite_tool_result(
+                &mut result,
+                &Rules {
+                    min_bytes: 0,
+                    columnar: true,
+                    ..Rules::default()
+                },
+                None
+            )
+            .converted()
+        );
         let frame = result["content"][0]["text"].as_str().unwrap();
         assert_eq!(decode_columnar_frame(frame).unwrap(), parse(&text));
         // FastMCP's wrapped string follows the text, so both copies agree.
@@ -944,13 +1104,21 @@ mod tests {
         ] {
             let mut result =
                 json!({"content": [{"type": "text", "text": text}], "structuredContent": other});
-            rewrite_tool_result(&mut result, 0, None, true);
+            rewrite_tool_result(
+                &mut result,
+                &Rules {
+                    min_bytes: 0,
+                    columnar: true,
+                    ..Rules::default()
+                },
+                None,
+            );
             assert_eq!(result["structuredContent"], other);
         }
         // Minified JSON follows too.
         let pretty = "{\n  \"a\": [\n    1\n  ]\n}";
         let mut result = json!({"content": [{"type": "text", "text": pretty}], "structuredContent": {"result": pretty}});
-        rewrite_tool_result(&mut result, 0, None, false);
+        rewrite_tool_result(&mut result, &Rules::default(), None);
         assert_eq!(result["structuredContent"]["result"], r#"{"a":[1]}"#);
 
         let sel = Selector::new("claude-opus-5-5", None);
@@ -1000,6 +1168,107 @@ mod tests {
         assert!(!numbers_in_domain(
             r#"{"s":"\"","n":100000000000000000000}"#
         ));
+    }
+
+    fn capped(max: usize, columnar: bool) -> Rules {
+        Rules {
+            columnar,
+            max_bytes: Some(max),
+            ..Rules::default()
+        }
+    }
+
+    #[test]
+    fn cap_keeps_leading_rows_and_says_so() {
+        let text = rows(200);
+        let mut result = json!({"content": [{"type": "text", "text": text}]});
+        let done = rewrite_tool_result(&mut result, &capped(2000, false), None);
+        let (shown, total) = done.blocks[0].rows.unwrap();
+        assert_eq!(total, 200);
+        assert!(shown > 10 && shown < 200, "{shown}");
+        let content = result["content"].as_array().unwrap();
+        assert_eq!(content.len(), 2, "note block after the cut block");
+        let out = content[0]["text"].as_str().unwrap();
+        assert!(out.len() <= 2000);
+        let back = ldf::decode(out).unwrap();
+        let mut b = text.as_bytes().to_vec();
+        let Value::Array(all) = parse_json_value(&mut b, JsonEngine::SerdeJson).unwrap() else {
+            panic!()
+        };
+        assert_eq!(back, all[..shown].to_vec(), "a prefix, values unchanged");
+        let note = content[1]["text"].as_str().unwrap();
+        assert!(
+            note.contains(&format!("first {shown} of 200 rows")),
+            "{note}"
+        );
+        // The largest prefix that fits: one more row does not.
+        let mut one_more = String::new();
+        ldf::text::push_json_value(&Value::Array(all[..=shown].to_vec()), &mut one_more);
+        assert!(convert_with(&one_more, 0, None, false).unwrap().len() > 2000);
+
+        // Not even one row fits: zero rows, still a note.
+        let mut tiny = json!({"content": [{"type": "text", "text": text}]});
+        let done = rewrite_tool_result(&mut tiny, &capped(10, false), None);
+        assert_eq!(done.blocks[0].rows, Some((0, 200)));
+    }
+
+    #[test]
+    fn cap_on_a_columnar_result_mirrors_the_wrapped_copy() {
+        let rows = duck_rows(200);
+        let rows: Vec<&str> = rows.iter().map(String::as_str).collect();
+        let text = duck(&rows, "");
+        let mut result = json!({"content": [{"type": "text", "text": text}], "structuredContent": {"result": text}});
+        let done = rewrite_tool_result(&mut result, &capped(3000, true), None);
+        let (shown, _) = done.blocks[0].rows.unwrap();
+        let out = result["content"][0]["text"].as_str().unwrap().to_string();
+        let note = result["content"][1]["text"].as_str().unwrap().to_string();
+        assert!(out.len() <= 3000);
+        assert_eq!(
+            result["structuredContent"]["result"],
+            format!("{out}\n\n{note}")
+        );
+        let back = decode_columnar_frame(&out).unwrap();
+        assert_eq!(
+            back.get("rows").and_then(Value::as_array).map(Vec::len),
+            Some(shown)
+        );
+        // Every other member as the server sent it, rowCount included.
+        assert_eq!(
+            back.get("rowCount")
+                .and_then(Value::as_number)
+                .and_then(|n| n.as_i128()),
+            Some(200)
+        );
+        assert_eq!(back.get("columnTypes"), parse(&text).get("columnTypes"));
+    }
+
+    #[test]
+    fn cap_leaves_errors_small_and_non_tabular_results_alone() {
+        let text = rows(200);
+        let mut err = json!({"isError": true, "content": [{"type": "text", "text": text}]});
+        let done = rewrite_tool_result(&mut err, &capped(100, false), None);
+        assert_eq!(done.blocks[0].rows, None);
+        assert_eq!(err["content"].as_array().unwrap().len(), 1);
+        assert_eq!(err["content"][0]["text"], text);
+
+        let long = format!(r#"{{"report":"{}"}}"#, "x".repeat(5000));
+        let mut one = json!({"content": [{"type": "text", "text": long}]});
+        let done = rewrite_tool_result(&mut one, &capped(100, false), None);
+        assert_eq!(done.blocks[0].rows, None, "nothing to cut");
+        assert_eq!(one["content"].as_array().unwrap().len(), 1);
+
+        let mut fits = json!({"content": [{"type": "text", "text": text}]});
+        let done = rewrite_tool_result(&mut fits, &capped(1_000_000, false), None);
+        assert_eq!(done.blocks[0].rows, None);
+        assert_eq!(fits["content"].as_array().unwrap().len(), 1);
+
+        // Two arrays of rows in one object: no way to tell which to cut.
+        let two = format!(r#"{{"a":{},"b":{}}}"#, rows(50), rows(50));
+        let mut both = json!({"content": [{"type": "text", "text": two}]});
+        assert_eq!(
+            rewrite_tool_result(&mut both, &capped(100, false), None).blocks[0].rows,
+            None
+        );
     }
 
     #[test]
