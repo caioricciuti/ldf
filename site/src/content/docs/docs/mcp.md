@@ -119,27 +119,34 @@ result it profiles the rows, encodes LDF at sparse thresholds 0.5 and 0.75,
 each with and without hoisted arrays (spec section 7, rule 2a), round-trips
 all four, and uses LDF only when there is measured evidence for this
 exact model on data with the same traits (child tables, JSON cells,
-sparse keys): at least 50 questions, no more than 3 points below JSON, no
-significant loss, judged at the smallest measured size at or above the
-input's row count (200 or 1 000 records; nothing larger than measured), and at least 5 percent
-smaller than the JSON in bytes. Anything else stays JSON, and a stderr line
-says why:
+sparse keys), judged at the smallest measured size at or above the input's
+row count (200 or 1 000 records; nothing larger than measured), and only
+when that evidence **rules out** a loss of more than 3 points against JSON:
+the rows of that size, pooled, must give a one-sided 95 percent paired
+score bound on the loss of at most 3 points, and no single row may show
+harm (more than 3 points below JSON, or a significant sign-test loss). It
+must also be at least 5 percent smaller than the JSON in bytes. Anything
+else stays JSON, and a stderr line says why:
 
-    ldf-mcp: query json for claude-haiku-5-5 (1 rows): no evidence for ldf (sparse threshold 0.5) on a measured dataset with traits {"child_tables"}
+    ldf-mcp: query json for claude-sonnet-5-5 (200 rows): inconclusive: 2 runs pooled (+5 / -8 of 300) leaves a loss of up to 3.2 points possible, margin 3
 
-The evidence is a copy of `reports/evidence/evidence.json` built into
-the binary; `--evidence FILE` uses another file of the same shape. A model
-with no row of 50 questions or more gets JSON throughout, and the proxy then
-leaves the primer and tool notes out. As of the Stage C run (2026-10-19) that
-is GPT (15 to 20 questions per cell). Opus 5.5 gets LDF on flat, nested,
-sparse and mixed-type data, DeepSeek too, Haiku 5.5 on flat, sparse and
-mixed-type data with JSON on nested orders (v0.1 is 4.4 points and hoisted
-7.4 points below JSON there). On nested orders Opus and DeepSeek get the
-hoisted form, 40 percent of the JSON bytes against 46 for child tables.
-The primer explains hoisted columns, so they are only sent with it. TOON is not
-offered here because the primer explains LDF only. Each result is decided
-on its own, so pages of one file can differ. Without `--model`, LDF is used
-whenever it is shorter, as before.
+The rule was pre-registered before the study that measured it
+(`reports/2026-10-21-ni-study`). Before it, LDF was used wherever no loss
+had been detected, which with 52 to 95 questions per cell could hide a loss
+of 4 to 6 points. The evidence is a copy of `reports/evidence/evidence.json`
+built into the binary; `--evidence FILE` uses another file of the same
+shape. A model with no row of 50 questions or more gets JSON throughout,
+and the proxy then leaves the primer and tool notes out; that is GPT.
+
+What each model gets today, up to 200 rows (above 200, JSON for everyone,
+because no 1 000-record cell has enough questions to prove the bound):
+Opus 5.5 on flat, sparse and mixed-type data, and nested orders at sparse
+threshold 0.75; Sonnet 5.5 on flat and mixed-type data; DeepSeek on mixed
+types and sparse events at 0.75; Haiku 5.5 nothing. Hoisted arrays are not
+sent to any model: Opus lost 10 nested-order questions against 1 with them
+(p = 0.01). Each result is decided on its own, so pages of one file can
+differ. Without `--model`, LDF is used whenever it is shorter than the
+minified JSON, as before.
 
 ## Local ClickHouse with the benchmark datasets
 

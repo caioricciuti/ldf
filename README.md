@@ -1,14 +1,36 @@
-# LDF: Language Data Format
+# LDF: smaller tool results for LLM agents
 
 [![ci](https://github.com/caioricciuti/ldf/actions/workflows/ci.yml/badge.svg)](https://github.com/caioricciuti/ldf/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT%20or%20Apache--2.0-blue)](#license)
 [![docs](https://img.shields.io/badge/docs-ldflabs.org-f2b56b)](https://ldflabs.org)
 
-A lossless, line-oriented text encoding of JSON records for language
-models. One typed header, one line per record, child tables for nested
-arrays. Nothing is flattened away, and the claims are measured: on held-out
-data Claude Opus 5.5 answers from LDF as well as from JSON (294 of 297 each)
-at 57 to 77 percent of JSON's input tokens, with the misses in the reports.
+`ldf-mcp` sits between an agent and its data (MCP servers, shell output,
+files) and cuts what tool results cost in the model's context without
+changing what they mean. Most of the saving needs no new format:
+
+- **Minify.** Database MCP servers often send pretty-printed JSON. Removing
+  the whitespace alone takes 30 to 60 percent off most results (5 percent
+  on long text), for every model.
+- **Keep one copy in sync.** FastMCP servers send each result twice, as
+  text and as `structuredContent`, and Claude Code shows the model the
+  second copy. The proxy rewrites both, so its savings reach the model.
+- **Cap big results** (opt-in). `--max-result-bytes` keeps the rows that
+  fit and tells the model how many exist and how to narrow the query.
+- **Compact encoding where it pays and is proven.** On rows that repeat
+  their keys, or hold structs, lists and nested arrays, LDF (below) is 13
+  to 57 percent smaller than minified JSON. With `--model`, it is used only
+  where a pre-registered test ruled out a loss of more than 3 points
+  against JSON; everywhere else the model gets JSON.
+
+Where it does not help much: flat SQL results that are already columnar
+(`columns` plus row arrays, or CSV). There LDF saves 1 to 7 percent over
+minified JSON. If you control the server, ask your database for a compact
+output format and you get most of that for free.
+
+## The format
+
+LDF is a lossless, line-oriented text encoding of JSON records: one typed
+header, one line per record, child tables for nested arrays.
 
 ```text
 @records id:s,customer.name:s,items:t,total:f,status:s
@@ -25,31 +47,30 @@ ORD-3,E5,1,28.78
 
 That is three orders, each with a customer object and an items array, as a
 root table and one child table: 143 o200k tokens against 169 for the same
-records as compact JSON. Headers are a fixed cost, so the gap grows with the
-row count (table below).
+records as compact JSON.
 
 Docs, spec and results: **[ldflabs.org](https://ldflabs.org)**.
 
-## Why
+## What is measured
 
-| | JSON | CSV | TOON | LDF |
+Tokens are o200k against minified JSON. Comprehension is the
+pre-registered study in `reports/2026-10-21-ni-study`: 200 held-out
+records, 151 to 249 questions per cell, the same questions in both
+formats, the LDF primer in both arms. "Bound" is the largest loss against
+JSON the data cannot rule out.
+
+| data | tokens | Opus 5.5 | Sonnet 5.5 | DeepSeek |
 |---|---|---|---|---|
-| nested records | yes | no | yes | yes, as child tables |
-| missing versus null | yes | lost | yes | yes |
-| number kinds (`1` vs `1.0`, big integers) | yes | lost | yes | yes |
-| tokens on flat data, share of JSON | 1.00 | 0.60 | 0.65 | 0.61 |
-| tokens on nested orders | 1.00 | n/a | 1.08 | 0.64 |
-| tokens on sparse events | 1.00 | 0.61, lossy | 1.22 | 0.80 |
+| flat rows that repeat keys | 0.43 to 0.65 | pass (bound 1.2) | no loss seen, not proven alone (3.9); passes pooled with an earlier run | **loses** 6 points |
+| nested orders | 0.56 to 0.75 | hoisted arrays **lose** 3.6 points (p = 0.01); threshold 0.75 passes on an earlier run | not proven (3.5) | not proven (3.7) |
+| sparse events | about 0.80 | pass (2.6) | not proven (3.6) | not proven (5.5) |
+| mixed types | about 0.75 | pass (1.1) | pass (1.8) | pass (2.3) |
+| SQL rows with many NULLs, as `null` cells | 0.47 of key-repeating JSON | | pass (2.6) | |
 
-Token figures are o200k_base on the first 1 000 records of the benchmark
-datasets, from `reports/2026-10-17-baseline/tokens-medium-2026-10-18.md`.
-
-Comprehension: Claude Opus 5.5 on held-out data ties JSON, 294 of 297
-(`reports/2026-10-19-stage-c`); in headless Claude Code sessions the Bash
-hook brought JSON tool output to 0.56 of its Claude tokens on Haiku 5.5 and
-Opus 5.5 with no answer lost (`reports/2026-10-20-hook`). Below the frontier
-tier no format is reliably better than another, and the reports say so; a
-model without enough evidence gets JSON.
+"Not proven" means accuracy within about a point of JSON, but not enough
+questions to rule out a 3-point loss; the selector sends JSON there. Above
+200 rows no cell has enough questions yet, so every model gets JSON. Haiku
+5.5 and GPT models get JSON throughout.
 
 ## Use it
 
