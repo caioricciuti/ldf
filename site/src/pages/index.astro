@@ -1,6 +1,6 @@
 ---
 import Landing from "../layouts/Landing.astro";
-import EvidenceChart from "../components/EvidenceChart.astro";
+import VerdictGrid from "../components/VerdictGrid.astro";
 
 const repo = "https://github.com/caioricciuti/ldf";
 
@@ -159,24 +159,25 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
     <div class="container">
       <div class="section-head" data-reveal>
         <p class="eyebrow">Evidence</p>
-        <h2 class="h2">Same questions, JSON against LDF.</h2>
+        <h2 class="h2">Who gets LDF. <span class="soft">Everyone else gets JSON.</span></h2>
         <p class="lead">
-          Every model and dataset shape gets its own verdict: at least 50 graded questions, no more than
-          3 points below JSON, at least 5 percent fewer tokens. Evidence also has a size band: an input
-          is judged by the evaluation at the smallest measured size at or above its row count, so a
-          result that passed at 200 records and failed at 1 000 goes out as LDF up to 200 rows and as
-          JSON above.
+          Each model reads each shape of data in both formats, on the same graded questions. LDF goes
+          to a model only where it scored within 3 points of JSON over at least 50 questions, at that
+          size. A cell shows LDF's tokens as a share of JSON's; where LDF lost or was never measured it
+          says JSON, and that is what the model gets. Above 1 000 rows nothing is measured yet, so it is
+          JSON for everyone.
         </p>
       </div>
-      <div class="chart-wrap" data-reveal>
-        <EvidenceChart dark />
+      <div data-reveal>
+        <VerdictGrid />
       </div>
+      <p class="note" data-reveal>Up to 200 rows on the first line, 201 to 1 000 on the second. GPT-6.1 Sol has runs, but none with 50 questions per cell yet. Every score behind these cells, misses included, is in the <a href="/docs/evidence/">evidence chart</a>.</p>
       <div class="stats" data-reveal>
         <div class="stat"><span class="stat-n">294 / 297</span><span class="stat-l">Claude Opus 5.5 on held-out data, LDF and JSON alike, with LDF at 57 to 77 percent of JSON's input tokens. <a href="/docs/results/stage-c/">Stage C</a></span></div>
         <div class="stat"><span class="stat-n">53 / 53</span><span class="stat-l">GPT-6.1 Sol on LDF at 50 records, zero-shot: the prompt names the format and shows the data, nothing more.</span></div>
         <div class="stat"><span class="stat-n">0.36 to 0.80</span><span class="stat-l">LDF's o200k tokens as a share of compact JSON on the first 1 000 records of six benchmark datasets. CSV ties it on flat data and cannot hold the rest. <a href="/docs/results/baseline/">Baseline</a></span></div>
       </div>
-      <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the reports say so. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
+      <p class="note" data-reveal>Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
     </div>
   </section>
 

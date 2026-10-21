@@ -77,6 +77,7 @@ python3 -I eval/bench_hook.py --out results/hook   # the hook on the medium fixt
 ./target/release/ldf-bench arrow fixtures/medium/*.parquet --iters 5 --out results/arrow   # Parquet to LDF, Value path vs direct Arrow path, output hashes compared
 python3 -I eval/analysis/evidence.py eval/out reports/evidence   # rebuild the selector evidence after any graded run
 ./target/release/ldf-discover select --model claude-haiku-5-5 --input F --sample 200   # selector decision with its reasons
+./target/release/ldf-discover verdicts --root fixtures/medium --out reports/evidence/verdicts.json   # the site's who-gets-LDF grid; rerun after evidence.py
 python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files   # MCP end to end; --mode clickhouse needs CLICKHOUSE_PASSWORD
 ```
 
