@@ -1,0 +1,182 @@
+{"success":true,"columns":["order_id","customer","items","total","status","shipped","note"],"columnTypes":["VARCHAR","STRUCT(id BIGINT, \"name\" VARCHAR, address STRUCT(city VARCHAR, country VARCHAR, zip VARCHAR))","STRUCT(sku VARCHAR, qty BIGINT, price DOUBLE)[]","DOUBLE","VARCHAR","BOOLEAN","VARCHAR"],"rows":"@records","rowCount":50}
+@records order_id:s,customer.id:i,customer.name:s,customer.address.city:s,customer.address.country:s,customer.address.zip:s,items:t,total:f,status:s,shipped:b,note:s?
+ORD-000001,4654,Val Thompson,São Paulo,ES,35658,2,715.94,shipped,true,context compare
+ORD-000002,50,Sol Ritchie,Buenos Aires,DK,22729,3,2757.03,cancelled,true,latency column
+ORD-000003,2270,Wes Gosling,Lisbon,DK,50263,4,837.47,shipped,false,signal field
+ORD-000004,2468,Hana Dijkstra,Paris,AU,71685,2,3437.62,pending,true,null
+ORD-000005,740,Hana Ritchie,Rome,ES,54197,3,1880.2,refunded,false,string window
+ORD-000006,928,Xia Hopper,Rome,US,18427,1,257.44,delivered,true,window report
+ORD-000007,3978,Fay Shannon,Sydney,MX,24505,3,936.56,shipped,false,window aggregate
+ORD-000008,1224,Quin Goodall,Madrid,KR,68688,3,1339.86,refunded,false,null
+ORD-000009,4811,Yan Allen,Buenos Aires,JP,20728,3,2834.39,cancelled,false,column model
+ORD-000010,2555,Iris Pike,Shanghai,DE,36587,4,2913.99,shipped,false,colon quote
+ORD-000011,4262,Gil Carson,Madrid,SE,55367,2,1758.35,paid,true,object object
+ORD-000012,76,Cleo Torvalds,Sydney,MX,00140,1,761.48,delivered,false,null
+ORD-000013,2432,Gus Ritchie,Lisbon,KR,59141,2,1632.1,paid,true,null
+ORD-000014,726,Ana Noether,Lisbon,PT,66689,4,2007.17,refunded,true,data field
+ORD-000015,1718,Yan Shannon,Rome,NO,64875,1,562.2,delivered,true,extract accuracy
+ORD-000016,3987,Max Matsumoto,Mumbai,DE,39919,3,1951.82,pending,false,null array
+ORD-000017,4335,Hana Easley,Stockholm,SE,76784,4,1054.68,delivered,true,field report
+ORD-000018,892,Oli Jackson,Rome,KR,31654,1,456.16,refunded,true,lookup question
+ORD-000019,1131,Nia Noether,Seoul,UK,14846,1,569.7,delivered,false,value true
+ORD-000020,1741,Finn Lamport,Rome,US,51625,4,1266.58,shipped,false,quote column
+ORD-000021,4585,Uma Matsumoto,Madrid,JP,75149,2,2566.34,cancelled,false,true nested
+ORD-000022,3603,Iris Shannon,Stockholm,IN,84458,2,1419.78,cancelled,true,signal quote
+ORD-000023,1539,Oli Carson,Sydney,NZ,87744,4,3749.56,paid,true,null
+ORD-000024,4109,Lou McCarthy,Austin,UK,59098,1,1267.59,shipped,false,filter benchmark
+ORD-000025,1585,Bob Knuth,Lisbon,NZ,32521,2,861.75,pending,true,row record
+ORD-000026,2791,Cleo Knuth,Berlin,IN,85820,1,415.28,pending,true,question prompt
+ORD-000027,2635,Oli Shannon,Lisbon,CA,64324,1,654.24,refunded,true,null
+ORD-000028,2199,Cy Rossum,Paris,IT,01110,4,2126.05,paid,true,measure sample
+ORD-000029,2270,Val Bartik,Lisbon,AU,98340,4,5182.84,refunded,true,null
+ORD-000030,2944,Hal Lovelace,Oslo,DK,99240,2,1077.0,delivered,false,lookup null
+ORD-000031,4016,Ada Pike,Auckland,PT,74069,4,5272.12,paid,true,report benchmark
+ORD-000032,1819,Sol Clarke,Austin,ES,03966,1,314.52,delivered,true,record accuracy
+ORD-000033,3649,Jun McCarthy,Shanghai,SE,57651,2,1848.62,cancelled,true,null
+ORD-000034,1586,Rui Allen,Austin,SE,34458,3,2699.45,pending,true,signal format
+ORD-000035,4951,Ben Carson,Oslo,CN,01363,1,359.32,refunded,true,null
+ORD-000036,3313,Hana Easley,London,DK,68915,4,3356.06,cancelled,false,signal benchmark
+ORD-000037,4298,Eve Dijkstra,Sydney,CN,79588,3,2427.82,pending,true,null
+ORD-000038,3470,Eve Ride,Auckland,NO,40572,1,1864.0,paid,true,measure extract
+ORD-000039,655,Ana Thompson,London,MX,31996,1,825.65,delivered,false,object report
+ORD-000040,1588,Kai Lamport,Seoul,ES,60972,4,2754.52,shipped,false,null
+ORD-000041,3286,Jun Curie,London,AR,23716,4,1827.43,pending,false,null
+ORD-000042,852,Cleo Kernighan,Tokyo,BR,05456,3,936.37,cancelled,true,stream comma
+ORD-000043,3981,Xia Allen,Lisbon,SE,33047,4,2695.86,delivered,true,memory schema
+ORD-000044,2335,Uma Liskov,Toronto,DE,48920,2,956.8,paid,true,token context
+ORD-000045,2459,Lea Torvalds,Auckland,DK,66517,1,112.07,pending,true,question context
+ORD-000046,3618,Oli Hopper,Tokyo,NO,90603,4,4836.22,shipped,false,the field
+ORD-000047,4538,Iris Pike,Berlin,BR,65136,1,208.78,delivered,false,value question
+ORD-000048,4319,Tea Rossum,Auckland,ES,27665,4,3144.47,shipped,true,schema table
+ORD-000049,2645,Dan Lovelace,Copenhagen,FR,54471,4,3349.6,shipped,false,null
+ORD-000050,1097,Val Wirth,Sydney,PT,85221,4,4310.99,pending,false,token array
+@records.items order_id:s,sku:s,qty:i,price:f
+ORD-000001,E5,3,28.78
+ORD-000001,C3,4,157.4
+ORD-000002,E5,1,146.62
+ORD-000002,L11,1,485.86
+ORD-000002,D4,5,424.91
+ORD-000003,L11,1,75.11
+ORD-000003,M12,2,138.03
+ORD-000003,E5,1,311.66
+ORD-000003,K10,1,174.64
+ORD-000004,K10,5,407.14
+ORD-000004,C3,4,350.48
+ORD-000005,G7,4,38.45
+ORD-000005,H8,2,7.9
+ORD-000005,E5,5,342.12
+ORD-000006,E5,4,64.36
+ORD-000007,J9,2,157.24
+ORD-000007,F6,4,64.83
+ORD-000007,M12,4,90.69
+ORD-000008,M12,2,172.52
+ORD-000008,M12,2,9.33
+ORD-000008,A1,2,488.08
+ORD-000009,H8,1,191.51
+ORD-000009,A1,4,354.0
+ORD-000009,L11,3,408.96
+ORD-000010,E5,3,272.6
+ORD-000010,E5,1,486.11
+ORD-000010,G7,5,309.84
+ORD-000010,E5,4,15.22
+ORD-000011,G7,5,259.05
+ORD-000011,F6,5,92.62
+ORD-000012,E5,4,190.37
+ORD-000013,G7,4,325.77
+ORD-000013,M12,1,329.02
+ORD-000014,J9,1,429.85
+ORD-000014,J9,1,304.75
+ORD-000014,A1,4,74.19
+ORD-000014,L11,3,325.27
+ORD-000015,L11,4,140.55
+ORD-000016,E5,2,72.28
+ORD-000016,D4,1,438.3
+ORD-000016,D4,4,342.24
+ORD-000017,L11,2,4.95
+ORD-000017,K10,4,57.23
+ORD-000017,D4,2,164.47
+ORD-000017,M12,4,121.73
+ORD-000018,M12,1,456.16
+ORD-000019,D4,2,284.85
+ORD-000020,L11,2,99.68
+ORD-000020,L11,3,267.94
+ORD-000020,D4,1,217.7
+ORD-000020,K10,2,22.85
+ORD-000021,E5,5,371.14
+ORD-000021,K10,4,177.66
+ORD-000022,G7,3,275.55
+ORD-000022,L11,3,197.71
+ORD-000023,K10,4,489.1
+ORD-000023,L11,3,198.15
+ORD-000023,B2,3,204.2
+ORD-000023,G7,3,195.37
+ORD-000024,C3,3,422.53
+ORD-000025,H8,5,81.96
+ORD-000025,A1,1,451.95
+ORD-000026,D4,4,103.82
+ORD-000027,L11,4,163.56
+ORD-000028,F6,5,156.12
+ORD-000028,H8,2,487.7
+ORD-000028,D4,1,216.88
+ORD-000028,E5,1,153.17
+ORD-000029,A1,5,496.08
+ORD-000029,H8,1,285.5
+ORD-000029,E5,5,204.58
+ORD-000029,L11,3,464.68
+ORD-000030,J9,2,397.55
+ORD-000030,G7,1,281.9
+ORD-000031,B2,5,234.25
+ORD-000031,J9,3,353.04
+ORD-000031,L11,5,291.69
+ORD-000031,D4,5,316.66
+ORD-000032,F6,2,157.26
+ORD-000033,L11,1,287.7
+ORD-000033,D4,4,390.23
+ORD-000034,F6,2,417.2
+ORD-000034,M12,5,120.85
+ORD-000034,A1,4,315.2
+ORD-000035,J9,1,359.32
+ORD-000036,G7,2,382.66
+ORD-000036,E5,3,433.95
+ORD-000036,F6,5,233.85
+ORD-000036,L11,2,59.82
+ORD-000037,F6,4,86.06
+ORD-000037,J9,2,125.31
+ORD-000037,L11,4,458.24
+ORD-000038,M12,5,372.8
+ORD-000039,A1,5,165.13
+ORD-000040,J9,5,271.69
+ORD-000040,E5,2,171.41
+ORD-000040,F6,5,40.53
+ORD-000040,J9,5,170.12
+ORD-000041,E5,5,26.44
+ORD-000041,A1,3,91.92
+ORD-000041,L11,2,361.31
+ORD-000041,E5,5,139.37
+ORD-000042,G7,4,107.13
+ORD-000042,D4,3,73.42
+ORD-000042,A1,1,287.59
+ORD-000043,C3,3,260.26
+ORD-000043,A1,1,325.5
+ORD-000043,G7,2,332.65
+ORD-000043,M12,2,462.14
+ORD-000044,K10,2,68.12
+ORD-000044,K10,4,205.14
+ORD-000045,B2,1,112.07
+ORD-000046,G7,4,324.57
+ORD-000046,K10,4,445.07
+ORD-000046,J9,1,483.41
+ORD-000046,K10,5,254.85
+ORD-000047,D4,2,104.39
+ORD-000048,K10,4,23.16
+ORD-000048,H8,4,112.0
+ORD-000048,M12,5,300.32
+ORD-000048,K10,3,367.41
+ORD-000049,J9,2,260.49
+ORD-000049,C3,4,457.46
+ORD-000049,J9,4,26.04
+ORD-000049,K10,2,447.31
+ORD-000050,H8,4,499.2
+ORD-000050,E5,2,497.68
+ORD-000050,G7,3,162.57
+ORD-000050,D4,4,207.78

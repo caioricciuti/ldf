@@ -1,0 +1,22 @@
+{"success":true,"columns":["country","n","avg_score"],"columnTypes":["VARCHAR","BIGINT","DOUBLE"],"rows":"@records","rowCount":20}
+@records country:s,n:i,avg_score:f
+UK,570,51.33
+DE,524,50.57
+BR,523,49.41
+IT,510,50.43
+ES,508,53.33
+IN,503,51.43
+KR,503,48.4
+US,503,48.11
+NO,502,49.39
+SE,502,47.98
+AR,498,52.25
+JP,498,51.17
+FR,493,50.11
+NZ,492,49.16
+MX,491,52.21
+AU,489,49.22
+CN,487,50.78
+DK,481,49.23
+PT,472,49.53
+CA,451,50.7
