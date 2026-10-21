@@ -23,6 +23,13 @@ stated in `site/src/content/docs/docs/spec.md`.
   questions through headless Claude Code, three arms; paid, not run).
   `eval/bench_mcp.py --ldf-arg`. Report: `reports/2026-10-21-columnar`.
 
+- `ldf-mcp proxy --max-result-bytes N` (opt-in): a result whose rewritten
+  text is still longer than `N` bytes keeps its longest leading run of rows
+  that fits, followed by a note block saying how many rows were shown and
+  how to narrow the query. Other members of the result are kept as sent;
+  errors and results without rows are never cut. Stats events carry
+  `rows_shown` and `rows_total`.
+
 ### Changed
 
 - `ldf-mcp`: LDF must now be shorter than the result's JSON minified, not

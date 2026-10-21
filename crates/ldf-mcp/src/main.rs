@@ -10,12 +10,15 @@ use std::sync::Arc;
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--columnar] [--quiet] [--model ID [--evidence FILE]] -- COMMAND [ARGS...]\n\
+        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--columnar] [--max-result-bytes N] [--quiet] [--model ID [--evidence FILE]] -- COMMAND [ARGS...]\n\
          \x20     run COMMAND as the MCP server and rewrite its JSON tool results into LDF\n\
          \x20     --passthrough  forward tool results unchanged (for A/B comparison)\n\
          \x20     --columnar     also convert results shaped {{\"columns\": [...], \"rows\": [[...], ...]}} (MotherDuck's\n\
          \x20                    DuckDB server): the result minus its rows as one JSON line, then the rows as LDF;\n\
          \x20                    sent only when it decodes back to the exact result\n\
+         \x20     --max-result-bytes N  cut rows from a result still longer than N bytes after rewriting, keeping\n\
+         \x20                    the first rows that fit, and add a note saying how many were shown (about 2.2 to 3\n\
+         \x20                    bytes per o200k token for LDF and JSON); errors and non-tabular results are never cut\n\
          \x20     --plain        leave initialize instructions and tool descriptions alone\n\
          \x20     --min-bytes N  never convert a text block shorter than N bytes (default 1024)\n\
          \x20     --quiet        no per-result stderr line\n\
@@ -112,6 +115,7 @@ fn run_proxy(args: &[String]) -> ExitCode {
         plain: false,
         min_bytes: 1024,
         columnar: false,
+        max_bytes: None,
         log: true,
         selector: None,
         stats: Arc::new(Recorder::off()),
@@ -127,6 +131,10 @@ fn run_proxy(args: &[String]) -> ExitCode {
             "--passthrough" => cfg.passthrough = true,
             "--plain" => cfg.plain = true,
             "--columnar" => cfg.columnar = true,
+            "--max-result-bytes" => match it.next().and_then(|v| v.parse().ok()) {
+                Some(n) if n > 0 => cfg.max_bytes = Some(n),
+                _ => return usage(),
+            },
             "--model" | "--evidence" => match it.next() {
                 Some(v) => sel.set(a, v),
                 None => return usage(),

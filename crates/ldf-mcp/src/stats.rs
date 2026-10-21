@@ -121,6 +121,7 @@ impl Recorder {
                 in_bytes,
                 out_bytes,
                 kept,
+                rows: None,
             }],
             micros,
         };
@@ -173,6 +174,10 @@ impl Recorder {
         }
         if !passthrough && done.minified() {
             ev["minified"] = json!(true);
+        }
+        if !passthrough && let Some((shown, total)) = done.blocks.iter().find_map(|b| b.rows) {
+            ev["rows_shown"] = json!(shown);
+            ev["rows_total"] = json!(total);
         }
         if let Some(m) = &self.model {
             ev["model"] = json!(m);
@@ -466,16 +471,19 @@ mod tests {
             in_bytes: 1000,
             out_bytes: 400,
             kept: None,
+            rows: None,
         }]);
         let small = done(vec![Block {
             in_bytes: 50,
             out_bytes: 50,
             kept: Some(Kept::Small),
+            rows: None,
         }]);
         let sel = done(vec![Block {
             in_bytes: 900,
             out_bytes: 900,
             kept: Some(Kept::Selector("secret-looking reason".into())),
+            rows: None,
         }]);
         rec.record("query", &ldf, false, Some(12));
         rec.record("query", &small, false, None);
