@@ -5,7 +5,13 @@ Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `site/src/content/docs/docs/spec.md`.
 
-## Unreleased
+## 0.5.3 (2026-10-21)
+
+The proxy minifies JSON it keeps as JSON, a selector verdicts table for
+the site, and end-to-end reports for ClickHouse and DuckDB. The
+specification stays v0.2.
+
+### Changed
 
 - `ldf-mcp proxy`: a JSON result that stays JSON (not a dataset, LDF not
   shorter, or the selector's choice) now goes out minified when it was
@@ -14,7 +20,19 @@ stated in `site/src/content/docs/docs/spec.md`.
   `--passthrough` sends the original, and the stats event carries
   `"minified": true`. MotherDuck's DuckDB server answers in pretty
   columnar JSON, which LDF does not convert; this takes it to 0.40 to 0.58
-  of its bytes (`reports/2026-10-21-duckdb/minified`, bench_mcp.py --mode duckdb after this change).
+  of its bytes (`reports/2026-10-21-duckdb/minified`).
+
+### Added
+
+- `ldf-discover verdicts`: what `ldf-mcp --model` sends per model, data
+  shape and size band, from the built-in rule and the evidence, written
+  to `reports/evidence/verdicts.json` (the site's landing grid).
+- `eval/bench_mcp.py`: `--user` for ClickHouse, and `--mode duckdb`
+  (MotherDuck's MCP server, pinned, behind `ldf-mcp proxy`).
+- Reports: `reports/2026-10-21-clickhouse` (orders at 0.56 of JSON's
+  o200k tokens through `ldf-mcp clickhouse`) and
+  `reports/2026-10-21-duckdb` (the proxy passes columnar results through;
+  SQL nulls and the v0.1 sparse rule, an open format question).
 
 ## 0.5.2 (2026-10-20)
 
