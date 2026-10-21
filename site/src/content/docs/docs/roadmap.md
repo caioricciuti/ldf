@@ -114,6 +114,16 @@ where not" with a cheap switch.
   failure at 1 000 rows does not withdraw LDF from inputs of 200 or fewer
   where the same model passed. Released as 0.5.2, with the Claude Code
   hook audit (subagents, `LDF_RAW=1`, sibling hook warning).
+- Done 2026-10-21: databases end to end. `ldf-mcp clickhouse` sends 100
+  nested orders at 0.56 of JSON's tokens (`reports/2026-10-21-clickhouse`);
+  in front of MotherDuck's DuckDB server the proxy finds columnar JSON it
+  does not convert, and now minifies it (`reports/2026-10-21-duckdb`).
+  Released as 0.5.3.
+- Open: SQL results carry sparse fields as `null`, never absent, so the
+  v0.1 sparse rule moves them into `~` with their keys (1.61 times the
+  minified JSON on `events`). Keeping a column for keys present on every
+  row is a format change and needs Haiku measured again; waits for a user
+  who needs it. Same for converting the `columns`/`rows` result shape.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
