@@ -13,6 +13,7 @@ CLICKHOUSE_PASSWORD in the environment; this script never reads or prints it.
 
     python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files
     python3 -I eval/bench_mcp.py --mode duckdb --db results/mcp-duckdb/ldf.duckdb --out results/mcp-duckdb
+    python3 -I eval/bench_mcp.py --mode duckdb --db results/mcp-duckdb/ldf.duckdb --ldf-arg=--columnar --out results/mcp-duckdb-columnar
     python3 -I eval/bench_mcp.py --mode clickhouse --url http://127.0.0.1:8124 --user ldf --out results/mcp-clickhouse
 """
 import argparse, json, os, statistics, subprocess, sys, time
@@ -95,6 +96,7 @@ def main():
     ap.add_argument('--max-rows', type=int, default=10000)
     ap.add_argument('--repeats', type=int, default=20)
     ap.add_argument('--warmup', type=int, default=3)
+    ap.add_argument('--ldf-arg', action='append', default=[], help='extra argument for the ldf variant, e.g. --ldf-arg=--columnar')
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
     os.makedirs(os.path.join(a.out, 'texts'), exist_ok=True)
@@ -109,7 +111,7 @@ def main():
         argv = lambda extra: base + extra
         queries = CLICKHOUSE if a.mode == 'clickhouse' else FILES
     results = {q[0]: {'tool': q[1], 'arguments': q[2]} for q in queries}
-    for variant, extra in [('ldf', []), ('json', ['--passthrough'])]:
+    for variant, extra in [('ldf', a.ldf_arg), ('json', ['--passthrough'])]:
         srv = Server(argv(extra))
         for name, tool, args in queries:
             times = []
@@ -127,7 +129,7 @@ def main():
             times.sort()
             results[name][variant] = {
                 'bytes': len(text.encode('utf-8')),
-                'is_ldf': text.startswith('@'),
+                'is_ldf': text.startswith('@') or '\n@records ' in text,
                 'capped': len(blocks) > 1,
                 'p50_ms': round(statistics.median(times), 3),
                 'p95_ms': round(times[int(0.95 * (len(times) - 1))], 3),

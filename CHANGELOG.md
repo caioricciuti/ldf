@@ -17,6 +17,11 @@ stated in `site/src/content/docs/docs/spec.md`.
   `--model`, since no model has been graded on frames. `convert --columnar
   [--decode]` writes and reads frames. The primer gains one paragraph when
   the flag is on.
+- `eval/bench_columnar.py` (sent, minified and LDF tokens per result, NULL
+  layouts), `eval/analysis/selector_audit.py` (non-inferiority reading of
+  the evidence), `eval/db_eval.py` and `eval/minify_proxy.py` (database
+  questions through headless Claude Code, three arms; paid, not run).
+  `eval/bench_mcp.py --ldf-arg`. Report: `reports/2026-10-21-columnar`.
 
 ### Changed
 
