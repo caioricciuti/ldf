@@ -49,7 +49,9 @@ Safety rules, all tested:
   fixes the existing record path: before, an integer beyond u64 (DuckDB
   `HUGEINT`, seen in a probe: `100000000000000000000`) was converted to a
   float.
-- `isError` results and `structuredContent` are never touched.
+- `isError` results are never touched. `structuredContent` is left alone
+  except in FastMCP's `{"result": S}` form with `S` the original text,
+  where `S` gets the same rewritten text (section 5 found why).
 - With `--model`, columnar results stay JSON: no model was graded on a
   frame, and the selector's sparse evidence has absent keys where a frame
   has NULLs (section 4).
@@ -137,23 +139,28 @@ looks like in SQL.
 A row passes the policy when the accuracy drop is at most 3 points (point
 estimate) and the sign test does not show a significant loss at 0.05. Both
 look for harm. Neither shows that harm is small, so a row with too few
-questions to see anything passes. `selector-audit.md` adds a one-sided 95
-percent upper bound on the loss for each of the 47 evidence rows the policy
-counts (Clopper-Pearson on each side, Bonferroni; exact and conservative):
+questions to see anything passes. `selector-audit.md` adds two one-sided
+95 percent upper bounds on the loss for each of the 47 evidence rows the
+policy counts. The paired score bound (Tango) is the usual test for
+non-inferiority on matched pairs. The exact bound (Clopper-Pearson on each
+side, Bonferroni) is a conservative check on it.
 
 - 12 rows fail the current policy.
-- **0 of the other 35 show the loss is under 3 points**, the policy's own
-  tolerance; 7 show under 5 points. Every passing Opus and Sonnet row has
-  an upper bound of 3.8 to 12.9 points.
-- A perfect tie needs 122 questions for this bound to reach 3 points
-  (about 99 for the loosest exact bound, `1 - 0.05^(1/n)` on the loss rate
-  alone). The runs have 52 to 95 per cell.
+- Of the other 35, **5 show the loss is under 3 points** (the policy's own
+  tolerance) by the score bound, and 23 show it is under 5 points. By the
+  exact bound the counts are 0 and 7.
+- Opus and Sonnet rows that pass the policy have score bounds of 1.0 to 8.7
+  points. Only two are under 3: Opus on nested orders at sparse 0.75
+  (+1 / -0 of 95) and Sonnet on flat users (+2 / -0 of 65), both at 200
+  records.
+- A perfect tie needs 88 questions for the score bound to reach 3 points
+  (122 for the exact one). The runs have 52 to 95 per cell, and every
+  question that differs pushes the bound up.
 
-So "LDF ties JSON" in the reports means "no loss detected at this sample
-size". Treating inconclusive as unsafe would make the selector give JSON
-everywhere today. Making that the default is a product decision, so this
-branch does not change the policy, and the numbers above are what it would
-rest on.
+So "LDF ties JSON" in the reports mostly means "no loss detected at this
+sample size". Treating inconclusive as unsafe would make the selector give
+JSON almost everywhere today. That is a product decision, so this branch
+does not change the policy. Section 6 is the study that would settle it.
 
 Other findings from the audit:
 
@@ -168,24 +175,83 @@ Other findings from the audit:
   rows in a band must pass, which is conservative. A non-inferiority rule
   would need the same "all rows" form.
 
-## 5. Model evaluation for database work (built, not run)
+## 5. Database questions through Claude Code (pilot)
 
 `eval/db_eval.py` runs headless Claude Code (`claude -p`, no built-in
-tools, one MCP server, project settings only) on 30 database questions, five
-each of schema discovery, filtering, joins, nested records, NULL semantics
-and exact values. The arms are `json` (the server as shipped), `minified`
-(`eval/minify_proxy.py`) and `ldf` (`ldf-mcp proxy --columnar`). Ground truth
-comes from the fixture files, except schema questions, which use the
-server's catalog. Arm order is shuffled per task. It reports strict
-accuracy, prompt tokens and cost from the session transcripts, tool-result
-size, and paired sign tests of `ldf` against both baselines. All three arms
-were smoke-tested against the real server without a model.
+tools, one MCP server, project settings only, started outside this
+repository) on 30 database questions, five each of schema discovery,
+filtering, joins, nested records, NULL semantics and exact values. The arms
+are `json` (the server as shipped), `minified` (`eval/minify_proxy.py`) and
+`ldf` (`ldf-mcp proxy --columnar`). Ground truth comes from the fixture
+files, except schema questions, which use the server's catalog. Arm order
+is shuffled per task. Approved pilot: Sonnet 5.5, one question per
+category, one rep, 18 runs per pilot. Files are in `pilot/`.
 
-Planned run, waiting for approval: Sonnet 5.5, 30 tasks x 3 arms x 2 reps =
-180 runs, `--max-budget-usd 0.50` per run (hard bound $90). A 5-task pilot
-(15 runs) first to measure real cost per run, then the full run under a
-`--max-cost` cap set from it. At 60 paired runs per comparison it can find
-a clear loss, but by section 4 it cannot show non-inferiority at 3 points.
-It measures what LDF changes in a real agent loop: whether the model still
-answers, and whether the tokens saved are large enough to matter once
-Claude Code's own context is counted.
+**Pilot 1 found a bug ($0.53, `pilot/runs-before-fix.jsonl`).** Tool
+results in the transcripts had the same length in all three arms. Claude
+Code 2.1.306 shows the model a result's `structuredContent` when it is
+present, not its text block. MotherDuck's server sends the text a second
+time as `structuredContent` `{"result": "<pretty JSON>"}`, and the model saw
+that copy, with its quotes and newlines escaped. Neither the 0.5.3 minify
+nor the frame reached the model. `docs/agents.md` said Claude Code gets the
+proxy's output, which was wrong for any server that sends
+`structuredContent`. Fixed in #33: the proxy (and the `minified` arm)
+rewrites `structuredContent` in FastMCP's `{"result": S}` form, and any
+other form is still left alone.
+
+**Pilot 2 after the fix ($0.45, `pilot/report.md`):**
+
+| arm | correct | prompt tokens per run (mean) | tool result chars per run (mean) | turns (mean) |
+|---|---:|---:|---:|---:|
+| json | 6/6 | 19 922 | 2 420 | 3.3 |
+| minified | 6/6 | 19 840 | 2 026 | 3.3 |
+| ldf | 6/6 | 20 508 | 1 688 | 3.7 |
+
+Six questions answer nothing about accuracy. What the pilot does show is
+the scale. A run's prompt is about 20 000 tokens summed over its requests,
+nearly all of it Claude Code's own system prompt and tool definitions. The
+model writes SQL that returns a few rows, so tool results are a few hundred
+tokens. LDF cut the tool-result text by 17 percent against minified JSON,
+but the primer (sent on every request) and one run that took two extra
+turns made the `ldf` arm's total prompt 3 percent larger. On questions an
+agent answers with targeted SQL, the format of the result hardly matters
+to the total. It matters when results are large: wide or long row reads,
+exports, and agents that pull rows to reason over them.
+
+Full run, not started: 30 tasks x 3 arms x 2 reps = 180 runs at about
+$0.025 per run measured, so about $4.50. It would measure accuracy over 60
+paired runs per comparison, which can find a clear loss but cannot show
+non-inferiority at 3 points (section 4).
+
+## 6. A study that can show non-inferiority (proposed)
+
+Single-prompt questions over one data block, as in Stage C, because
+there the data is most of the prompt and the format effect is not diluted.
+
+- **Pre-registered rule:** LDF is accepted for a model, shape and size
+  when the one-sided 95 percent paired score bound on its loss against JSON
+  is at most 3 points. Anything else is inconclusive and the selector gives
+  JSON. Written into the policy before the run.
+- **Cells:** Opus 5.5 and Sonnet 5.5, each on flat_users, nested_orders,
+  sparse_events and mixed_types at 200 held-out records (question seed 3,
+  unseen), the layouts the selector would send (also hoisted for Opus and
+  threshold 0.75 for Sonnet on nested data), plus one Sonnet cell for
+  SQL-shaped sparse data with NULLs as `null` cells (section 3).
+- **Size:** at most 30 questions per kind, so 150 to 250 paired questions
+  per cell (one 200-record block yields 386 to 573 distinct questions).
+  With about 3 percent of questions differing between formats, which is
+  what most Opus cells show, a true tie gives a bound near 2 points, so a
+  pass is likely if LDF really is as good. Sonnet on nested data differs
+  on 13 percent of questions, so that cell would need about 750 questions,
+  and 250 is expected to come out inconclusive.
+- **Deployed condition:** the system prompt carries the LDF primer in both
+  arms, as the proxy sends it whatever format a result ends up in. That
+  needs a `--primer` flag in `ldf-eval build`, a small change.
+- **Cost:** Stage C cost $0.0051 per prompt on Sonnet and $0.0069 on Opus.
+  About 1 800 prompts per model, so about $9 to $12 for Sonnet, $13 to $17
+  for Opus and $3 for the NULL cell: about $25 to $32, capped per stage in
+  `eval/plan.sh`.
+
+It can also come out against LDF in some cells. Either way the selector's
+claims would then rest on a test that can show safety, not only on the
+absence of detected harm.

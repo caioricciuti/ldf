@@ -1,0 +1,30 @@
+{"id": "schema_1", "category": "schema", "question": "Which table in the database has a column named error_code? Answer with the table name.", "answer": "sparse_events", "kind": "exact"}
+{"id": "schema_2", "category": "schema", "question": "How many columns does the table nested_orders have?", "answer": 7, "kind": "exact"}
+{"id": "schema_3", "category": "schema", "question": "What is the SQL type of the column signup_date in table flat_users?", "answer": "DATE", "kind": "exact"}
+{"id": "schema_4", "category": "schema", "question": "List the column names of table repetitive_logs in table order.", "answer": ["ts", "level", "service", "status", "region", "message", "latency_ms"], "kind": "ordered"}
+{"id": "schema_5", "category": "schema", "question": "How many columns of table wide_table have type DOUBLE?", "answer": 10, "kind": "exact"}
+{"id": "filter_1", "category": "filter", "question": "List the ids of active users from country SE with score above 97, ascending.", "answer": [214, 1262, 1616, 2381, 2665, 3712, 4019, 5782, 6232, 6424, 6612, 6619, 7273], "kind": "ordered"}
+{"id": "filter_2", "category": "filter", "question": "List the ids of active users from country KR with score above 97, ascending.", "answer": [231, 239, 1395, 1832, 2286, 2445, 3870, 4439, 4557, 4706, 5516, 6519, 6583, 8767, 9947], "kind": "ordered"}
+{"id": "filter_3", "category": "filter", "question": "List the ids of active users from country UK with score above 97, ascending.", "answer": [430, 2965, 3080, 4145, 4813, 5360, 6138, 7696, 8643, 8873, 8988], "kind": "ordered"}
+{"id": "filter_4", "category": "filter", "question": "How many ERROR log lines does service api have?", "answer": 57, "kind": "exact"}
+{"id": "filter_5", "category": "filter", "question": "Which order ids have status refunded and total above 5558? List them ascending.", "answer": ["ORD-000264", "ORD-000691", "ORD-001333", "ORD-002375", "ORD-004254", "ORD-006112", "ORD-007654", "ORD-007714", "ORD-007843", "ORD-007871", "ORD-008838"], "kind": "ordered"}
+{"id": "join_1", "category": "join", "question": "What is the email of the user who placed order ORD-006246? (orders.customer.id matches users.id)", "answer": "uma.1152@corp.example", "kind": "exact"}
+{"id": "join_2", "category": "join", "question": "What is the email of the user who placed order ORD-006626? (orders.customer.id matches users.id)", "answer": "finn.3561@example.com", "kind": "exact"}
+{"id": "join_3", "category": "join", "question": "What is the email of the user who placed order ORD-005147? (orders.customer.id matches users.id)", "answer": "rui.513@mail.test", "kind": "exact"}
+{"id": "join_4", "category": "join", "question": "How many orders were placed by users whose country in flat_users is ES? (orders.customer.id matches users.id)", "answer": 469, "kind": "exact"}
+{"id": "join_5", "category": "join", "question": "List the order ids of user 4557 (Gil Bartik), ascending.", "answer": ["ORD-003957"], "kind": "ordered"}
+{"id": "nested_1", "category": "nested", "question": "In order ORD-006538, what is the quantity of SKU C3?", "answer": 5, "kind": "exact"}
+{"id": "nested_2", "category": "nested", "question": "In order ORD-006647, what is the quantity of SKU M12?", "answer": 2, "kind": "exact"}
+{"id": "nested_3", "category": "nested", "question": "How many line items does order ORD-000298 have?", "answer": 1, "kind": "exact"}
+{"id": "nested_4", "category": "nested", "question": "Which city is the customer of order ORD-000884 in?", "answer": "Toronto", "kind": "exact"}
+{"id": "nested_5", "category": "nested", "question": "List the SKUs of order ORD-009756 in item order.", "answer": ["D4", "F6", "A1", "H8"], "kind": "ordered"}
+{"id": "null_1", "category": "null", "question": "How many events in sparse_events have a NULL referrer?", "answer": 7006, "kind": "exact"}
+{"id": "null_2", "category": "null", "question": "How many purchase events have a non-NULL amount?", "answer": 369, "kind": "exact"}
+{"id": "null_3", "category": "null", "question": "What is the error_code of event 1130? Answer null if it has none.", "answer": null, "kind": "exact"}
+{"id": "null_4", "category": "null", "question": "What is the error_code of event 2327? Answer null if it has none.", "answer": 5313, "kind": "exact"}
+{"id": "null_5", "category": "null", "question": "Among events with event_id from 1 to 100, list the event_ids whose device is NULL, ascending.", "answer": [3, 4, 5, 6, 7, 9, 13, 14, 16, 18, 19, 21, 23, 25, 26, 27, 29, 31, 33, 36, 37, 39, 40, 41, 43, 45, 46, 47, 48, 49, 50, 51, 54, 56, 58, 62, 63, 64, 67, 68, 69, 70, 71, 75, 76, 77, 78, 79, 82, 83, 86, 89, 90, 91, 92, 93, 94, 96, 97], "kind": "ordered"}
+{"id": "exact_1", "category": "exact", "question": "What is the exact score of user 7565?", "answer": 15.14, "kind": "number"}
+{"id": "exact_2", "category": "exact", "question": "What is the hash of the row with id 6694 in high_card_strings?", "answer": "b4c7fda70a96690354cf242e01a544992ddff0c184e8ddd1bc9aa69968b5eab2", "kind": "exact"}
+{"id": "exact_3", "category": "exact", "question": "What is the uuid of the row with id 1483 in high_card_strings?", "answer": "0121c9ce-2ae1-4a6b-8fbb-03f212e5f633", "kind": "exact"}
+{"id": "exact_4", "category": "exact", "question": "What is the name of the row with id 1789 in unicode_strings?", "answer": "Dzintars", "kind": "exact"}
+{"id": "exact_5", "category": "exact", "question": "What is the total of order ORD-005049?", "answer": 1163.31, "kind": "number"}
