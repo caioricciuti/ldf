@@ -181,11 +181,45 @@ impl Rewritten {
     pub fn converted(&self) -> bool {
         self.blocks.iter().any(|b| b.kept.is_none())
     }
+
+    /// True when some block kept as JSON went out minified.
+    pub fn minified(&self) -> bool {
+        self.blocks
+            .iter()
+            .any(|b| b.kept.is_some() && b.out_bytes < b.in_bytes)
+    }
 }
 
-/// Rewrites the text content blocks of a `tools/call` result in place.
-/// Results flagged `isError` and non-text blocks are left alone, as is
-/// `structuredContent`.
+/// `text` without the whitespace between JSON tokens, when that is
+/// shorter. Every token is kept byte for byte, so numbers and escapes read
+/// exactly as before (semantic equality). Call it only on text that parsed
+/// as JSON.
+pub fn minify_json(text: &str) -> Option<String> {
+    let mut out = String::with_capacity(text.len());
+    let (mut in_string, mut escaped) = (false, false);
+    for c in text.chars() {
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                in_string = false;
+            }
+        } else if matches!(c, ' ' | '\t' | '\n' | '\r') {
+            continue;
+        } else if c == '"' {
+            in_string = true;
+        }
+        out.push(c);
+    }
+    (out.len() < text.len()).then_some(out)
+}
+
+/// Rewrites the text content blocks of a `tools/call` result in place: LDF
+/// where [`convert`] gives it, otherwise JSON that parsed goes out
+/// minified. Results flagged `isError`, blocks under `min_bytes` and
+/// non-text blocks are left alone, as is `structuredContent`.
 pub fn rewrite_tool_result(
     result: &mut Json,
     min_bytes: usize,
@@ -216,11 +250,21 @@ pub fn rewrite_tool_result(
                     });
                     block["text"] = Json::String(ldf);
                 }
-                Err(why) => done.blocks.push(Block {
-                    in_bytes: text.len(),
-                    out_bytes: text.len(),
-                    kept: Some(why),
-                }),
+                Err(why) => {
+                    // Parsed as JSON but stays JSON: at least drop the
+                    // pretty-printing.
+                    let parsed =
+                        matches!(why, Kept::NotDataset | Kept::NotShorter | Kept::Selector(_));
+                    let mini = if parsed { minify_json(text) } else { None };
+                    done.blocks.push(Block {
+                        in_bytes: text.len(),
+                        out_bytes: mini.as_ref().map_or(text.len(), String::len),
+                        kept: Some(why),
+                    });
+                    if let Some(mini) = mini {
+                        block["text"] = Json::String(mini);
+                    }
+                }
             }
         }
     }
@@ -309,6 +353,41 @@ mod tests {
             back[0].get("rows").and_then(|r| r.as_array()).map(Vec::len),
             Some(10)
         );
+    }
+
+    #[test]
+    fn minify_keeps_strings_and_numbers() {
+        let text = "{\n  \"a b\": \"x  \\\" y\\n\",\n  \"n\": [1.50, -0e0,\t2]\r\n}";
+        let mini = minify_json(text).unwrap();
+        assert_eq!(mini, r#"{"a b":"x  \" y\n","n":[1.50,-0e0,2]}"#);
+        let a: Json = serde_json::from_str(text).unwrap();
+        let b: Json = serde_json::from_str(&mini).unwrap();
+        assert_eq!(a, b);
+        assert_eq!(minify_json(r#"{"a":1}"#), None, "already minified");
+    }
+
+    #[test]
+    fn json_that_stays_json_goes_out_minified() {
+        // Columnar, as MotherDuck's DuckDB server answers: not records.
+        let pretty =
+            "{\n  \"columns\": [\n    \"id\"\n  ],\n  \"rows\": [\n    [\n      1\n    ]\n  ]\n}";
+        let mut result = json!({"content": [{"type": "text", "text": pretty}]});
+        let done = rewrite_tool_result(&mut result, 0, None);
+        assert!(!done.converted() && done.minified());
+        assert_eq!(
+            result["content"][0]["text"],
+            r#"{"columns":["id"],"rows":[[1]]}"#
+        );
+
+        // Errors, small blocks and text that is not JSON stay byte for byte.
+        let mut err = json!({"isError": true, "content": [{"type": "text", "text": pretty}]});
+        assert!(!rewrite_tool_result(&mut err, 0, None).minified());
+        assert_eq!(err["content"][0]["text"], pretty);
+        let mut small = json!({"content": [{"type": "text", "text": pretty}]});
+        assert!(!rewrite_tool_result(&mut small, 10_000, None).minified());
+        let mut prose = json!({"content": [{"type": "text", "text": "{ not json }"}]});
+        assert!(!rewrite_tool_result(&mut prose, 0, None).minified());
+        assert_eq!(prose["content"][0]["text"], "{ not json }");
     }
 
     #[test]

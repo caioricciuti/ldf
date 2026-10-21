@@ -301,9 +301,15 @@ fn rewrite_line(line: &str, pending: &Pending, cfg: &Config) -> Option<String> {
                         Some(Kept::Selector(why)) => eprintln!("ldf-mcp: {tool} {why}"),
                         Some(_) => {}
                     }
+                    if b.kept.is_some() && b.out_bytes < b.in_bytes {
+                        eprintln!(
+                            "ldf-mcp: {tool} json {} B -> minified {} B",
+                            b.in_bytes, b.out_bytes
+                        );
+                    }
                 }
             }
-            if !done.converted() {
+            if !done.converted() && !done.minified() {
                 return None;
             }
         }
