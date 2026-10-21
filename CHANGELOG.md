@@ -5,7 +5,12 @@ Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `site/src/content/docs/docs/spec.md`.
 
-## Unreleased
+## 0.6.0 (2026-10-21)
+
+Database MCP results: the columnar adapter, the `structuredContent` fix,
+an opt-in result size cap, and the selector's pre-registered
+non-inferiority rule. The specification stays v0.2.
+
 
 **Behaviour change, `--model` only:** the selector now sends LDF only where
 the evidence rules out a loss of more than 3 points against JSON, as

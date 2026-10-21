@@ -119,11 +119,19 @@ where not" with a cheap switch.
   in front of MotherDuck's DuckDB server the proxy finds columnar JSON it
   does not convert, and now minifies it (`reports/2026-10-21-duckdb`).
   Released as 0.5.3.
-- Open: SQL results carry sparse fields as `null`, never absent, so the
-  v0.1 sparse rule moves them into `~` with their keys (1.61 times the
-  minified JSON on `events`). Keeping a column for keys present on every
-  row is a format change and needs Haiku measured again; waits for a user
-  who needs it. Same for converting the `columns`/`rows` result shape.
+- Done 2026-10-21: database MCP results, released as 0.6.0. `--columnar`
+  converts `columns`/`rows` results only when the frame decodes back
+  exactly; LDF has to beat minified JSON, never the pretty text; FastMCP's
+  wrapped `structuredContent`, which Claude Code shows the model, now
+  follows the rewrite; `--max-result-bytes` caps big results with a note
+  (`reports/2026-10-21-columnar`). A pre-registered study replaced "no loss
+  detected" with "a 3-point loss ruled out" as the selector's rule
+  (`reports/2026-10-21-ni-study`).
+- Open: offer the threshold-0 layout (NULL as `null` cells, no `~`) for
+  SQL results; Sonnet passed it at 0.47 of the tokens of key-repeating
+  JSON. Measure Opus on it first.
+- Open: enough questions above 200 rows to prove the bound there; today
+  every model gets JSON above 200.
 - Next: child tables (lists of structs) on the Arrow path.
 - Compare direct streaming paths against Arrow for JSONL and CSV inputs;
   keep whichever is faster per input kind, measured.
