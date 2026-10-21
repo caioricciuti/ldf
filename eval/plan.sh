@@ -25,6 +25,10 @@
 #   eval/plan.sh large-sonnet           Sonnet 5.5 on it (cap $13)
 #   eval/plan.sh stage-c-sonnet         Sonnet 5.5 on them (~$7.50-11.50, cap $12)
 #   eval/plan.sh stage-c-gpt            GPT on them; needs GPT_MODEL and GPT_PRICE_IN/CACHED/OUT set (cap $GPT_BUDGET)
+#   eval/plan.sh ni-build              non-inferiority study bundles, primer in every prompt (free)
+#   eval/plan.sh ni-sonnet             Sonnet 5.5 on them (cap $13)
+#   eval/plan.sh ni-deepseek           deepseek-chat on them (cap $5)
+#   eval/plan.sh ni-opus               Opus 5.5 on them; needs NI_OPUS_BUDGET (USD, whole stage)
 #   eval/plan.sh all           the first four stages above, in that order
 #   eval/plan.sh score         regrade every responses file into results.<model>.md
 set -euo pipefail
@@ -197,6 +201,63 @@ stage_stage_c_gpt() {
   stage_c eval/out/stage-c "$GPT_BUDGET" --provider openai --model "$GPT_MODEL" --reasoning-effort low \
     --price-input "$GPT_PRICE_IN" --price-cached "$GPT_PRICE_CACHED" --price-output "$GPT_PRICE_OUT"
 }
+# Non-inferiority study (pre-registered 2026-10-21 in
+# reports/2026-10-21-ni-study/PREREGISTRATION.md, committed before any run).
+# 200 held-out records, question seed 3 (never used before), at most 30
+# questions per kind, the LDF primer the proxy sends appended to the system
+# prompt of every prompt in both arms. sql_events is sparse_events as a SQL
+# table returns it: every key on every row, null where the record lacks it,
+# in first-seen key order.
+NI_S75='d=comma h=typed q?=1 o=dotted a=child-key sp=75 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+NI_HOIST='d=comma h=typed q?=1 o=dotted a=hoisted sp=50 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+NI_S0='d=comma h=typed q?=1 o=dotted a=child-key sp=0 rf=json n=null/empty qt=json k=once fl=keep b=words tr=0'
+ni_build() {
+  mkdir -p eval/out/ni
+  ./target/release/ldf-mcp primer > eval/out/ni/primer.txt
+  python3 -I -c 'import json, sys
+recs = json.load(open(sys.argv[1]))[:200]
+keys = []
+for r in recs:
+    keys += [k for k in r if k not in keys]
+json.dump([{k: r.get(k) for k in keys} for r in recs], open(sys.argv[2], "w"), ensure_ascii=False)' \
+    fixtures/holdout/medium/sparse_events.json eval/out/ni/sql_events.json
+  local b
+  for b in "${STAGE_C_DATASETS[@]}"; do
+    ./target/release/ldf-eval build --input "fixtures/holdout/medium/$b.json" --records 200 --per-kind 30 --seed 3 \
+      --formats json,ldf --candidate "ldf-s75=$NI_S75" --candidate "ldf-hoisted=$NI_HOIST" \
+      --system-extra eval/out/ni/primer.txt --out "eval/out/ni/$b"
+  done
+  ./target/release/ldf-eval build --input eval/out/ni/sql_events.json --records 200 --per-kind 30 --seed 3 \
+    --formats json,ldf --candidate "ldf-s0=$NI_S0" --system-extra eval/out/ni/primer.txt --out eval/out/ni/sql_events
+}
+# Each model gets the layouts its selector would send at 200 records: Sonnet
+# threshold 0.75 on nested orders, Opus and DeepSeek hoisted, DeepSeek 0.75
+# on sparse events. The budget is split by each bundle's share of prompts.
+ni_run() {
+  local total=$1; shift
+  local entries=("$@") entry b formats share
+  for entry in "${entries[@]}"; do
+    read -r b formats share <<< "$entry"
+    run --bundle "eval/out/ni/$b" "${NI_MODEL[@]}" --formats "$formats" --max-tokens 4096 \
+      --budget "$(python3 -c "print(round($total * $share, 2))")"
+  done
+}
+stage_ni_sonnet() {
+  NI_MODEL=("${SONNET[@]}")
+  ni_run 13 "flat_users json,ldf 0.15" "nested_orders json,ldf-s75 0.35" "sparse_events json,ldf 0.20" \
+    "mixed_types json,ldf 0.12" "sql_events json,ldf-s0 0.18"
+}
+stage_ni_deepseek() {
+  NI_MODEL=("${DEEPSEEK[@]}")
+  ni_run 5 "flat_users json,ldf 0.15" "nested_orders json,ldf-hoisted 0.40" "sparse_events json,ldf-s75 0.27" \
+    "mixed_types json,ldf 0.18"
+}
+stage_ni_opus() {
+  : "${NI_OPUS_BUDGET:?set NI_OPUS_BUDGET (USD, whole stage)}"
+  NI_MODEL=("${OPUS[@]}")
+  ni_run "$NI_OPUS_BUDGET" "flat_users json,ldf 0.15" "nested_orders json,ldf-hoisted 0.45" "sparse_events json,ldf 0.25" \
+    "mixed_types json,ldf 0.15"
+}
 stage_b() {
   local cap=$1; shift
   for entry in "${STAGE_B[@]}"; do
@@ -212,7 +273,7 @@ stage_deepseek() {
   done
 }
 stage_score() {
-  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl eval/out/stage-c10/*/responses.*.jsonl eval/out/large/*/responses.*.jsonl; do
+  for r in eval/out/*/responses.*.jsonl eval/out/stage-b/*/responses.*.jsonl eval/out/sparse-sweep/*/responses.*.jsonl eval/out/stage-c/*/responses.*.jsonl eval/out/stage-c10/*/responses.*.jsonl eval/out/large/*/responses.*.jsonl eval/out/ni/*/responses.*.jsonl; do
     [ -e "$r" ] || continue
     bundle=$(dirname "$r")
     model=$(basename "$r" .jsonl | cut -d. -f3-)
@@ -220,7 +281,7 @@ stage_score() {
   done
 }
 
-[ $# -gt 0 ] || { sed -n '2,25p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,31p' "$0"; exit 1; }
 for stage in "$@"; do
   case "$stage" in
     opus-ldf) stage_opus_ldf ;;
@@ -245,6 +306,10 @@ for stage in "$@"; do
     stage-b-haiku) stage_stage_b_haiku ;;
     stage-b-deepseek) stage_stage_b_deepseek ;;
     all) stage_opus_ldf; stage_haiku; stage_opus_200; stage_deepseek ;;
+    ni-build) ni_build ;;
+    ni-sonnet) stage_ni_sonnet ;;
+    ni-deepseek) stage_ni_deepseek ;;
+    ni-opus) stage_ni_opus ;;
     score) stage_score ;;
     *) echo "unknown stage: $stage" >&2; exit 1 ;;
   esac

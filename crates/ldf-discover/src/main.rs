@@ -8,7 +8,7 @@
 //! ldf-discover profile --input F [--sample N]          structural traits, JSON
 //! ldf-discover select --model M --input F [--sample N] [--evidence FILE]
 //!                     [--min-n 50] [--max-drop 3] [--extrapolate-rows]
-//!                     [--require-key-order] [--json]
+//!                     [--require-key-order] [--non-inferiority PP] [--json]
 //! ```
 
 use std::fs;
@@ -97,6 +97,7 @@ fn cmd_select(args: &[String]) -> Result<(), String> {
     }
     policy.extrapolate_rows = args.iter().any(|a| a == "--extrapolate-rows");
     policy.require_key_order = args.iter().any(|a| a == "--require-key-order");
+    policy.max_loss_bound_pp = flag(args, "--non-inferiority").and_then(|s| s.parse().ok());
     let recs = load(Path::new(input), sample_flag(args))?;
     let tk = ldf_bench::tokens::Tokenizers::new(&["o200k_base"])?;
     let count = |s: &str| tk.count(s)[0].tokens;

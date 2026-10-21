@@ -56,6 +56,8 @@ fn usage() -> ExitCode {
          \x20     restore what install changed (servers and hooks), where it is still what install wrote\n\
          \x20 ldf-mcp doctor\n\
          \x20     this binary, the statistics file, agents on PATH, Claude Code servers and their state\n\
+         \x20 ldf-mcp primer [--columnar]\n\
+         \x20     print the LDF primer the proxy appends to initialize instructions\n\
          \x20 ldf-mcp --version\n\
          \x20 ldf-mcp fake-server [--ignore-eof]\n\
          \x20     a stand-in downstream server with one tool, `query`, that returns generated rows"
@@ -71,6 +73,15 @@ fn main() -> ExitCode {
         Some("clickhouse") => run_clickhouse(&args[1..]),
         Some("files") => run_files(&args[1..]),
         Some("stats") => run_stats(&args[1..]),
+        Some("primer") => {
+            let r = ldf_mcp::rewrite::PRIMER;
+            if args[1..].iter().any(|a| a == "--columnar") {
+                println!("{r}\n\n{}", ldf_mcp::rewrite::COLUMNAR_PRIMER);
+            } else {
+                println!("{r}");
+            }
+            ExitCode::SUCCESS
+        }
         Some("hook") => run_hook(&args[1..]),
         Some("install") => run_install(&args[1..]),
         Some("uninstall") => run_uninstall(&args[1..]),

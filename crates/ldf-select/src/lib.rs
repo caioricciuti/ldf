@@ -158,6 +158,12 @@ pub struct Policy {
     pub min_saving: f64,
     /// Reject candidates whose decode changes object member order.
     pub require_key_order: bool,
+    /// Non-inferiority: when set, an evidence row also needs the one-sided
+    /// 95 percent paired score bound on its loss against JSON
+    /// ([`loss_upper_bound`]) to be at most this many percentage points.
+    /// A row that shows no harm but cannot rule out a loss this large is
+    /// inconclusive and counts as failing. `None` keeps the harm-only rule.
+    pub max_loss_bound_pp: Option<f64>,
 }
 
 impl Default for Policy {
@@ -169,6 +175,7 @@ impl Default for Policy {
             extrapolate_rows: false,
             min_saving: 0.05,
             require_key_order: false,
+            max_loss_bound_pp: None,
         }
     }
 }
@@ -277,6 +284,70 @@ pub fn sign_test(wins: usize, losses: usize) -> f64 {
     (2.0 * sum).min(1.0)
 }
 
+/// One-sided 95 percent upper bound, in percentage points, on the loss
+/// against JSON (share of questions only JSON got right minus share only
+/// the format got right) from the paired score test (Tango 1998): the
+/// largest loss whose restricted maximum-likelihood fit still gives
+/// Z >= -1.645 for `wins` and `losses` out of `n` paired questions.
+/// `eval/analysis/selector_audit.py` computes the same bound.
+pub fn loss_upper_bound(wins: usize, losses: usize, n: usize) -> f64 {
+    const Z: f64 = 1.644_853_626_951_472_2;
+    if n == 0 {
+        return 100.0;
+    }
+    let (w, l, nf) = (wins as f64, losses as f64, n as f64);
+    let t = nf - w - l;
+    let term = |k: f64, p: f64| {
+        if k == 0.0 {
+            0.0
+        } else if p > 0.0 {
+            k * p.ln()
+        } else {
+            f64::NEG_INFINITY
+        }
+    };
+    let zstat = |d: f64| {
+        let (lo, hi) = ((-d).max(0.0), (1.0 - d) / 2.0);
+        if hi <= lo {
+            return f64::NEG_INFINITY;
+        }
+        let ll = |pw: f64| {
+            let (pl, pt) = (pw + d, 1.0 - 2.0 * pw - d);
+            if pw < 0.0 || pl < 0.0 || pt < 0.0 {
+                return f64::NEG_INFINITY;
+            }
+            term(w, pw) + term(l, pl) + term(t, pt)
+        };
+        let g = (5f64.sqrt() - 1.0) / 2.0;
+        let (mut a, mut b) = (lo, hi);
+        for _ in 0..200 {
+            let (c, e) = (b - g * (b - a), a + g * (b - a));
+            if ll(c) < ll(e) {
+                a = c;
+            } else {
+                b = e;
+            }
+        }
+        let pw = (a + b) / 2.0;
+        let var = (2.0 * pw + d - d * d) / nf;
+        if var > 0.0 {
+            ((l - w) / nf - d) / var.sqrt()
+        } else {
+            f64::NEG_INFINITY
+        }
+    };
+    let (mut lo, mut hi) = ((l - w) / nf, 1.0);
+    for _ in 0..100 {
+        let mid = (lo + hi) / 2.0;
+        if zstat(mid) >= -Z {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    100.0 * lo
+}
+
 /// Checks one evidence row against the policy; `Err` says why it fails.
 fn row_passes(e: &Evidence, policy: &Policy) -> Result<(), String> {
     let tag = format!("{} on {} ({} records)", e.format, e.dataset, e.records);
@@ -292,6 +363,15 @@ fn row_passes(e: &Evidence, policy: &Policy) -> Result<(), String> {
             "{tag}: significantly worse than JSON (+{} / -{}, p={:.3})",
             e.wins, e.losses, e.p
         ));
+    }
+    if let Some(margin) = policy.max_loss_bound_pp {
+        let bound = loss_upper_bound(e.wins, e.losses, e.n);
+        if bound > margin {
+            return Err(format!(
+                "{tag}: inconclusive, a loss of up to {bound:.1} points is not ruled out (+{} / -{} of {}), margin {margin}",
+                e.wins, e.losses, e.n
+            ));
+        }
     }
     Ok(())
 }
@@ -591,6 +671,60 @@ fn check_evidence(
 mod tests {
     use super::*;
     use ldf_data::obj;
+
+    #[test]
+    fn loss_bound_matches_the_audit_script() {
+        // Values from eval/analysis/selector_audit.py.
+        for (w, l, n, want) in [
+            (0, 0, 88, 2.983),
+            (1, 0, 95, 1.746),
+            (2, 0, 65, 1.042),
+            (2, 2, 80, 5.15),
+            (5, 7, 95, 8.653),
+            (3, 3, 200, 2.394),
+        ] {
+            let got = loss_upper_bound(w, l, n);
+            assert!((got - want).abs() < 0.01, "{w} {l} {n}: {got}");
+        }
+    }
+
+    #[test]
+    fn non_inferiority_turns_an_underpowered_tie_into_json() {
+        // 65 questions, no difference: passes the harm rule, cannot show
+        // a loss under 3 points (bound 4.0).
+        let ev = vec![Evidence {
+            n: 65,
+            ..row("m", "ldf", &[], 60, 60, 0, 0)
+        }];
+        let p = Policy::default();
+        assert!(matches!(
+            select(&flat(50), "m", &ev, &p).choice,
+            Choice::Ldf { .. }
+        ));
+        let strict = Policy {
+            max_loss_bound_pp: Some(3.0),
+            ..p
+        };
+        let d = select(&flat(50), "m", &ev, &strict);
+        assert_eq!(d.choice, Choice::Json);
+        assert!(
+            d.verdicts[1]
+                .notes
+                .iter()
+                .any(|n| n.contains("inconclusive")),
+            "{:?}",
+            d.verdicts[1].notes
+        );
+        // 200 questions, two each way: bound 2.0, accepted.
+        let ev = vec![Evidence {
+            n: 200,
+            ..row("m", "ldf", &[], 190, 190, 2, 2)
+        }];
+        assert!(matches!(
+            select(&flat(50), "m", &ev, &strict).choice,
+            Choice::Ldf { .. }
+        ));
+    }
 
     #[test]
     fn sign_test_matches_known_values() {

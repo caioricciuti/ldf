@@ -23,6 +23,14 @@ stated in `site/src/content/docs/docs/spec.md`.
   questions through headless Claude Code, three arms; paid, not run).
   `eval/bench_mcp.py --ldf-arg`. Report: `reports/2026-10-21-columnar`.
 
+- Non-inferiority study, pre-registered before any run
+  (`reports/2026-10-21-ni-study/PREREGISTRATION.md`):
+  `ldf_select::loss_upper_bound` (paired score bound on the loss against
+  JSON) and `Policy::max_loss_bound_pp` (off by default until the study
+  is graded), `ldf-discover select --non-inferiority PP`, `ldf-eval build
+  --system-extra FILE`, `ldf-mcp primer [--columnar]`, and the `ni-*`
+  stages in `eval/plan.sh`.
+
 ### Changed
 
 - `ldf-mcp`: LDF must now be shorter than the result's JSON minified, not
