@@ -158,6 +158,16 @@ pub struct Policy {
     pub min_saving: f64,
     /// Reject candidates whose decode changes object member order.
     pub require_key_order: bool,
+    /// Non-inferiority: when set, the evidence rows in the size band,
+    /// pooled (wins, losses and questions added, one row per run), must
+    /// have a one-sided 95 percent paired score bound on the loss against
+    /// JSON ([`loss_upper_bound`]) of at most this many percentage points,
+    /// and every row must still pass the harm rule. Otherwise the result is
+    /// inconclusive and the candidate is turned down.
+    /// Default 3.0, as pre-registered in
+    /// `reports/2026-10-21-ni-study/PREREGISTRATION.md`; `None` is the
+    /// harm-only rule used before.
+    pub max_loss_bound_pp: Option<f64>,
 }
 
 impl Default for Policy {
@@ -169,6 +179,7 @@ impl Default for Policy {
             extrapolate_rows: false,
             min_saving: 0.05,
             require_key_order: false,
+            max_loss_bound_pp: Some(3.0),
         }
     }
 }
@@ -277,6 +288,70 @@ pub fn sign_test(wins: usize, losses: usize) -> f64 {
     (2.0 * sum).min(1.0)
 }
 
+/// One-sided 95 percent upper bound, in percentage points, on the loss
+/// against JSON (share of questions only JSON got right minus share only
+/// the format got right) from the paired score test (Tango 1998): the
+/// largest loss whose restricted maximum-likelihood fit still gives
+/// Z >= -1.645 for `wins` and `losses` out of `n` paired questions.
+/// `eval/analysis/selector_audit.py` computes the same bound.
+pub fn loss_upper_bound(wins: usize, losses: usize, n: usize) -> f64 {
+    const Z: f64 = 1.644_853_626_951_472_2;
+    if n == 0 {
+        return 100.0;
+    }
+    let (w, l, nf) = (wins as f64, losses as f64, n as f64);
+    let t = nf - w - l;
+    let term = |k: f64, p: f64| {
+        if k == 0.0 {
+            0.0
+        } else if p > 0.0 {
+            k * p.ln()
+        } else {
+            f64::NEG_INFINITY
+        }
+    };
+    let zstat = |d: f64| {
+        let (lo, hi) = ((-d).max(0.0), (1.0 - d) / 2.0);
+        if hi <= lo {
+            return f64::NEG_INFINITY;
+        }
+        let ll = |pw: f64| {
+            let (pl, pt) = (pw + d, 1.0 - 2.0 * pw - d);
+            if pw < 0.0 || pl < 0.0 || pt < 0.0 {
+                return f64::NEG_INFINITY;
+            }
+            term(w, pw) + term(l, pl) + term(t, pt)
+        };
+        let g = (5f64.sqrt() - 1.0) / 2.0;
+        let (mut a, mut b) = (lo, hi);
+        for _ in 0..200 {
+            let (c, e) = (b - g * (b - a), a + g * (b - a));
+            if ll(c) < ll(e) {
+                a = c;
+            } else {
+                b = e;
+            }
+        }
+        let pw = (a + b) / 2.0;
+        let var = (2.0 * pw + d - d * d) / nf;
+        if var > 0.0 {
+            ((l - w) / nf - d) / var.sqrt()
+        } else {
+            f64::NEG_INFINITY
+        }
+    };
+    let (mut lo, mut hi) = ((l - w) / nf, 1.0);
+    for _ in 0..100 {
+        let mid = (lo + hi) / 2.0;
+        if zstat(mid) >= -Z {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    100.0 * lo
+}
+
 /// Checks one evidence row against the policy; `Err` says why it fails.
 fn row_passes(e: &Evidence, policy: &Policy) -> Result<(), String> {
     let tag = format!("{} on {} ({} records)", e.format, e.dataset, e.records);
@@ -367,11 +442,40 @@ pub fn measure_ldf(
     )
 }
 
-/// Whether the evidence holds any row for `model` that the policy counts.
+/// Whether some measured data shape and size would get `model` an LDF
+/// layout under `policy`. When none would, every result stays JSON and a
+/// caller can leave the LDF primer out.
 pub fn knows_model(model: &str, evidence: &[Evidence], policy: &Policy) -> bool {
-    evidence
+    LDF_CANDIDATES
         .iter()
-        .any(|e| e.model == model && e.n >= policy.min_n)
+        .filter(|c| **c != Choice::Json)
+        .any(|&choice| {
+            evidence
+                .iter()
+                .filter(|e| e.model == model && e.n >= policy.min_n && choice.matches(e))
+                .any(|e| {
+                    let names: BTreeSet<&str> = e.traits.iter().map(String::as_str).collect();
+                    let prof = Profile {
+                        rows: e.records,
+                        top_keys: 0,
+                        min_fill: 1.0,
+                        traits: Traits {
+                            child_tables: names.contains("child_tables"),
+                            json_cells: names.contains("json_cells"),
+                            sparse: names.contains("sparse"),
+                        },
+                    };
+                    check_evidence(
+                        choice,
+                        model,
+                        &names,
+                        &prof,
+                        evidence,
+                        policy,
+                        &mut Vec::new(),
+                    )
+                })
+        })
 }
 
 /// The candidates a reader primed for LDF only can take, JSON first.
@@ -562,7 +666,37 @@ fn check_evidence(
             prof.rows
         ));
     }
-    for e in rows.iter().filter(|e| e.records == band) {
+    let in_band: Vec<&&Evidence> = rows.iter().filter(|e| e.records == band).collect();
+    if let Some(margin) = policy.max_loss_bound_pp {
+        // Non-inferiority on the band's rows pooled (one row per run, so no
+        // question counts twice): their questions together must rule out a
+        // loss above the margin. Every row must still pass the harm rule
+        // below, so one harmful row vetoes whatever the pool says.
+        let mut runs: Vec<&str> = Vec::new();
+        let (mut w, mut l, mut n) = (0, 0, 0);
+        for e in &in_band {
+            if !runs.contains(&e.run.as_str()) {
+                runs.push(&e.run);
+                (w, l, n) = (w + e.wins, l + e.losses, n + e.n);
+            }
+        }
+        let bound = loss_upper_bound(w, l, n);
+        let pooled = match runs.len() {
+            1 => "1 run".to_string(),
+            k => format!("{k} runs pooled"),
+        };
+        if n > 0 && bound <= margin {
+            notes.push(format!(
+                "ok: non-inferior, {pooled} (+{w} / -{l} of {n}) rules out a loss above {bound:.1} points, margin {margin}"
+            ));
+        } else {
+            notes.push(format!(
+                "inconclusive: {pooled} (+{w} / -{l} of {n}) leaves a loss of up to {bound:.1} points possible, margin {margin}"
+            ));
+            ok = false;
+        }
+    }
+    for e in in_band {
         match row_passes(e, policy) {
             Ok(()) => notes.push(format!(
                 "ok: {} on {} ({} records, {}): {}/{} vs JSON {}/{}, +{} / -{}, p={:.2}",
@@ -593,6 +727,78 @@ mod tests {
     use ldf_data::obj;
 
     #[test]
+    fn loss_bound_matches_the_audit_script() {
+        // Values from eval/analysis/selector_audit.py.
+        for (w, l, n, want) in [
+            (0, 0, 88, 2.983),
+            (1, 0, 95, 1.746),
+            (2, 0, 65, 1.042),
+            (2, 2, 80, 5.15),
+            (5, 7, 95, 8.653),
+            (3, 3, 200, 2.394),
+        ] {
+            let got = loss_upper_bound(w, l, n);
+            assert!((got - want).abs() < 0.01, "{w} {l} {n}: {got}");
+        }
+    }
+
+    #[test]
+    fn non_inferiority_turns_an_underpowered_tie_into_json() {
+        // 65 questions, no difference: passes the harm rule, cannot show
+        // a loss under 3 points (bound 4.0).
+        let ev = vec![Evidence {
+            n: 65,
+            k: 60,
+            json_k: 60,
+            ..row("m", "ldf", &[], 0, 0, 0, 0)
+        }];
+        let harm_only = Policy {
+            max_loss_bound_pp: None,
+            ..Policy::default()
+        };
+        assert!(matches!(
+            select(&flat(50), "m", &ev, &harm_only).choice,
+            Choice::Ldf { .. }
+        ));
+        let d = select(&flat(50), "m", &ev, &Policy::default());
+        assert_eq!(d.choice, Choice::Json);
+        assert!(
+            d.verdicts[1]
+                .notes
+                .iter()
+                .any(|n| n.contains("inconclusive")),
+            "{:?}",
+            d.verdicts[1].notes
+        );
+        // Add 200 questions, two each way: pooled +2 / -2 of 265 rules out a
+        // loss above 3 points, and neither row shows harm.
+        let mut ev = ev;
+        ev.push(Evidence {
+            n: 200,
+            k: 190,
+            json_k: 190,
+            run: "second".into(),
+            ..row("m", "ldf", &[], 0, 0, 2, 2)
+        });
+        assert!(matches!(
+            select(&flat(50), "m", &ev, &Policy::default()).choice,
+            Choice::Ldf { .. }
+        ));
+        // A harmful row vetoes even when the pool passes the bound.
+        ev.push(Evidence {
+            n: 80,
+            k: 70,
+            json_k: 78,
+            run: "third".into(),
+            ..row("m", "ldf", &[], 0, 0, 1, 9)
+        });
+        assert_eq!(
+            select(&flat(50), "m", &ev, &Policy::default()).choice,
+            Choice::Json
+        );
+    }
+
+    #[test]
     fn sign_test_matches_known_values() {
         assert!((sign_test(0, 0) - 1.0).abs() < 1e-12);
         assert!((sign_test(5, 15) - 0.04138946533203125).abs() < 1e-9);
@@ -619,9 +825,11 @@ mod tests {
             thresholds: vec![0.0, 0.25, 0.5, 0.75],
             hoist_thresholds: vec![0.0, 0.25, 0.5, 0.75],
             format: family.into(),
-            n: 100,
-            k,
-            json_k,
+            // Three times the counts given, out of 300: enough questions for
+            // a tie to rule out a 3-point loss.
+            n: 300,
+            k: 3 * k,
+            json_k: 3 * json_k,
             wins,
             losses,
             p: sign_test(wins, losses),
@@ -761,9 +969,9 @@ mod builtin_tests {
             thresholds: vec![0.5, 0.75],
             hoist_thresholds: vec![0.5, 0.75],
             format: "ldf".into(),
-            n: 60,
-            k: 50,
-            json_k: 50,
+            n: 400,
+            k: 350,
+            json_k: 350,
             wins: 0,
             losses: 0,
             p: 1.0,

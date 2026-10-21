@@ -1,0 +1,276 @@
+[
+ {
+  "model": "claude-opus-5-5",
+  "dataset": "flat_users",
+  "format": "ldf",
+  "n": 151,
+  "k": 150,
+  "json_k": 148,
+  "wins": 3,
+  "losses": 1,
+  "drop_pp": -1.32,
+  "p": 0.625,
+  "loss_bound_pp": 1.16,
+  "verdict": "pass",
+  "losses_by_kind": {
+   "filter": 1
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "dataset": "flat_users",
+  "format": "ldf",
+  "n": 151,
+  "k": 148,
+  "json_k": 150,
+  "wins": 0,
+  "losses": 2,
+  "drop_pp": 1.32,
+  "p": 0.5,
+  "loss_bound_pp": 3.92,
+  "verdict": "inconclusive",
+  "losses_by_kind": {
+   "aggregate_where": 2
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "deepseek-chat",
+  "dataset": "flat_users",
+  "format": "ldf",
+  "n": 151,
+  "k": 83,
+  "json_k": 92,
+  "wins": 3,
+  "losses": 12,
+  "drop_pp": 5.96,
+  "p": 0.0352,
+  "loss_bound_pp": 10.66,
+  "verdict": "fails",
+  "losses_by_kind": {
+   "filter": 5,
+   "compare": 3,
+   "multi_record": 1,
+   "aggregate_where": 2,
+   "rank": 1
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "claude-opus-5-5",
+  "dataset": "mixed_types",
+  "format": "ldf",
+  "n": 151,
+  "k": 151,
+  "json_k": 150,
+  "wins": 1,
+  "losses": 0,
+  "drop_pp": -0.66,
+  "p": 1.0,
+  "loss_bound_pp": 1.11,
+  "verdict": "pass",
+  "losses_by_kind": {},
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "dataset": "mixed_types",
+  "format": "ldf",
+  "n": 151,
+  "k": 151,
+  "json_k": 151,
+  "wins": 0,
+  "losses": 0,
+  "drop_pp": 0.0,
+  "p": 1.0,
+  "loss_bound_pp": 1.76,
+  "verdict": "pass",
+  "losses_by_kind": {},
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "deepseek-chat",
+  "dataset": "mixed_types",
+  "format": "ldf",
+  "n": 151,
+  "k": 150,
+  "json_k": 150,
+  "wins": 1,
+  "losses": 1,
+  "drop_pp": 0.0,
+  "p": 1.0,
+  "loss_bound_pp": 2.32,
+  "verdict": "pass",
+  "losses_by_kind": {
+   "missing_value": 1
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "claude-opus-5-5",
+  "dataset": "nested_orders",
+  "format": "ldf-hoisted",
+  "n": 249,
+  "k": 238,
+  "json_k": 247,
+  "wins": 1,
+  "losses": 10,
+  "drop_pp": 3.61,
+  "p": 0.0117,
+  "loss_bound_pp": 6.26,
+  "verdict": "fails",
+  "losses_by_kind": {
+   "nested_extract": 3,
+   "child_aggregate": 5,
+   "aggregate_where": 2
+  },
+  "other_outcomes": {
+   "wrapped": 1
+  },
+  "unanswered": 0
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "dataset": "nested_orders",
+  "format": "ldf-s75",
+  "n": 249,
+  "k": 227,
+  "json_k": 229,
+  "wins": 6,
+  "losses": 8,
+  "drop_pp": 0.8,
+  "p": 0.7905,
+  "loss_bound_pp": 3.52,
+  "verdict": "inconclusive",
+  "losses_by_kind": {
+   "compare": 1,
+   "child_aggregate": 5,
+   "aggregate_where": 1,
+   "filter": 1
+  },
+  "other_outcomes": {
+   "bare": 1
+  },
+  "unanswered": 0
+ },
+ {
+  "model": "deepseek-chat",
+  "dataset": "nested_orders",
+  "format": "ldf-hoisted",
+  "n": 249,
+  "k": 159,
+  "json_k": 162,
+  "wins": 4,
+  "losses": 7,
+  "drop_pp": 1.2,
+  "p": 0.5488,
+  "loss_bound_pp": 3.71,
+  "verdict": "inconclusive",
+  "losses_by_kind": {
+   "child_count": 5,
+   "child_aggregate": 1,
+   "aggregate_where": 1
+  },
+  "other_outcomes": {
+   "truncated": 3
+  },
+  "unanswered": 0
+ },
+ {
+  "model": "claude-opus-5-5",
+  "dataset": "sparse_events",
+  "format": "ldf",
+  "n": 220,
+  "k": 214,
+  "json_k": 214,
+  "wins": 5,
+  "losses": 5,
+  "drop_pp": 0.0,
+  "p": 1.0,
+  "loss_bound_pp": 2.63,
+  "verdict": "pass",
+  "losses_by_kind": {
+   "filter": 2,
+   "compare": 2,
+   "rank": 1
+  },
+  "other_outcomes": {
+   "wrapped": 2
+  },
+  "unanswered": 0
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "dataset": "sparse_events",
+  "format": "ldf",
+  "n": 220,
+  "k": 214,
+  "json_k": 216,
+  "wins": 4,
+  "losses": 6,
+  "drop_pp": 0.91,
+  "p": 0.7539,
+  "loss_bound_pp": 3.62,
+  "verdict": "inconclusive",
+  "losses_by_kind": {
+   "filter": 4,
+   "aggregate": 2
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "deepseek-chat",
+  "dataset": "sparse_events",
+  "format": "ldf-s75",
+  "n": 220,
+  "k": 132,
+  "json_k": 136,
+  "wins": 9,
+  "losses": 13,
+  "drop_pp": 1.82,
+  "p": 0.5235,
+  "loss_bound_pp": 5.55,
+  "verdict": "inconclusive",
+  "losses_by_kind": {
+   "lookup": 1,
+   "filter": 1,
+   "aggregate": 3,
+   "compare": 1,
+   "missing_value": 1,
+   "multi_record": 2,
+   "aggregate_where": 1,
+   "rank": 3
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "dataset": "sql_events",
+  "format": "ldf-s0",
+  "n": 220,
+  "k": 216,
+  "json_k": 217,
+  "wins": 2,
+  "losses": 3,
+  "drop_pp": 0.45,
+  "p": 1.0,
+  "loss_bound_pp": 2.57,
+  "verdict": "pass",
+  "losses_by_kind": {
+   "filter": 1,
+   "aggregate_where": 1,
+   "rank": 1
+  },
+  "other_outcomes": {},
+  "unanswered": 0
+ }
+]

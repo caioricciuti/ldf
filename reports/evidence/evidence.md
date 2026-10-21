@@ -88,6 +88,19 @@ Each row: one model, one bundle, one format, against JSON on the same questions.
 | gpt-6.1-sol | nested_orders | 50 | child_tables,sparse | toon | toon |  |  | 20 | 100.0% | 100.0% | +0 / -0 | 1.00 | 1.073 | 1755 (1815) |
 | gpt-6.1-sol | nested_orders | 50 | child_tables,sparse | toon-tab | other |  |  | 20 | 100.0% | 100.0% | +0 / -0 | 1.00 | 1.074 | 1714 (1815) |
 | gpt-6.1-sol | nested_orders | 50 | child_tables,sparse | yaml | other |  |  | 20 | 100.0% | 100.0% | +0 / -0 | 1.00 | 1.257 | 2118 (1815) |
+| claude-opus-5-5 | ni/flat_users | 200 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 0.0,0.25,0.5,0.75,1.0 | 151 | 99.3% | 98.0% | +3 / -1 | 0.62 | 0.608 | 2482 (2268) |
+| claude-sonnet-5-5 | ni/flat_users | 200 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 0.0,0.25,0.5,0.75,1.0 | 151 | 98.0% | 99.3% | +0 / -2 | 0.50 | 0.608 | 2287 (2083) |
+| deepseek-chat | ni/flat_users | 200 | flat | ldf | ldf | 0.0,0.25,0.5,0.75,1.0 | 0.0,0.25,0.5,0.75,1.0 | 151 | 55.0% | 60.9% | +3 / -12 | 0.04 | 0.608 | 1134 (1127) |
+| claude-opus-5-5 | ni/mixed_types | 200 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 0.5,0.75 | 151 | 100.0% | 99.3% | +1 / -0 | 1.00 | 0.73 | 1765 (1334) |
+| claude-sonnet-5-5 | ni/mixed_types | 200 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 0.5,0.75 | 151 | 100.0% | 100.0% | +0 / -0 | 1.00 | 0.73 | 1454 (1421) |
+| deepseek-chat | ni/mixed_types | 200 | json_cells,sparse | ldf | ldf | 0.5,0.75 | 0.5,0.75 | 151 | 99.3% | 99.3% | +1 / -1 | 1.00 | 0.73 | 1027 (1022) |
+| claude-opus-5-5 | ni/nested_orders | 200 | child_tables,sparse | ldf-hoisted | ldf |  | 0.0,0.25,0.5 | 249 | 95.6% | 99.2% | +1 / -10 | 0.01 | 0.552 | 3027 (3146) |
+| claude-sonnet-5-5 | ni/nested_orders | 200 | child_tables,sparse | ldf-s75 | ldf | 0.75,1.0 |  | 249 | 91.2% | 92.0% | +6 / -8 | 0.79 | 0.681 | 2673 (2672) |
+| deepseek-chat | ni/nested_orders | 200 | child_tables,sparse | ldf-hoisted | ldf |  | 0.0,0.25,0.5 | 249 | 63.9% | 65.1% | +4 / -7 | 0.55 | 0.552 | 1406 (1269) |
+| claude-opus-5-5 | ni/sparse_events | 200 | sparse | ldf | ldf | 0.5 | 0.5 | 220 | 97.3% | 97.3% | +5 / -5 | 1.00 | 0.801 | 2705 (2365) |
+| claude-sonnet-5-5 | ni/sparse_events | 200 | sparse | ldf | ldf | 0.5 | 0.5 | 220 | 97.3% | 98.2% | +4 / -6 | 0.75 | 0.801 | 2284 (2256) |
+| deepseek-chat | ni/sparse_events | 200 | sparse | ldf-s75 | ldf | 0.75,1.0 | 0.75,1.0 | 220 | 60.0% | 61.8% | +9 / -13 | 0.52 | 0.888 | 1114 (1215) |
+| claude-sonnet-5-5 | ni/sql_events | 200 | sparse | ldf-s0 | ldf | 0.0 | 0.0 | 220 | 98.2% | 98.6% | +2 / -3 | 1.00 | 0.466 | 2331 (2297) |
 | deepseek-chat | sparse-sweep/sparse_events, json from stage-b/sparse_events | 200 | sparse | ldf-s75 | ldf | 0.75,1.0 | 0.75,1.0 | 115 | 66.1% | 60.9% | +8 / -2 | 0.11 | 0.89 | 1186 (957) |
 | claude-opus-5-5 | sparse_events | 50 | sparse | csv | other |  |  | 18 | 94.4% | 94.4% | +0 / -0 | 1.00 | 0.622 | 1890 (1909) |
 | claude-opus-5-5 | sparse_events | 50 | sparse | json-pretty | other |  |  | 18 | 94.4% | 94.4% | +0 / -0 | 1.00 | 1.491 | 1917 (1909) |

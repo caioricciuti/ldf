@@ -65,6 +65,10 @@ impl Tokenizer {
 
 pub struct BundleInput<'a> {
     pub dataset: &'a str,
+    /// The system prompt of every prompt: [`SYSTEM_PROMPT`], plus anything
+    /// the caller appends (the LDF primer, to measure the deployed
+    /// condition).
+    pub system: &'a str,
     pub source_path: &'a str,
     pub seed: u64,
     pub records: &'a [Value],
@@ -80,6 +84,7 @@ pub struct BundleInput<'a> {
 pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, String> {
     let BundleInput {
         dataset,
+        system,
         source_path,
         seed,
         records,
@@ -137,7 +142,7 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
                 .replace("{format_name}", display)
                 .replace("{data}", text)
                 .replace("{question}", &t.question);
-            let pt = tokenizer.map(|tk| tk.count(SYSTEM_PROMPT) + tk.count(&user));
+            let pt = tokenizer.map(|tk| tk.count(system) + tk.count(&user));
             if let Some(n) = pt {
                 max_prompt_tokens = Some(max_prompt_tokens.map_or(n, |m| m.max(n)));
             }
@@ -145,7 +150,7 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
                 prompt_id: format!("{}__{}", t.id, name),
                 task_id: t.id.clone(),
                 format: name.clone(),
-                system: SYSTEM_PROMPT.to_string(),
+                system: system.to_string(),
                 user,
                 data_bytes: text.len() as u64,
                 data_tokens_o200k: dt,
@@ -172,7 +177,7 @@ pub fn write_bundle(out: &Path, input: &BundleInput<'_>) -> Result<Manifest, Str
             })
             .collect(),
         prompts: prompt_count,
-        system_prompt: SYSTEM_PROMPT.to_string(),
+        system_prompt: system.to_string(),
         user_template: USER_TEMPLATE.to_string(),
         data_tokens_o200k: data_tokens,
         max_prompt_tokens_o200k: max_prompt_tokens,

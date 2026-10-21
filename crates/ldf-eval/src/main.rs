@@ -3,7 +3,7 @@
 //! ```text
 //! ldf-eval build --input fixtures/small/flat_users.json [--records 50] [--per-kind 3] [--kinds a,b]
 //!                [--formats all] [--seed 1] [--extra name=file]... [--candidate name=ID]...
-//!                --out eval/out/flat_users
+//!                [--system-extra FILE] --out eval/out/flat_users
 //! ldf-eval score --bundle eval/out/flat_users --responses eval/out/flat_users/responses.jsonl
 //! ```
 
@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use ldf_data::input::{ReadOptions, read_all};
-use ldf_eval::bundle::{BundleInput, Manifest, Tokenizer, write_bundle};
+use ldf_eval::bundle::{BundleInput, Manifest, SYSTEM_PROMPT, Tokenizer, write_bundle};
 use ldf_eval::score::{Response, grade, render_markdown};
 use ldf_eval::tasks::{Generator, Task, TaskKind};
 
@@ -25,7 +25,8 @@ fn flag(args: &[String], name: &str) -> Option<String> {
 fn usage() -> ExitCode {
     eprintln!(
         "usage:\n  ldf-eval build --input FILE --out DIR [--records N] [--per-kind N] [--kinds a,b] [--formats all|a,b] [--seed N]\n\
-         \x20     [--extra name=file]... [--candidate name=ID]...\n\
+         \x20     [--extra name=file]... [--candidate name=ID]... [--system-extra FILE]\n\
+         \x20     --system-extra appends FILE to the system prompt of every prompt (all formats alike)\n\
          \x20 ldf-eval score --bundle DIR --responses FILE [--out FILE.md]"
     );
     ExitCode::from(2)
@@ -132,8 +133,19 @@ fn build(args: &[String]) -> ExitCode {
             }
         }
     }
+    let system = match flag(args, "--system-extra") {
+        None => SYSTEM_PROMPT.to_string(),
+        Some(path) => match fs::read_to_string(&path) {
+            Ok(text) => format!("{SYSTEM_PROMPT}\n\n{}", text.trim_end()),
+            Err(e) => {
+                eprintln!("{path}: {e}");
+                return ExitCode::FAILURE;
+            }
+        },
+    };
     let bundle = BundleInput {
         dataset: &dataset,
+        system: &system,
         source_path: &input,
         seed,
         records: &records,

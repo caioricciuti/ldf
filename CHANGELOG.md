@@ -7,6 +7,15 @@ stated in `site/src/content/docs/docs/spec.md`.
 
 ## Unreleased
 
+**Behaviour change, `--model` only:** the selector now sends LDF only where
+the evidence rules out a loss of more than 3 points against JSON, as
+pre-registered in `reports/2026-10-21-ni-study`. Before, it sent LDF
+wherever no loss had been detected. Opus 5.5 keeps LDF on flat, sparse and
+mixed-type data and gets threshold 0.75 instead of hoisted arrays on nested
+orders; Sonnet 5.5 keeps flat and mixed-type data; DeepSeek keeps mixed
+types and sparse events at 0.75; Haiku 5.5 gets JSON everywhere and no
+primer; nothing above 200 rows gets LDF. Without `--model` nothing changes.
+
 ### Added
 
 - `ldf-mcp proxy --columnar` (opt-in): results shaped `{"columns": [...],
@@ -29,9 +38,24 @@ stated in `site/src/content/docs/docs/spec.md`.
   how to narrow the query. Other members of the result are kept as sent;
   errors and results without rows are never cut. Stats events carry
   `rows_shown` and `rows_total`.
+- Non-inferiority study, pre-registered before any run
+  (`reports/2026-10-21-ni-study/PREREGISTRATION.md`):
+  `ldf_select::loss_upper_bound` (paired score bound on the loss against
+  JSON) and `Policy::max_loss_bound_pp` (off by default until the study
+  is graded), `ldf-discover select --non-inferiority PP`, `ldf-eval build
+  --system-extra FILE`, `ldf-mcp primer [--columnar]`, and the `ni-*`
+  stages in `eval/plan.sh`.
 
 ### Changed
 
+- `ldf-select`: `Policy::max_loss_bound_pp` defaults to 3.0. A size band's
+  evidence rows are pooled (one per run) and their paired score bound on
+  the loss must be at most 3 points; every row must still pass the harm
+  rule. `knows_model` is now true only when some measured shape would get
+  the model LDF, so a model with only unproven evidence gets no primer.
+  `ldf-discover select --harm-only` gives the old rule.
+- Evidence: the study's 13 rows added to `reports/evidence/evidence.json`
+  (and the built-in copy); `verdicts.json` regenerated.
 - `ldf-mcp`: LDF must now be shorter than the result's JSON minified, not
   the text as sent, so whitespace is never counted as an LDF saving (the
   proxy, the hook and the selector's size check). A pretty-printed result

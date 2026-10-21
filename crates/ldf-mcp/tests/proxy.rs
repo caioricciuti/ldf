@@ -211,9 +211,9 @@ fn model_without_evidence_gets_json_and_no_primer() {
 
 #[test]
 fn measured_model_gets_ldf_on_flat_rows() {
-    // Built-in evidence: Haiku 5.5 is measured on flat data at 200 records
-    // with no loss against JSON.
-    let mut s = Session::start(&["--model", "claude-haiku-5-5", "--quiet"]);
+    // Built-in evidence: Opus 5.5 on flat data at 200 records rules out a
+    // loss above 3 points (reports/2026-10-21-ni-study).
+    let mut s = Session::start(&["--model", "claude-opus-5-5", "--quiet"]);
     let init = s.handshake();
     assert!(init["instructions"].as_str().unwrap().contains("LDF"));
     let big = s.call(

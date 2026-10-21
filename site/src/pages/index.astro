@@ -99,7 +99,7 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
     <ul class="container facts" data-reveal>
       <li><strong>Lossless.</strong> Byte-exact round trip on ten of twelve benchmark datasets; the two sparse ones come back with keys reordered, nothing lost.</li>
       <li><strong>Chosen per model.</strong> LDF goes only to a model measured reading it as well as JSON on that shape and size of data. Every other model keeps getting JSON.</li>
-      <li><strong>Measured.</strong> Five models, held-out data, sign tests. The misses are in the reports, not hidden.</li>
+      <li><strong>Measured.</strong> Five models, held-out data, a pre-registered non-inferiority test. The misses are in the reports, not hidden.</li>
     </ul>
   </section>
 
@@ -162,10 +162,10 @@ const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
         <h2 class="h2">Who gets LDF. <span class="soft">Everyone else gets JSON.</span></h2>
         <p class="lead">
           Each model reads each shape of data in both formats, on the same graded questions. LDF goes
-          to a model only where it scored within 3 points of JSON over at least 50 questions, at that
-          size. A cell shows LDF's tokens as a share of JSON's; where LDF lost or was never measured it
-          says JSON, and that is what the model gets. Above 1 000 rows nothing is measured yet, so it is
-          JSON for everyone.
+          to a model only where the evidence rules out a loss of more than 3 points against JSON at that
+          size, a rule fixed before the study that tested it. A cell shows LDF's tokens as a share of
+          JSON's; where LDF lost, was never measured, or could not be proven safe it says JSON, and that
+          is what the model gets.
         </p>
       </div>
       <div data-reveal>

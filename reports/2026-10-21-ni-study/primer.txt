@@ -1,0 +1,8 @@
+Tool results from this server may be returned in LDF (Language Data Format), a lossless table encoding of JSON records. A document is one or more tables. A table is a header line `@name col:type,col:type,...` followed by one row per record, cells separated by commas, in header order. Types: i integer, f float, s string, b boolean, j any JSON value, t child table (the cell holds that record's number of child rows). A `?` after a type marks a column that may be null or absent. An empty cell means the key is absent from the record; `null` means the key is present with value null. Strings are bare unless they contain a comma, quote, backslash or newline, are empty, or read as null/true/false; those are JSON string literals. Column names are dotted paths into nested objects: `customer.name` is field `name` of object `customer`. An array of objects becomes a child table named `parent.field`; each child row starts with a join column holding the parent's first column value (or `_`, the parent's 1-based row number), followed by the element's fields. A column typed with a key list, `items:[sku,qty]`, holds the whole array in its cell as a JSON array with one array of values per element, in key order: `[["E5",3],["C3",4]]` is two elements, `{"sku":"E5","qty":3}` and `{"sku":"C3","qty":4}`. Example, two orders with a customer object and an items array:
+@records order_id:s,customer.name:s,items:t,total:f,note:s?
+ORD-1,Val Thompson,2,715.94,context compare
+ORD-2,Sol Ritchie,1,2757.03,null
+@records.items order_id:s,sku:s,qty:i,price:f
+ORD-1,E5,3,28.78
+ORD-1,C3,4,157.4
+ORD-2,A1,1,2757.03

@@ -1970,6 +1970,388 @@
   "mean_output_tokens": 40
  },
  {
+  "model": "claude-opus-5-5",
+  "run": "ni/flat_users",
+  "dataset": "flat_users",
+  "records": 200,
+  "traits": [],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 150,
+  "json_k": 148,
+  "wins": 3,
+  "losses": 1,
+  "p": 0.625,
+  "tokens_ratio": 0.608,
+  "mean_latency_ms": 2482,
+  "json_mean_latency_ms": 2268,
+  "mean_output_tokens": 137
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "ni/flat_users",
+  "dataset": "flat_users",
+  "records": 200,
+  "traits": [],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 148,
+  "json_k": 150,
+  "wins": 0,
+  "losses": 2,
+  "p": 0.5,
+  "tokens_ratio": 0.608,
+  "mean_latency_ms": 2287,
+  "json_mean_latency_ms": 2083,
+  "mean_output_tokens": 157
+ },
+ {
+  "model": "deepseek-chat",
+  "run": "ni/flat_users",
+  "dataset": "flat_users",
+  "records": 200,
+  "traits": [],
+  "family": "ldf",
+  "thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 83,
+  "json_k": 92,
+  "wins": 3,
+  "losses": 12,
+  "p": 0.0352,
+  "tokens_ratio": 0.608,
+  "mean_latency_ms": 1134,
+  "json_mean_latency_ms": 1127,
+  "mean_output_tokens": 9
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "ni/mixed_types",
+  "dataset": "mixed_types",
+  "records": 200,
+  "traits": [
+   "json_cells",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5,
+   0.75
+  ],
+  "hoist_thresholds": [
+   0.5,
+   0.75
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 151,
+  "json_k": 150,
+  "wins": 1,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.73,
+  "mean_latency_ms": 1765,
+  "json_mean_latency_ms": 1334,
+  "mean_output_tokens": 13
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "ni/mixed_types",
+  "dataset": "mixed_types",
+  "records": 200,
+  "traits": [
+   "json_cells",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5,
+   0.75
+  ],
+  "hoist_thresholds": [
+   0.5,
+   0.75
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 151,
+  "json_k": 151,
+  "wins": 0,
+  "losses": 0,
+  "p": 1.0,
+  "tokens_ratio": 0.73,
+  "mean_latency_ms": 1454,
+  "json_mean_latency_ms": 1421,
+  "mean_output_tokens": 13
+ },
+ {
+  "model": "deepseek-chat",
+  "run": "ni/mixed_types",
+  "dataset": "mixed_types",
+  "records": 200,
+  "traits": [
+   "json_cells",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5,
+   0.75
+  ],
+  "hoist_thresholds": [
+   0.5,
+   0.75
+  ],
+  "format": "ldf",
+  "n": 151,
+  "k": 150,
+  "json_k": 150,
+  "wins": 1,
+  "losses": 1,
+  "p": 1.0,
+  "tokens_ratio": 0.73,
+  "mean_latency_ms": 1027,
+  "json_mean_latency_ms": 1022,
+  "mean_output_tokens": 4
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "ni/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5
+  ],
+  "format": "ldf-hoisted",
+  "n": 249,
+  "k": 238,
+  "json_k": 247,
+  "wins": 1,
+  "losses": 10,
+  "p": 0.0117,
+  "tokens_ratio": 0.552,
+  "mean_latency_ms": 3027,
+  "json_mean_latency_ms": 3146,
+  "mean_output_tokens": 181
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "ni/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [],
+  "format": "ldf-s75",
+  "n": 249,
+  "k": 227,
+  "json_k": 229,
+  "wins": 6,
+  "losses": 8,
+  "p": 0.7905,
+  "tokens_ratio": 0.681,
+  "mean_latency_ms": 2673,
+  "json_mean_latency_ms": 2672,
+  "mean_output_tokens": 209
+ },
+ {
+  "model": "deepseek-chat",
+  "run": "ni/nested_orders",
+  "dataset": "nested_orders",
+  "records": 200,
+  "traits": [
+   "child_tables",
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [],
+  "hoist_thresholds": [
+   0.0,
+   0.25,
+   0.5
+  ],
+  "format": "ldf-hoisted",
+  "n": 249,
+  "k": 159,
+  "json_k": 162,
+  "wins": 4,
+  "losses": 7,
+  "p": 0.5488,
+  "tokens_ratio": 0.552,
+  "mean_latency_ms": 1406,
+  "json_mean_latency_ms": 1269,
+  "mean_output_tokens": 124
+ },
+ {
+  "model": "claude-opus-5-5",
+  "run": "ni/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5
+  ],
+  "hoist_thresholds": [
+   0.5
+  ],
+  "format": "ldf",
+  "n": 220,
+  "k": 214,
+  "json_k": 214,
+  "wins": 5,
+  "losses": 5,
+  "p": 1.0,
+  "tokens_ratio": 0.801,
+  "mean_latency_ms": 2705,
+  "json_mean_latency_ms": 2365,
+  "mean_output_tokens": 135
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "ni/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.5
+  ],
+  "hoist_thresholds": [
+   0.5
+  ],
+  "format": "ldf",
+  "n": 220,
+  "k": 214,
+  "json_k": 216,
+  "wins": 4,
+  "losses": 6,
+  "p": 0.7539,
+  "tokens_ratio": 0.801,
+  "mean_latency_ms": 2284,
+  "json_mean_latency_ms": 2256,
+  "mean_output_tokens": 172
+ },
+ {
+  "model": "deepseek-chat",
+  "run": "ni/sparse_events",
+  "dataset": "sparse_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.75,
+   1.0
+  ],
+  "hoist_thresholds": [
+   0.75,
+   1.0
+  ],
+  "format": "ldf-s75",
+  "n": 220,
+  "k": 132,
+  "json_k": 136,
+  "wins": 9,
+  "losses": 13,
+  "p": 0.5235,
+  "tokens_ratio": 0.888,
+  "mean_latency_ms": 1114,
+  "json_mean_latency_ms": 1215,
+  "mean_output_tokens": 20
+ },
+ {
+  "model": "claude-sonnet-5-5",
+  "run": "ni/sql_events",
+  "dataset": "sql_events",
+  "records": 200,
+  "traits": [
+   "sparse"
+  ],
+  "family": "ldf",
+  "thresholds": [
+   0.0
+  ],
+  "hoist_thresholds": [
+   0.0
+  ],
+  "format": "ldf-s0",
+  "n": 220,
+  "k": 216,
+  "json_k": 217,
+  "wins": 2,
+  "losses": 3,
+  "p": 1.0,
+  "tokens_ratio": 0.466,
+  "mean_latency_ms": 2331,
+  "json_mean_latency_ms": 2297,
+  "mean_output_tokens": 197
+ },
+ {
   "model": "deepseek-chat",
   "run": "sparse-sweep/sparse_events, json from stage-b/sparse_events",
   "dataset": "sparse_events",

@@ -48,9 +48,10 @@ The format is chosen per model from measured accuracy (the same selector as
 model](/docs/mcp/#choosing-the-format-per-model)). The model comes from
 `SessionStart`, then `PostModelSwitch`, then, when Claude Code did not send
 one (`claude -p` does not), the last `"model"` in the session transcript;
-only that id is read and kept. A model without evidence gets JSON. Today
-that means Opus 5.5 and Haiku 5.5 get LDF on the shapes they were measured
-on, Sonnet 5.5 and GPT models get JSON. `install --hooks --model ID` fixes
+only that id is read and kept. A model gets LDF only on data shapes where
+the evidence rules out a loss of more than 3 points against JSON. Today
+that means Opus 5.5 and Sonnet 5.5 on some shapes up to 200 rows (see the
+ldf-mcp page), and JSON for Haiku 5.5 and GPT models. `install --hooks --model ID` fixes
 the model instead.
 
 A conversion is made only when LDF plus the note (and the primer, the
