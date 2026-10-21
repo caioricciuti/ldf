@@ -467,8 +467,12 @@ pub fn minify_json(text: &str) -> Option<String> {
 /// Rewrites the text content blocks of a `tools/call` result in place: LDF
 /// where [`convert_with`] gives it (`columnar` turns on the columnar
 /// adapter), otherwise JSON that parsed goes out minified. Results flagged
-/// `isError`, blocks under `min_bytes` and non-text blocks are left alone,
-/// as is `structuredContent`.
+/// `isError`, blocks under `min_bytes` and non-text blocks are left alone.
+/// `structuredContent` is left alone too, except when it is exactly
+/// `{"result": S}` with `S` the text of a rewritten block, which is how
+/// FastMCP wraps a tool that returns a string: then `S` is replaced by the
+/// same rewritten text, so both copies still agree. Claude Code shows the
+/// model `structuredContent` when it is present, not the text block.
 pub fn rewrite_tool_result(
     result: &mut Json,
     min_bytes: usize,
@@ -478,6 +482,14 @@ pub fn rewrite_tool_result(
     let start = Instant::now();
     let mut done = Rewritten::default();
     let is_error = result.get("isError").and_then(Json::as_bool) == Some(true);
+    let wrapped: Option<String> = result
+        .get("structuredContent")
+        .and_then(Json::as_object)
+        .filter(|o| o.len() == 1)
+        .and_then(|o| o.get("result"))
+        .and_then(Json::as_str)
+        .map(str::to_string);
+    let mut rewrapped: Option<String> = None;
     if let Some(content) = result.get_mut("content").and_then(Json::as_array_mut) {
         for block in content.iter_mut() {
             if block.get("type").and_then(Json::as_str) != Some("text") {
@@ -486,6 +498,7 @@ pub fn rewrite_tool_result(
             let Some(text) = block.get("text").and_then(Json::as_str) else {
                 continue;
             };
+            let mirrored = rewrapped.is_none() && wrapped.as_deref() == Some(text);
             let converted = if is_error {
                 Err(Kept::IsError)
             } else {
@@ -498,6 +511,9 @@ pub fn rewrite_tool_result(
                         out_bytes: ldf.len(),
                         kept: None,
                     });
+                    if mirrored {
+                        rewrapped = Some(ldf.clone());
+                    }
                     block["text"] = Json::String(ldf);
                 }
                 Err(why) => {
@@ -518,11 +534,17 @@ pub fn rewrite_tool_result(
                         kept: Some(why),
                     });
                     if let Some(mini) = mini {
+                        if mirrored {
+                            rewrapped = Some(mini.clone());
+                        }
                         block["text"] = Json::String(mini);
                     }
                 }
             }
         }
+    }
+    if let Some(text) = rewrapped {
+        result["structuredContent"]["result"] = Json::String(text);
     }
     done.micros = start.elapsed().as_micros() as u64;
     done
@@ -910,7 +932,26 @@ mod tests {
         assert!(rewrite_tool_result(&mut result, 0, None, true).converted());
         let frame = result["content"][0]["text"].as_str().unwrap();
         assert_eq!(decode_columnar_frame(frame).unwrap(), parse(&text));
-        assert_eq!(result["structuredContent"], structured, "left alone");
+        // FastMCP's wrapped string follows the text, so both copies agree.
+        assert_eq!(result["structuredContent"], json!({"result": frame}));
+
+        // Any other structuredContent is left alone, as is a wrapped string
+        // that is not the text.
+        for other in [
+            json!({"result": text, "n": 1}),
+            json!({"result": "other"}),
+            json!({"rows": [1]}),
+        ] {
+            let mut result =
+                json!({"content": [{"type": "text", "text": text}], "structuredContent": other});
+            rewrite_tool_result(&mut result, 0, None, true);
+            assert_eq!(result["structuredContent"], other);
+        }
+        // Minified JSON follows too.
+        let pretty = "{\n  \"a\": [\n    1\n  ]\n}";
+        let mut result = json!({"content": [{"type": "text", "text": pretty}], "structuredContent": {"result": pretty}});
+        rewrite_tool_result(&mut result, 0, None, false);
+        assert_eq!(result["structuredContent"]["result"], r#"{"a":[1]}"#);
 
         let sel = Selector::new("claude-opus-5-5", None);
         let Err(Kept::Selector(why)) = convert_with(&text, 0, Some(&sel), true) else {

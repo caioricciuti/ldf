@@ -67,9 +67,14 @@ result (members, their order, and integer or float kind) and it is shorter
 than the original minified; otherwise the minified JSON goes out. Duplicate
 column names, ragged rows, an empty result, and any number outside the
 value model (an integer beyond u64, as DuckDB's `HUGEINT` can send, or a
-decimal f64 cannot hold) stay JSON. `isError` results and
-`structuredContent` are never touched, so a client that reads
-`structuredContent` still gets the server's original. The primer gains
+decimal f64 cannot hold) stay JSON. `isError` results are never touched.
+MotherDuck's server, like any FastMCP tool that returns a string, also
+sends the text as `structuredContent` `{"result": "..."}`, and Claude Code
+shows the model that copy rather than the text block. When
+`structuredContent` is exactly `{"result": S}` with `S` the original text,
+the proxy puts the rewritten text (frame or minified JSON) there as well,
+so both copies agree; any other `structuredContent` is left as it is. The
+primer gains
 one paragraph describing the frame. With `--model`, columnar results stay
 JSON: no model has been graded on a frame yet.
 

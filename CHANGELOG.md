@@ -25,6 +25,13 @@ stated in `site/src/content/docs/docs/spec.md`.
   proxy, the hook and the selector's size check). A pretty-printed result
   that LDF only beat by its whitespace now goes out as minified JSON.
 
+- `ldf-mcp proxy`: when `structuredContent` is exactly `{"result": S}`
+  with `S` the text of a rewritten block (FastMCP's wrapping of a string
+  return, as MotherDuck's server sends), `S` is replaced by the same
+  rewritten text. Claude Code shows the model `structuredContent` when it
+  is present, so before this neither minifying nor LDF reached the model
+  for such servers. Any other `structuredContent` is untouched.
+
 ### Fixed
 
 - `ldf-mcp`: a result holding a number outside the value model (an integer
