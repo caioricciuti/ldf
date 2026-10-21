@@ -5,6 +5,33 @@ Versions are tags on this repository and, from 0.1.0, the versions of the
 `ldf`, `ldf-data` and `ldf-mcp` crates (and `ldf-select` from 0.2.0); the specification version is
 stated in `site/src/content/docs/docs/spec.md`.
 
+## Unreleased
+
+### Added
+
+- `ldf-mcp proxy --columnar` (opt-in): results shaped `{"columns": [...],
+  "rows": [[...], ...]}` (MotherDuck's DuckDB server) go out as a frame,
+  the result as one compact JSON line with `rows` set to `"@records"`,
+  then the rows as an LDF table. Sent only when the frame decodes back to
+  exactly the original result and is shorter than it minified; JSON with
+  `--model`, since no model has been graded on frames. `convert --columnar
+  [--decode]` writes and reads frames. The primer gains one paragraph when
+  the flag is on.
+
+### Changed
+
+- `ldf-mcp`: LDF must now be shorter than the result's JSON minified, not
+  the text as sent, so whitespace is never counted as an LDF saving (the
+  proxy, the hook and the selector's size check). A pretty-printed result
+  that LDF only beat by its whitespace now goes out as minified JSON.
+
+### Fixed
+
+- `ldf-mcp`: a result holding a number outside the value model (an integer
+  beyond u64, a decimal f64 cannot hold exactly) stays JSON, reason
+  `out_of_domain`. Before, the conversion turned such an integer into a
+  float.
+
 ## 0.5.3 (2026-10-21)
 
 The proxy minifies JSON it keeps as JSON, a selector verdicts table for

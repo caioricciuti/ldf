@@ -32,6 +32,15 @@ ORD-1,E5,3,28.78\n\
 ORD-1,C3,4,157.4\n\
 ORD-2,A1,1,2757.03";
 
+/// Appended to [`PRIMER`] when the columnar adapter is on (`--columnar`).
+pub const COLUMNAR_PRIMER: &str = "A columnar result (`columns` and `rows`) comes back as one line of JSON \
+with every field of the original result except that `rows` is the string \"@records\", followed by the \
+rows as the LDF table `@records`: one row per original row array, one column per entry of `columns`, \
+`null` for SQL NULL.";
+
+/// The value `rows` takes in the first line of a columnar frame.
+pub const ROWS_MARK: &str = "@records";
+
 /// Appended to every tool description in `tools/list`.
 pub const TOOL_NOTE: &str =
     " Large JSON results come back as LDF tables (format described in the server instructions).";
@@ -53,6 +62,12 @@ pub enum Kept {
     Selector(String),
     /// The result is flagged `isError`: never touched.
     IsError,
+    /// A number outside the value model's domain (an integer beyond u64,
+    /// a decimal f64 cannot hold exactly): LDF would change it.
+    OutOfDomain,
+    /// Columnar, but the frame would not decode to the same result
+    /// (duplicate column names, ragged rows, a value LDF cannot keep).
+    NotLossless,
     /// A reason only the Claude Code hook has (`crate::hook`), as its code.
     Hook(&'static str),
 }
@@ -66,6 +81,8 @@ impl Kept {
             Kept::NotShorter => "not_shorter",
             Kept::Selector(_) => "selector",
             Kept::IsError => "is_error",
+            Kept::OutOfDomain => "out_of_domain",
+            Kept::NotLossless => "not_lossless",
             Kept::Hook(code) => code,
         }
     }
@@ -102,11 +119,24 @@ pub fn convert_text(text: &str, min_bytes: usize) -> Option<String> {
     convert(text, min_bytes, None).ok()
 }
 
+/// [`convert_with`] without the columnar adapter.
+pub fn convert(text: &str, min_bytes: usize, sel: Option<&Selector>) -> Result<String, Kept> {
+    convert_with(text, min_bytes, sel, false)
+}
+
 /// Returns the LDF text for `text` when it is a JSON dataset worth
 /// converting: a non-empty array of objects, or an object holding at least
 /// one non-empty array of objects (which becomes a one-row root table with
-/// child tables). Otherwise says why it stays as it is ([`Kept`]).
-pub fn convert(text: &str, min_bytes: usize, sel: Option<&Selector>) -> Result<String, Kept> {
+/// child tables). With `columnar`, an object with `columns` and `rows`
+/// becomes a columnar frame ([`columnar_frame`]) first. LDF must be shorter
+/// than the JSON minified, so whitespace never counts as a saving.
+/// Otherwise says why it stays as it is ([`Kept`]).
+pub fn convert_with(
+    text: &str,
+    min_bytes: usize,
+    sel: Option<&Selector>,
+    columnar: bool,
+) -> Result<String, Kept> {
     if text.len() < min_bytes {
         return Err(Kept::Small);
     }
@@ -116,6 +146,13 @@ pub fn convert(text: &str, min_bytes: usize, sel: Option<&Selector>) -> Result<S
     }
     let mut bytes = text.as_bytes().to_vec();
     let root = parse_json_value(&mut bytes, JsonEngine::SerdeJson).map_err(|_| Kept::NotJson)?;
+    if !numbers_in_domain(text) {
+        return Err(Kept::OutOfDomain);
+    }
+    let json_len = minify_json(text).map_or(text.len(), |m| m.len());
+    if columnar && columnar_shape(&root).is_some() {
+        return columnar_frame(&root, json_len, sel);
+    }
     let records: Vec<Value> = match root {
         Value::Array(items) if !items.is_empty() && items.iter().all(|v| v.as_object().is_some()) => items,
         Value::Object(ref o)
@@ -127,20 +164,30 @@ pub fn convert(text: &str, min_bytes: usize, sel: Option<&Selector>) -> Result<S
         }
         _ => return Err(Kept::NotDataset),
     };
+    encode_records(&records, json_len, sel)
+}
+
+/// LDF for `records` when it is shorter than `json_len` bytes and, with a
+/// selector, when the selector accepts it.
+fn encode_records(
+    records: &[Value],
+    json_len: usize,
+    sel: Option<&Selector>,
+) -> Result<String, Kept> {
     let Some(sel) = sel else {
-        let out = ldf::encode(&records);
-        return if out.len() < text.len() {
+        let out = ldf::encode(records);
+        return if out.len() < json_len {
             Ok(out)
         } else {
             Err(Kept::NotShorter)
         };
     };
     let (d, out) = ldf_select::select_ldf(
-        &records,
+        records,
         &sel.model,
         &sel.evidence,
         &sel.policy,
-        text.len() as u64,
+        json_len as u64,
     );
     out.ok_or_else(|| {
         // The first reason the smallest LDF candidate was turned down.
@@ -157,6 +204,207 @@ pub fn convert(text: &str, min_bytes: usize, sel: Option<&Selector>) -> Result<S
             sel.model, d.profile.rows
         ))
     })
+}
+
+/// The column names and row arrays of a columnar result: an object with
+/// exactly one `columns` (non-empty, unique strings) and one `rows`
+/// (non-empty, every row an array as long as `columns`), as MotherDuck's
+/// DuckDB server answers a query. Any other member is kept as it is.
+pub fn columnar_shape(root: &Value) -> Option<(Vec<&str>, &[Value])> {
+    let o = root.as_object()?;
+    let one = |key: &str| {
+        let mut it = o.iter().filter(|(k, _)| k == key);
+        let first = it.next().map(|(_, v)| v);
+        if it.next().is_some() { None } else { first }
+    };
+    let columns: Vec<&str> = one("columns")?
+        .as_array()?
+        .iter()
+        .map(Value::as_str)
+        .collect::<Option<_>>()?;
+    let rows = one("rows")?.as_array()?;
+    let unique = columns
+        .iter()
+        .enumerate()
+        .all(|(i, c)| !columns[..i].contains(c));
+    let ragged = rows
+        .iter()
+        .any(|r| r.as_array().is_none_or(|a| a.len() != columns.len()));
+    (!columns.is_empty() && unique && !rows.is_empty() && !ragged).then_some((columns, rows))
+}
+
+/// A columnar result as a frame: line one is the result as compact JSON
+/// with `rows` replaced by [`ROWS_MARK`], the rest is the LDF table of the
+/// rows as records keyed by `columns`. Every value is present in every
+/// record, so SQL NULL is `null` and an empty cell never appears. Returned
+/// only when [`decode_columnar_frame`] gives back exactly `root` (same
+/// members, order and number kinds) and the frame is shorter than
+/// `json_len`. With a selector the result stays JSON: no model has been
+/// graded on a frame, and the selector's sparse evidence has absent keys
+/// where a frame has SQL NULLs.
+pub fn columnar_frame(
+    root: &Value,
+    json_len: usize,
+    sel: Option<&Selector>,
+) -> Result<String, Kept> {
+    let (columns, rows) = columnar_shape(root).ok_or(Kept::NotDataset)?;
+    if let Some(sel) = sel {
+        return Err(Kept::Selector(format!(
+            "json for {} ({} rows): no evidence for columnar frames",
+            sel.model,
+            rows.len()
+        )));
+    }
+    let records: Vec<Value> = rows
+        .iter()
+        .filter_map(Value::as_array)
+        .map(|r| {
+            Value::Object(
+                columns
+                    .iter()
+                    .zip(r)
+                    .map(|(c, v)| (c.to_string(), v.clone()))
+                    .collect(),
+            )
+        })
+        .collect();
+    let Some(o) = root.as_object() else {
+        return Err(Kept::NotDataset);
+    };
+    let head = Value::Object(
+        o.iter()
+            .map(|(k, v)| {
+                let v = if k == "rows" {
+                    Value::String(ROWS_MARK.into())
+                } else {
+                    v.clone()
+                };
+                (k.clone(), v)
+            })
+            .collect(),
+    );
+    let mut frame = String::new();
+    ldf::text::push_json_value(&head, &mut frame);
+    frame.push('\n');
+    let room = json_len.saturating_sub(frame.len());
+    let table = encode_records(&records, room, None)?;
+    frame.push_str(&table);
+    if decode_columnar_frame(&frame).ok().as_ref() != Some(root) {
+        return Err(Kept::NotLossless);
+    }
+    Ok(frame)
+}
+
+/// The original result of a frame [`columnar_frame`] wrote.
+pub fn decode_columnar_frame(frame: &str) -> Result<Value, String> {
+    let (head, table) = frame
+        .split_once('\n')
+        .ok_or("no table after the first line")?;
+    let mut bytes = head.as_bytes().to_vec();
+    let head = parse_json_value(&mut bytes, JsonEngine::SerdeJson).map_err(|e| e.to_string())?;
+    let Value::Object(members) = head else {
+        return Err("first line is not a JSON object".into());
+    };
+    let columns: Vec<&str> = members
+        .iter()
+        .find(|(k, _)| k == "columns")
+        .and_then(|(_, v)| v.as_array())
+        .and_then(|a| a.iter().map(Value::as_str).collect())
+        .ok_or("no columns")?;
+    let records = ldf::decode(table).map_err(|e| e.to_string())?;
+    let mut rows = Vec::with_capacity(records.len());
+    for (i, r) in records.iter().enumerate() {
+        let o = r.as_object().ok_or(format!("row {i} is not a record"))?;
+        if o.len() != columns.len() {
+            return Err(format!(
+                "row {i} has {} values for {} columns",
+                o.len(),
+                columns.len()
+            ));
+        }
+        let row = columns
+            .iter()
+            .map(|c| r.get(c).cloned().ok_or(format!("row {i} has no {c}")))
+            .collect::<Result<Vec<_>, _>>()?;
+        rows.push(Value::Array(row));
+    }
+    let mut rows = Some(Value::Array(rows));
+    let mut out = Vec::with_capacity(members.len());
+    for (k, v) in &members {
+        let v = if k == "rows" && v.as_str() == Some(ROWS_MARK) {
+            rows.take().ok_or("two rows members")?
+        } else {
+            v.clone()
+        };
+        out.push((k.clone(), v));
+    }
+    if rows.is_some() {
+        return Err("no rows member".into());
+    }
+    Ok(Value::Object(out))
+}
+
+/// False when some number in the JSON `text` would not survive the value
+/// model: an integer literal outside i64 and u64, or a decimal whose digits
+/// the nearest f64 does not reproduce. Strings are skipped.
+pub fn numbers_in_domain(text: &str) -> bool {
+    let b = text.as_bytes();
+    let mut i = 0;
+    while i < b.len() {
+        match b[i] {
+            b'"' => match ldf::text::json_string_end(&text[i..]) {
+                Some(n) => i += n,
+                None => return true,
+            },
+            b'-' | b'0'..=b'9' => {
+                let start = i;
+                while i < b.len() && matches!(b[i], b'-' | b'+' | b'.' | b'e' | b'E' | b'0'..=b'9')
+                {
+                    i += 1;
+                }
+                if !number_in_domain(&text[start..i]) {
+                    return false;
+                }
+            }
+            _ => i += 1,
+        }
+    }
+    true
+}
+
+fn number_in_domain(lit: &str) -> bool {
+    if !lit.contains(['.', 'e', 'E']) {
+        return lit.parse::<i64>().is_ok() || lit.parse::<u64>().is_ok();
+    }
+    match lit.parse::<f64>() {
+        Ok(f) if f.is_finite() => decimal_digits(lit) == decimal_digits(&format!("{f:e}")),
+        _ => false,
+    }
+}
+
+/// Sign, significant digits and decimal exponent of a decimal literal, so
+/// `1.50`, `15e-1` and `1.5e0` compare equal. Zero of either sign is
+/// `(false, "", 0)`.
+fn decimal_digits(lit: &str) -> (bool, String, i64) {
+    let (neg, lit) = match lit.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, lit),
+    };
+    let (mant, exp) = match lit.find(['e', 'E']) {
+        Some(p) => (&lit[..p], lit[p + 1..].parse::<i64>().unwrap_or(0)),
+        None => (lit, 0),
+    };
+    let (int, frac) = mant.split_once('.').unwrap_or((mant, ""));
+    let all = format!("{int}{frac}");
+    let lead = all.len() - all.trim_start_matches('0').len();
+    let digits = all
+        .trim_start_matches('0')
+        .trim_end_matches('0')
+        .to_string();
+    if digits.is_empty() {
+        return (false, digits, 0);
+    }
+    (neg, digits, exp + int.len() as i64 - lead as i64)
 }
 
 /// One text block of a `tools/call` result and what happened to it.
@@ -217,13 +465,15 @@ pub fn minify_json(text: &str) -> Option<String> {
 }
 
 /// Rewrites the text content blocks of a `tools/call` result in place: LDF
-/// where [`convert`] gives it, otherwise JSON that parsed goes out
-/// minified. Results flagged `isError`, blocks under `min_bytes` and
-/// non-text blocks are left alone, as is `structuredContent`.
+/// where [`convert_with`] gives it (`columnar` turns on the columnar
+/// adapter), otherwise JSON that parsed goes out minified. Results flagged
+/// `isError`, blocks under `min_bytes` and non-text blocks are left alone,
+/// as is `structuredContent`.
 pub fn rewrite_tool_result(
     result: &mut Json,
     min_bytes: usize,
     sel: Option<&Selector>,
+    columnar: bool,
 ) -> Rewritten {
     let start = Instant::now();
     let mut done = Rewritten::default();
@@ -239,7 +489,7 @@ pub fn rewrite_tool_result(
             let converted = if is_error {
                 Err(Kept::IsError)
             } else {
-                convert(text, min_bytes, sel)
+                convert_with(text, min_bytes, sel, columnar)
             };
             match converted {
                 Ok(ldf) => {
@@ -253,8 +503,14 @@ pub fn rewrite_tool_result(
                 Err(why) => {
                     // Parsed as JSON but stays JSON: at least drop the
                     // pretty-printing.
-                    let parsed =
-                        matches!(why, Kept::NotDataset | Kept::NotShorter | Kept::Selector(_));
+                    let parsed = matches!(
+                        why,
+                        Kept::NotDataset
+                            | Kept::NotShorter
+                            | Kept::Selector(_)
+                            | Kept::OutOfDomain
+                            | Kept::NotLossless
+                    );
                     let mini = if parsed { minify_json(text) } else { None };
                     done.blocks.push(Block {
                         in_bytes: text.len(),
@@ -297,8 +553,9 @@ pub fn rewrite_tools_list(result: &mut Json) {
     }
 }
 
-/// Appends [`PRIMER`] to the `instructions` of an `initialize` result.
-pub fn rewrite_initialize(result: &mut Json) {
+/// Appends [`PRIMER`] to the `instructions` of an `initialize` result, and
+/// [`COLUMNAR_PRIMER`] after it with `columnar`.
+pub fn rewrite_initialize(result: &mut Json, columnar: bool) {
     let Some(result) = result.as_object_mut() else {
         return;
     };
@@ -308,10 +565,14 @@ pub fn rewrite_initialize(result: &mut Json) {
         .unwrap_or("")
         .trim_end()
         .to_string();
+    let mut primer = PRIMER.to_string();
+    if columnar {
+        primer = primer + "\n\n" + COLUMNAR_PRIMER;
+    }
     let text = if existing.is_empty() {
-        PRIMER.to_string()
+        primer
     } else {
-        existing + "\n\n" + PRIMER
+        existing + "\n\n" + &primer
     };
     result.insert("instructions".into(), Json::String(text));
 }
@@ -372,7 +633,7 @@ mod tests {
         let pretty =
             "{\n  \"columns\": [\n    \"id\"\n  ],\n  \"rows\": [\n    [\n      1\n    ]\n  ]\n}";
         let mut result = json!({"content": [{"type": "text", "text": pretty}]});
-        let done = rewrite_tool_result(&mut result, 0, None);
+        let done = rewrite_tool_result(&mut result, 0, None, false);
         assert!(!done.converted() && done.minified());
         assert_eq!(
             result["content"][0]["text"],
@@ -381,12 +642,12 @@ mod tests {
 
         // Errors, small blocks and text that is not JSON stay byte for byte.
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": pretty}]});
-        assert!(!rewrite_tool_result(&mut err, 0, None).minified());
+        assert!(!rewrite_tool_result(&mut err, 0, None, false).minified());
         assert_eq!(err["content"][0]["text"], pretty);
         let mut small = json!({"content": [{"type": "text", "text": pretty}]});
-        assert!(!rewrite_tool_result(&mut small, 10_000, None).minified());
+        assert!(!rewrite_tool_result(&mut small, 10_000, None, false).minified());
         let mut prose = json!({"content": [{"type": "text", "text": "{ not json }"}]});
-        assert!(!rewrite_tool_result(&mut prose, 0, None).minified());
+        assert!(!rewrite_tool_result(&mut prose, 0, None, false).minified());
         assert_eq!(prose["content"][0]["text"], "{ not json }");
     }
 
@@ -413,7 +674,7 @@ mod tests {
             {"type": "text", "text": "done"},
             {"type": "image", "data": "AAAA", "mimeType": "image/png"}
         ]});
-        let done = rewrite_tool_result(&mut ok, 0, None);
+        let done = rewrite_tool_result(&mut ok, 0, None, false);
         assert!(done.converted());
         assert_eq!(done.blocks.len(), 2, "text blocks only");
         assert_eq!(done.blocks[1].kept, Some(Kept::NotJson));
@@ -426,7 +687,7 @@ mod tests {
         assert_eq!(ok["content"][1]["text"], "done");
 
         let mut err = json!({"isError": true, "content": [{"type": "text", "text": ROWS}]});
-        let done = rewrite_tool_result(&mut err, 0, None);
+        let done = rewrite_tool_result(&mut err, 0, None, false);
         assert!(!done.converted());
         assert_eq!(done.blocks[0].kept, Some(Kept::IsError));
         assert_eq!(err["content"][0]["text"], ROWS);
@@ -445,11 +706,11 @@ mod tests {
         assert_eq!(list["tools"][1]["description"], TOOL_NOTE.trim_start());
 
         let mut init = json!({"protocolVersion": "2025-06-18", "instructions": "Be nice."});
-        rewrite_initialize(&mut init);
+        rewrite_initialize(&mut init, false);
         let s = init["instructions"].as_str().unwrap();
         assert!(s.starts_with("Be nice.\n\nTool results"));
         let mut bare = json!({"protocolVersion": "2025-06-18"});
-        rewrite_initialize(&mut bare);
+        rewrite_initialize(&mut bare, false);
         assert_eq!(bare["instructions"], PRIMER);
     }
 
@@ -511,6 +772,193 @@ mod tests {
 
         // Not a dataset: the selector never ran.
         assert_eq!(convert("[1,2]", 0, Some(&sel)), Err(Kept::NotDataset));
+    }
+
+    fn parse(text: &str) -> Value {
+        let mut b = text.as_bytes().to_vec();
+        parse_json_value(&mut b, JsonEngine::SerdeJson).unwrap()
+    }
+
+    /// MotherDuck's envelope, pretty-printed as its server sends it.
+    fn duck(rows: &[&str], extra: &str) -> String {
+        let rows: Vec<String> = rows.iter().map(|r| format!("[{r}]")).collect();
+        // `Value` keeps member order; serde_json's map would sort it.
+        let v = parse(&format!(
+            r#"{{"success":true,"columns":["id","name","score","note","tags","pt","day"],"columnTypes":["BIGINT","VARCHAR","DOUBLE","VARCHAR","INTEGER[]","STRUCT(x INTEGER, y INTEGER)","DATE"],"rows":[{}],"rowCount":{}{extra}}}"#,
+            rows.join(","),
+            rows.len()
+        ));
+        serde_json::to_string_pretty(&v).unwrap()
+    }
+
+    fn duck_rows(n: usize) -> Vec<String> {
+        (0..n)
+            .map(|i| {
+                let note = if i % 3 == 0 {
+                    "null".to_string()
+                } else {
+                    format!("\"n, {i}\"")
+                };
+                format!(
+                    r#"{i},"user {i}",{}.25,{note},[1,{i}],{{"x":{i},"y":-1}},"2020-01-0{}""#,
+                    i % 7,
+                    1 + i % 9
+                )
+            })
+            .collect()
+    }
+
+    #[test]
+    fn columnar_result_round_trips_exactly() {
+        let rows = duck_rows(40);
+        let rows: Vec<&str> = rows.iter().map(String::as_str).collect();
+        for extra in [
+            "",
+            r#","truncated":true,"warning":"Results limited to 40 rows.""#,
+        ] {
+            let text = duck(&rows, extra);
+            let frame = convert_with(&text, 0, None, true).unwrap();
+            let (head, table) = frame.split_once('\n').unwrap();
+            assert!(
+                head.starts_with(r#"{"success":true,"columns":["id","#),
+                "{head}"
+            );
+            assert!(
+                head.contains(r#""rows":"@records","rowCount":40"#),
+                "{head}"
+            );
+            assert!(table.starts_with("@records id:i,name:s,score:f,note:s?,tags:j,pt.x:i,pt.y:i,day:s\n0,user 0,0.25,null,[1,0],0,-1,2020-01-01\n"), "{table}");
+            assert_eq!(decode_columnar_frame(&frame).unwrap(), parse(&text));
+            // Shorter than the JSON minified, not only than the pretty text.
+            assert!(frame.len() < minify_json(&text).unwrap().len());
+        }
+        // Off by default: the same text is not a dataset, so it is minified.
+        assert_eq!(convert(&duck(&rows, ""), 0, None), Err(Kept::NotDataset));
+    }
+
+    #[test]
+    fn columnar_refuses_what_it_cannot_keep() {
+        let ok = duck_rows(30);
+        let ok: Vec<&str> = ok.iter().map(String::as_str).collect();
+        let base = duck(&ok, "");
+        // Duplicate column names: `SELECT 1 AS h, 2 AS h` is legal SQL.
+        let dup = base.replacen("\"name\"", "\"id\"", 1);
+        assert_eq!(convert_with(&dup, 0, None, true), Err(Kept::NotDataset));
+        // A ragged row.
+        let ragged = base.replacen("\"2020-01-01\"\n", "\"2020-01-01\", 9\n", 1);
+        assert_ne!(ragged, base);
+        assert_eq!(convert_with(&ragged, 0, None, true), Err(Kept::NotDataset));
+        // HUGEINT beyond u64, as MotherDuck sends it: the value model would
+        // turn it into a float, so nothing converts.
+        let huge = base.replacen("\"rowCount\": 30", "\"rowCount\": 100000000000000000000", 1);
+        assert_eq!(convert_with(&huge, 0, None, true), Err(Kept::OutOfDomain));
+        assert_eq!(
+            convert(r#"[{"a":100000000000000000000},{"a":1},{"a":2}]"#, 0, None),
+            Err(Kept::OutOfDomain)
+        );
+        // Empty result and non-string column names.
+        assert_eq!(
+            columnar_shape(&parse(r#"{"columns":["a"],"rows":[]}"#)),
+            None
+        );
+        assert_eq!(
+            columnar_shape(&parse(r#"{"columns":[1],"rows":[[1]]}"#)),
+            None
+        );
+        // An error envelope has no rows.
+        let err = r#"{"success": false, "error": "Catalog Error: Table with name nope does not exist!", "errorType": "CatalogException"}"#;
+        assert_eq!(convert_with(err, 0, None, true), Err(Kept::NotDataset));
+    }
+
+    #[test]
+    fn columnar_nulls_that_make_ldf_larger_stay_json() {
+        // Ten mostly-null columns, as a sparse table comes back from SQL:
+        // the default layout moves them into `~` as "key":null pairs.
+        let cols: Vec<String> = (0..10).map(|i| format!("\"c{i}\"")).collect();
+        let rows: Vec<String> = (0..50)
+            .map(|r| {
+                let cells: Vec<String> = (0..10)
+                    .map(|c| {
+                        if (r + c) % 10 == 0 {
+                            format!("{r}")
+                        } else {
+                            "null".into()
+                        }
+                    })
+                    .collect();
+                format!("[{r},{}]", cells.join(","))
+            })
+            .collect();
+        let text = format!(
+            r#"{{"columns":["id",{}],"rows":[{}]}}"#,
+            cols.join(","),
+            rows.join(",")
+        );
+        assert_eq!(convert_with(&text, 0, None, true), Err(Kept::NotShorter));
+        let mut result = json!({"content": [{"type": "text", "text": text}]});
+        let done = rewrite_tool_result(&mut result, 0, None, true);
+        assert_eq!(done.blocks[0].kept, Some(Kept::NotShorter));
+    }
+
+    #[test]
+    fn columnar_in_a_tool_result_and_primer() {
+        let rows = duck_rows(30);
+        let rows: Vec<&str> = rows.iter().map(String::as_str).collect();
+        let text = duck(&rows, "");
+        let structured = json!({"result": text});
+        let mut result = json!({"content": [{"type": "text", "text": text}], "isError": false, "structuredContent": structured});
+        assert!(rewrite_tool_result(&mut result, 0, None, true).converted());
+        let frame = result["content"][0]["text"].as_str().unwrap();
+        assert_eq!(decode_columnar_frame(frame).unwrap(), parse(&text));
+        assert_eq!(result["structuredContent"], structured, "left alone");
+
+        let sel = Selector::new("claude-opus-5-5", None);
+        let Err(Kept::Selector(why)) = convert_with(&text, 0, Some(&sel), true) else {
+            panic!("selector reason expected");
+        };
+        assert!(why.contains("no evidence for columnar frames"), "{why}");
+
+        let mut init = json!({});
+        rewrite_initialize(&mut init, true);
+        assert!(
+            init["instructions"]
+                .as_str()
+                .unwrap()
+                .ends_with(COLUMNAR_PRIMER)
+        );
+    }
+
+    #[test]
+    fn domain_check_reads_literals_not_values() {
+        for ok in [
+            "1",
+            "-0",
+            "18446744073709551615",
+            "-9223372036854775808",
+            "1.50",
+            "0.1",
+            "1e21",
+            "-2.5E-3",
+            "123456789.125",
+            "0.30000000000000004",
+        ] {
+            assert!(number_in_domain(ok), "{ok}");
+        }
+        for bad in [
+            "18446744073709551616",
+            "-9223372036854775809",
+            "0.1000000000000000000001",
+            "1e400",
+            "9007199254740993.0",
+        ] {
+            assert!(!number_in_domain(bad), "{bad}");
+        }
+        assert!(numbers_in_domain(
+            r#"{"s":"100000000000000000000","n":[1,2.5]}"#
+        ));
+        assert!(!numbers_in_domain(
+            r#"{"s":"\"","n":100000000000000000000}"#
+        ));
     }
 
     #[test]

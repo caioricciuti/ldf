@@ -10,9 +10,12 @@ use std::sync::Arc;
 
 fn usage() -> ExitCode {
     eprintln!(
-        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--quiet] [--model ID [--evidence FILE]] -- COMMAND [ARGS...]\n\
+        "usage:\n  ldf-mcp proxy [--passthrough] [--plain] [--min-bytes N] [--columnar] [--quiet] [--model ID [--evidence FILE]] -- COMMAND [ARGS...]\n\
          \x20     run COMMAND as the MCP server and rewrite its JSON tool results into LDF\n\
          \x20     --passthrough  forward tool results unchanged (for A/B comparison)\n\
+         \x20     --columnar     also convert results shaped {{\"columns\": [...], \"rows\": [[...], ...]}} (MotherDuck's\n\
+         \x20                    DuckDB server): the result minus its rows as one JSON line, then the rows as LDF;\n\
+         \x20                    sent only when it decodes back to the exact result\n\
          \x20     --plain        leave initialize instructions and tool descriptions alone\n\
          \x20     --min-bytes N  never convert a text block shorter than N bytes (default 1024)\n\
          \x20     --quiet        no per-result stderr line\n\
@@ -30,6 +33,9 @@ fn usage() -> ExitCode {
          \x20     an MCP server over a directory of json, jsonl, csv, tsv and parquet files: list_files,\n\
          \x20     describe_file and read_rows (paged, streamed), rows as LDF, paths confined to DIR\n\
          \x20 ldf-mcp convert [FILE] [--sparse T] [--hoist] [--block N]\n\
+         \x20 ldf-mcp convert --columnar [--decode] [FILE]\n\
+         \x20     a columnar JSON result to the frame --columnar sends (exit 3 and the reason when it would stay\n\
+         \x20     JSON), or with --decode a frame back to the result as compact JSON\n\
          \x20     print FILE (json, jsonl, csv, tsv, parquet) or JSON from stdin as LDF; --sparse T moves keys\n\
          \x20     filled in fewer than T (0..1) of the rows into a per-row ~ object instead of a column;\n\
          \x20     --hoist writes an array of flat objects with one key list as a [k1,k2] column (LDF v0.2);\n\
@@ -105,6 +111,7 @@ fn run_proxy(args: &[String]) -> ExitCode {
         passthrough: false,
         plain: false,
         min_bytes: 1024,
+        columnar: false,
         log: true,
         selector: None,
         stats: Arc::new(Recorder::off()),
@@ -119,6 +126,7 @@ fn run_proxy(args: &[String]) -> ExitCode {
         match a.as_str() {
             "--passthrough" => cfg.passthrough = true,
             "--plain" => cfg.plain = true,
+            "--columnar" => cfg.columnar = true,
             "--model" | "--evidence" => match it.next() {
                 Some(v) => sel.set(a, v),
                 None => return usage(),
@@ -531,6 +539,9 @@ impl SelectFlags {
 }
 
 fn convert(args: &[String]) -> ExitCode {
+    if args.iter().any(|a| a == "--columnar") {
+        return convert_columnar(args);
+    }
     let mut path: Option<&str> = None;
     let mut opts = ldf::plan::Options::default();
     let mut block: Option<usize> = None;
@@ -727,5 +738,55 @@ fn convert_streaming(path: Option<&str>, block: usize, opts: ldf::plan::Options)
         return ExitCode::from(1);
     }
     eprintln!("ldf-mcp convert: {records} records, {bytes} bytes of LDF, blocks of {block}");
+    ExitCode::SUCCESS
+}
+
+/// `convert --columnar [--decode] [FILE]`: the proxy's columnar frame for a
+/// result, or the result for a frame.
+fn convert_columnar(args: &[String]) -> ExitCode {
+    let decode = args.iter().any(|a| a == "--decode");
+    let rest: Vec<&String> = args
+        .iter()
+        .filter(|a| *a != "--columnar" && *a != "--decode")
+        .collect();
+    let text = match rest.as_slice() {
+        [] => {
+            let mut s = String::new();
+            std::io::stdin().read_to_string(&mut s).map(|_| s)
+        }
+        [p] if !p.starts_with("--") => std::fs::read_to_string(p),
+        _ => return usage(),
+    };
+    let text = match text {
+        Ok(t) => t,
+        Err(e) => return fail("ldf-mcp convert", e.to_string()),
+    };
+    let out = if decode {
+        match ldf_mcp::rewrite::decode_columnar_frame(&text) {
+            Ok(v) => {
+                let mut s = String::new();
+                ldf::text::push_json_value(&v, &mut s);
+                s.push('\n');
+                s
+            }
+            Err(e) => return fail("ldf-mcp convert", e),
+        }
+    } else {
+        match ldf_mcp::rewrite::convert_with(&text, 0, None, true) {
+            Ok(frame) => frame,
+            Err(why) => {
+                eprintln!("ldf-mcp convert: stays JSON: {}", why.code());
+                return ExitCode::from(3);
+            }
+        }
+    };
+    let mut stdout = std::io::stdout().lock();
+    if stdout
+        .write_all(out.as_bytes())
+        .and_then(|_| stdout.flush())
+        .is_err()
+    {
+        return ExitCode::from(1);
+    }
     ExitCode::SUCCESS
 }

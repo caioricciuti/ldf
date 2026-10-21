@@ -8,7 +8,11 @@ receives LDF instead of JSON. Three modes:
 
 * `ldf-mcp proxy -- <server command>` wraps any stdio MCP server and
   re-encodes its JSON tool results (README, "MCP proxy"). A result
-  that stays JSON goes out minified if it was pretty-printed.
+  that stays JSON goes out minified if it was pretty-printed, and LDF is
+  sent only when it is shorter than that minified JSON. `--columnar`
+  (opt-in) also converts results shaped `{"columns": [...], "rows":
+  [[...], ...]}`, as MotherDuck's DuckDB server answers: see "Columnar
+  results" below.
 * `ldf-mcp clickhouse` is an MCP server of its own over ClickHouse's HTTP
   interface. Most of this page is about that mode and a local setup to try
   it.
@@ -40,6 +44,41 @@ there is no TLS. The user comes from `--user` (default `default`) and the
 password from the `CLICKHOUSE_PASSWORD` environment variable only; it is
 never accepted as an argument, so it cannot end up in a process list or a
 shell history.
+
+## Columnar results
+
+With `ldf-mcp proxy --columnar`, a text result that is a JSON object with
+one `columns` (non-empty, unique names) and one `rows` (every row an array
+as long as `columns`) goes out as a frame: the result as one line of compact
+JSON with `rows` replaced by the string `"@records"`, then the rows as the
+LDF table `@records`, one column per entry of `columns` and `null` for SQL
+NULL. Every other member (`success`, `columnTypes`, `rowCount`,
+`truncated`, `warning`) stays on the first line, as it was:
+
+```text
+{"success":true,"columns":["id","name","score"],"columnTypes":["BIGINT","VARCHAR","DOUBLE"],"rows":"@records","rowCount":2}
+@records id:i,name:s,score:f
+1,Fay Goodall,19.27
+2,Cleo Jackson,0.1
+```
+
+A frame is sent only when decoding it gives back exactly the original
+result (members, their order, and integer or float kind) and it is shorter
+than the original minified; otherwise the minified JSON goes out. Duplicate
+column names, ragged rows, an empty result, and any number outside the
+value model (an integer beyond u64, as DuckDB's `HUGEINT` can send, or a
+decimal f64 cannot hold) stay JSON. `isError` results and
+`structuredContent` are never touched, so a client that reads
+`structuredContent` still gets the server's original. The primer gains
+one paragraph describing the frame. With `--model`, columnar results stay
+JSON: no model has been graded on a frame yet.
+
+On the twelve medium fixtures through MotherDuck's server
+(`reports/2026-10-21-columnar`), minifying alone removes 31 to 59 percent of
+the tokens on most tables; the frame removes a further 1 to 7 percent on
+flat tables and 13 to 28 percent where the rows have structs, lists or
+mixed types. NULL-heavy results stay JSON, because the sparse-key rule
+writes their NULLs as `"key":null` pairs.
 
 ## Choosing the format per model
 
@@ -169,7 +208,8 @@ conversion time    p50 2.1 ms, p95 6.4 ms, max 6.4 ms per response
 A line holds the time, mode, server label (`--name NAME`, default the
 downstream command's file name), tool name, outcome (`ldf` or `json`), the
 reason code when it stayed JSON (`small`, `not_json`, `not_dataset`,
-`not_shorter`, `selector`, `is_error`, `passthrough`, `no_text`, and for the
+`not_shorter`, `selector`, `is_error`, `out_of_domain`, `not_lossless`,
+`passthrough`, `no_text`, and for the
 hook `persisted`, `exit_code`, `interrupted`, `background`, `image`,
 `bad_input`, `too_large`), bytes in (for the hook, out includes the note it
 adds)
