@@ -12,7 +12,7 @@ Standard library only. The ClickHouse password is read by ldf-mcp from
 CLICKHOUSE_PASSWORD in the environment; this script never reads or prints it.
 
     python3 -I eval/bench_mcp.py --mode files --root fixtures/medium --out results/mcp-files
-    python3 -I eval/bench_mcp.py --mode clickhouse --url http://127.0.0.1:8124 --out results/mcp-clickhouse
+    python3 -I eval/bench_mcp.py --mode clickhouse --url http://127.0.0.1:8124 --user ldf --out results/mcp-clickhouse
 """
 import argparse, json, os, statistics, subprocess, sys, time
 
@@ -72,6 +72,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--mode', choices=['clickhouse', 'files'], required=True)
     ap.add_argument('--url', default='http://127.0.0.1:8124')
+    ap.add_argument('--user', default='default')
     ap.add_argument('--root', default='fixtures/medium')
     ap.add_argument('--max-rows', type=int, default=10000)
     ap.add_argument('--repeats', type=int, default=20)
@@ -80,7 +81,7 @@ def main():
     a = ap.parse_args()
     os.makedirs(os.path.join(a.out, 'texts'), exist_ok=True)
     base = [MCP, a.mode, '--max-rows', str(a.max_rows), '--quiet']
-    base += ['--url', a.url] if a.mode == 'clickhouse' else ['--root', a.root]
+    base += ['--url', a.url, '--user', a.user] if a.mode == 'clickhouse' else ['--root', a.root]
     queries = CLICKHOUSE if a.mode == 'clickhouse' else FILES
     results = {q[0]: {'tool': q[1], 'arguments': q[2]} for q in queries}
     for variant, extra in [('ldf', []), ('json', ['--passthrough'])]:

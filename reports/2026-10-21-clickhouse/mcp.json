@@ -1,0 +1,686 @@
+{
+ "mode": "clickhouse",
+ "repeats": 20,
+ "warmup": 3,
+ "queries": {
+  "list_tables": {
+   "tool": "list_tables",
+   "arguments": {},
+   "ldf": {
+    "bytes": 392,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 2.932,
+    "p95_ms": 3.864,
+    "min_ms": 2.122
+   },
+   "json": {
+    "bytes": 392,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 2.285,
+    "p95_ms": 2.789,
+    "min_ms": 1.913
+   },
+   "rows": 5,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 108,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 72,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 70,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 70,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "describe_orders": {
+   "tool": "describe_table",
+   "arguments": {
+    "table": "orders"
+   },
+   "ldf": {
+    "bytes": 624,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 2.445,
+    "p95_ms": 3.051,
+    "min_ms": 1.614
+   },
+   "json": {
+    "bytes": 1230,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 1.622,
+    "p95_ms": 2.076,
+    "min_ms": 1.43
+   },
+   "rows": 7,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 250,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 151,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 150,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 150,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "users_50": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM users ORDER BY id LIMIT 50"
+   },
+   "ldf": {
+    "bytes": 3134,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 3.681,
+    "p95_ms": 4.596,
+    "min_ms": 3.123
+   },
+   "json": {
+    "bytes": 6909,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 2.922,
+    "p95_ms": 4.351,
+    "min_ms": 2.404
+   },
+   "rows": 50,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 2346,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 1536,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 1443,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 1443,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "users_by_country": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT country, count() AS n, round(avg(score), 2) AS avg_score FROM users GROUP BY country ORDER BY n DESC"
+   },
+   "ldf": {
+    "bytes": 859,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 4.755,
+    "p95_ms": 6.133,
+    "min_ms": 3.951
+   },
+   "json": {
+    "bytes": 859,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 3.553,
+    "p95_ms": 4.772,
+    "min_ms": 2.745
+   },
+   "rows": 20,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 302,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 189,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 171,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 171,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "events_200": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM events ORDER BY event_id LIMIT 200"
+   },
+   "ldf": {
+    "bytes": 39107,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 6.109,
+    "p95_ms": 7.84,
+    "min_ms": 5.044
+   },
+   "json": {
+    "bytes": 51435,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 4.478,
+    "p95_ms": 5.172,
+    "min_ms": 3.976
+   },
+   "rows": 200,
+   "traits": [
+    "json_cells",
+    "sparse"
+   ],
+   "o200k": {
+    "json": {
+     "tokens": 17154,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 8576,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 13828,
+     "round_trip": "semantic-unordered"
+    },
+    "ldf@0.75": {
+     "tokens": 15936,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "toon"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "toon"
+    },
+    "deepseek-chat": {
+     "format": "toon"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "toon"
+    },
+    "claude-opus-5-5": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "orders_100": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM orders ORDER BY order_id LIMIT 100"
+   },
+   "ldf": {
+    "bytes": 13676,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 5.52,
+    "p95_ms": 6.038,
+    "min_ms": 4.927
+   },
+   "json": {
+    "bytes": 29465,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 4.699,
+    "p95_ms": 5.776,
+    "min_ms": 3.725
+   },
+   "rows": 100,
+   "traits": [
+    "child_tables",
+    "json_cells",
+    "sparse"
+   ],
+   "o200k": {
+    "json": {
+     "tokens": 10004,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 10741,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 5555,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 5903,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "json"
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "logs_errors_500": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM logs WHERE level IN ('ERROR', 'WARN') ORDER BY ts DESC LIMIT 500"
+   },
+   "ldf": {
+    "bytes": 34687,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 5.665,
+    "p95_ms": 7.979,
+    "min_ms": 4.993
+   },
+   "json": {
+    "bytes": 72615,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 3.925,
+    "p95_ms": 6.186,
+    "min_ms": 3.286
+   },
+   "rows": 500,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 23008,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 15876,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 14882,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 14882,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "wide_1000": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM wide ORDER BY id LIMIT 1000"
+   },
+   "ldf": {
+    "bytes": 274626,
+    "is_ldf": true,
+    "capped": false,
+    "p50_ms": 13.458,
+    "p95_ms": 15.173,
+    "min_ms": 12.757
+   },
+   "json": {
+    "bytes": 540065,
+    "is_ldf": false,
+    "capped": false,
+    "p50_ms": 9.648,
+    "p95_ms": 13.974,
+    "min_ms": 8.339
+   },
+   "rows": 1000,
+   "traits": [
+    "json_cells"
+   ],
+   "o200k": {
+    "json": {
+     "tokens": 234216,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 102579,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 100618,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 100618,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "json"
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  },
+  "logs_10000": {
+   "tool": "run_select",
+   "arguments": {
+    "sql": "SELECT * FROM logs"
+   },
+   "ldf": {
+    "bytes": 693012,
+    "is_ldf": true,
+    "capped": true,
+    "p50_ms": 19.477,
+    "p95_ms": 20.586,
+    "min_ms": 17.603
+   },
+   "json": {
+    "bytes": 1452940,
+    "is_ldf": false,
+    "capped": true,
+    "p50_ms": 12.61,
+    "p95_ms": 13.673,
+    "min_ms": 11.734
+   },
+   "rows": 10000,
+   "traits": [],
+   "o200k": {
+    "json": {
+     "tokens": 460418,
+     "round_trip": "byte"
+    },
+    "toon": {
+     "tokens": 317430,
+     "round_trip": "byte"
+    },
+    "ldf@0.5": {
+     "tokens": 297332,
+     "round_trip": "byte"
+    },
+    "ldf@0.75": {
+     "tokens": 297332,
+     "round_trip": "byte"
+    }
+   },
+   "decisions": {
+    "claude-haiku-5-5": {
+     "format": "json"
+    },
+    "claude-haiku-5-5 (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "deepseek-chat": {
+     "format": "json"
+    },
+    "deepseek-chat (extrapolate)": {
+     "format": "ldf",
+     "sparse_threshold": 0.5,
+     "hoist": false
+    },
+    "claude-opus-5-5": {
+     "format": "json"
+    },
+    "claude-opus-5-5 (extrapolate)": {
+     "format": "json"
+    },
+    "gpt-6.1-sol": {
+     "format": "json"
+    },
+    "gpt-6.1-sol (extrapolate)": {
+     "format": "json"
+    }
+   }
+  }
+ }
+}
