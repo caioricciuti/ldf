@@ -4,18 +4,6 @@ import EvidenceChart from "../components/EvidenceChart.astro";
 
 const repo = "https://github.com/caioricciuti/ldf";
 
-// Every figure below is copied from reports/2026-10-17-baseline
-// (tokens-medium-2026-10-18.md and the "Size step" sections). o200k_base
-// tokens, ratio to compact JSON, first 1 000 records of each dataset.
-const tokenRows = [
-  ["flat_users", "0.61", "0.65", "0.60"],
-  ["nested_orders", "0.64", "1.08", "n/a"],
-  ["sparse_events", "0.80", "1.22", "0.61, lossy"],
-  ["wide_table", "0.43", "0.44", "0.43"],
-  ["empty_values", "0.36", "1.27", "n/a"],
-  ["deep_nesting", "0.80", "1.82", "n/a"],
-];
-
 // `ldf-mcp convert` output for the JSON below, byte for byte. Token counts
 // are `ldf-bench count` (o200k_base) on the LDF and on the JSON in compact
 // form; the JSON is shown wrapped, one record per line.
@@ -43,41 +31,56 @@ const json = `[{"id":"ORD-1","customer":{"name":"Val Thompson"},
   "total":53.78,"status":"shipped"}]`;
 
 const install = `cargo install ldf-mcp --locked
-ldf-mcp convert data.json > data.ldf`;
+ldf-mcp clickhouse --url http://127.0.0.1:8123 --user reader`;
 
-// The server commands as any MCP client takes them (Claude Code, Codex CLI,
-// OpenCode, ...); each client has its own way to register a command.
-const mcp = `ldf-mcp proxy -- <any stdio MCP server> [its args]
-ldf-mcp clickhouse --url http://127.0.0.1:8123
-ldf-mcp files --root ./exports`;
+// Copied from reports/2026-10-21-clickhouse (bench_mcp.py, ClickHouse 25.8,
+// the medium fixtures): bytes of the tool result as JSON and as LDF, and
+// o200k_base tokens of LDF as a share of JSON's.
+const chRows = [
+  ["SELECT * FROM users LIMIT 50", "50", "6 909", "3 134", "0.62"],
+  ["SELECT * FROM orders LIMIT 100", "100", "29 465", "13 676", "0.56"],
+  ["SELECT * FROM logs WHERE level IN (…) LIMIT 500", "500", "72 615", "34 687", "0.65"],
+  ["SELECT * FROM wide LIMIT 1000", "1 000", "540 065", "274 626", "0.43"],
+  ["SELECT * FROM events LIMIT 200", "200", "51 435", "39 107", "0.81"],
+];
+
+// The server commands as any MCP client takes them; each client has its own
+// way to register a command.
+const servers = `ldf-mcp clickhouse --url http://127.0.0.1:8123 --user reader
+ldf-mcp files --root ./exports       # csv, tsv, json, jsonl, parquet`;
+
+const proxy = `ldf-mcp proxy --model claude-opus-5-5 -- <your database MCP server> [its args]`;
+
+const convert = `ldf-mcp convert export.parquet > export.ldf`;
 
 const lib = `let text = ldf::encode(&records);   // &[ldf_data::Value]
 let back = ldf::decode(&text)?;      // the same records`;
 
-const hook = `ldf-mcp install claude-code --hooks --apply`;
+const report = `${repo}/tree/main/reports/2026-10-21-clickhouse`;
 ---
 
 <Landing
-  title="LDF: tables a language model can read"
-  description="Language Data Format: a lossless text encoding of JSON records for language models. Claude Opus 5.5 answers from it as well as from JSON at 57 to 77 percent of JSON's input tokens. Measured, not assumed."
+  title="LDF: database results a language model reads for half the tokens"
+  description="LDF puts query results in front of a language model as typed tables instead of JSON: lossless, about half the tokens, and given only to models measured to answer from it as well as from JSON."
 >
   <section class="hero">
     <div class="container hero-grid">
       <div class="hero-copy" data-reveal>
-        <p class="eyebrow">Spec v0.2 · ldf-mcp 0.5</p>
-        <h1 class="h1">Tables a language model can read.</h1>
+        <p class="eyebrow">ldf-mcp 0.5 · spec v0.2</p>
+        <h1 class="h1">Your database, read by a model, for half the tokens.</h1>
         <p class="lead">
-          LDF turns JSON records into typed tables: one header, one line per record, child tables for
-          nested arrays. Nothing is lost on the way in or out, and it works with any model that reads
-          text. Measured on Claude, GPT and DeepSeek: on held-out data Claude Opus 5.5 answers from LDF
-          as well as from JSON, at 57 to 77 percent of JSON's input tokens.
+          When a model queries a database, the rows come back as JSON and every key is repeated on
+          every row. LDF sends the same rows as typed tables: one header, one line per record, child
+          tables for nested arrays. Nothing is lost. On held-out data Claude Opus 5.5 answers from LDF
+          as well as from JSON, at 57 to 77 percent of JSON's input tokens, and a model without that
+          kind of evidence keeps getting JSON.
         </p>
         <div class="sample install">
-          <div class="sample-bar"><span>Install, then convert</span><span class="dim">one binary, no runtime</span></div>
+          <div class="sample-bar"><span>An MCP server for ClickHouse</span><span class="dim">one binary, read-only</span></div>
           <pre><code>{install}</code></pre>
         </div>
         <div class="cta">
-          <a class="btn btn-light" href="/docs/">Get started <span class="arrow">→</span></a>
+          <a class="btn btn-light" href="/docs/mcp/">Set it up <span class="arrow">→</span></a>
           <a class="btn btn-ghost" href={repo}>Source on GitHub</a>
         </div>
       </div>
@@ -90,14 +93,128 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
           <div class="sample-bar"><span>the same data as JSON</span><span class="dim">169 tokens compact</span></div>
           <pre><code>{json}</code></pre>
         </div>
-        <p class="sample-note">Three records, so the headers weigh a lot. Over hundreds of records LDF lands at 0.4 to 0.8 of JSON's tokens, see the numbers below.</p>
+        <p class="sample-note">Three records, so the headers weigh a lot. A hundred orders from ClickHouse come out at 0.56 of JSON's tokens, see below.</p>
       </div>
     </div>
     <ul class="container facts" data-reveal>
       <li><strong>Lossless.</strong> Byte-exact round trip on ten of twelve benchmark datasets; the two sparse ones come back with keys reordered, nothing lost.</li>
-      <li><strong>Chosen per model.</strong> LDF goes only to a model measured reading it as well as JSON on that shape of data. Every other model keeps getting JSON.</li>
+      <li><strong>Chosen per model.</strong> LDF goes only to a model measured reading it as well as JSON on that shape and size of data. Every other model keeps getting JSON.</li>
       <li><strong>Measured.</strong> Five models, held-out data, sign tests. The misses are in the reports, not hidden.</li>
     </ul>
+  </section>
+
+  <section class="section" id="demo">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">ClickHouse</p>
+        <h2 class="h2">The queries an agent runs. <span class="soft">Same rows, fewer tokens.</span></h2>
+        <p class="lead">
+          <code>ldf-mcp clickhouse</code> against ClickHouse 25.8, each result taken once as LDF and once
+          as JSON. No model in the loop: these are the bytes and tokens the model would be sent.
+          Encoding adds under 2 ms per call up to 500 rows.
+        </p>
+      </div>
+      <div class="table-wrap" data-reveal>
+        <table class="numbers">
+          <thead><tr><th>query</th><th>rows</th><th>JSON bytes</th><th>LDF bytes</th><th>tokens, LDF / JSON</th></tr></thead>
+          <tbody>
+            {chRows.map(([q, rows, jb, lb, ratio]) => (
+              <tr><td><code>{q}</code></td><td>{rows}</td><td>{jb}</td><td>{lb}</td><td class="strong">{ratio}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="note" data-reveal>o200k_base tokens. The orders come back with a nested customer and an <code>items</code> array; LDF writes them as a parent table and a child table, where TOON falls back to a list larger than JSON (1.07). <a href={report}>Report and reproduction</a>.</p>
+    </div>
+  </section>
+
+  <section class="section" id="fit">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Where it fits</p>
+        <h2 class="h2">Record sets, not everything.</h2>
+      </div>
+      <div class="fit" data-reveal>
+        <div class="fit-col">
+          <h3>Helps</h3>
+          <ul>
+            <li>Query results from databases and warehouses: the same columns on every row is exactly what JSON pays for over and over.</li>
+            <li>API responses that are lists of records.</li>
+            <li>Data files handed to a model: CSV, JSONL, Parquet exports.</li>
+          </ul>
+        </div>
+        <div class="fit-col dim-col">
+          <h3>Does not</h3>
+          <ul>
+            <li>Coding agents. Their tool output is mostly source code, diffs and logs; in our own coding sessions record sets were a small share of it.</li>
+            <li>Small results. Under a kilobyte the format note costs more than it saves, so they pass through as JSON.</li>
+            <li>Prose, single objects, error messages. Nothing to tabulate.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="numbers">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Evidence</p>
+        <h2 class="h2">Same questions, JSON against LDF.</h2>
+        <p class="lead">
+          Every model and dataset shape gets its own verdict: at least 50 graded questions, no more than
+          3 points below JSON, at least 5 percent fewer tokens. Evidence also has a size band: an input
+          is judged by the evaluation at the smallest measured size at or above its row count, so a
+          result that passed at 200 records and failed at 1 000 goes out as LDF up to 200 rows and as
+          JSON above.
+        </p>
+      </div>
+      <div class="chart-wrap" data-reveal>
+        <EvidenceChart dark />
+      </div>
+      <div class="stats" data-reveal>
+        <div class="stat"><span class="stat-n">294 / 297</span><span class="stat-l">Claude Opus 5.5 on held-out data, LDF and JSON alike, with LDF at 57 to 77 percent of JSON's input tokens. <a href="/docs/results/stage-c/">Stage C</a></span></div>
+        <div class="stat"><span class="stat-n">53 / 53</span><span class="stat-l">GPT-6.1 Sol on LDF at 50 records, zero-shot: the prompt names the format and shows the data, nothing more.</span></div>
+        <div class="stat"><span class="stat-n">0.36 to 0.80</span><span class="stat-l">LDF's o200k tokens as a share of compact JSON on the first 1 000 records of six benchmark datasets. CSV ties it on flat data and cannot hold the rest. <a href="/docs/results/baseline/">Baseline</a></span></div>
+      </div>
+      <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the reports say so. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
+    </div>
+  </section>
+
+  <section class="section" id="use">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Use it</p>
+        <h2 class="h2">Put it between the data and the model.</h2>
+        <p class="lead">
+          LDF is plain text in a prompt: no SDK, no model support needed. The tools and scripts on the
+          other side keep seeing JSON; only the model's copy changes, and only when it comes out shorter.
+        </p>
+      </div>
+      <div class="agent-samples" data-reveal>
+        <div class="sample">
+          <div class="sample-bar"><span>MCP servers</span><span class="dim">ClickHouse, or a directory of data files</span></div>
+          <pre><code>{servers}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>In front of any database MCP server</span><span class="dim">stdio proxy</span></div>
+          <pre><code>{proxy}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>Any pipeline or model API</span><span class="dim">json, jsonl, csv, tsv, parquet in</span></div>
+          <pre><code>{convert}</code></pre>
+        </div>
+        <div class="sample">
+          <div class="sample-bar"><span>Rust</span><span class="dim">the ldf crate</span></div>
+          <pre><code>{lib}</code></pre>
+        </div>
+      </div>
+      <div class="mcp-points" data-reveal>
+        <div><strong>Per model.</strong> Give it the model id and it checks the measured evidence. No evidence, no conversion.</div>
+        <div><strong>Primer once.</strong> The model gets a short description of the format the first time, then the data.</div>
+        <div><strong>Only what helps.</strong> Small results, errors, partial output and anything not a complete dataset pass through untouched.</div>
+        <div><strong>Shell output too.</strong> An optional Claude Code hook converts JSON printed by shell commands. <a href="/docs/agents/">Agents guide</a></div>
+      </div>
+    </div>
   </section>
 
   <section class="section" id="format">
@@ -117,77 +234,9 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
         <div class="rule"><code>~:j?</code><p>Keys present in fewer than half the rows travel in a small per-row object instead of a mostly empty column. Measured to matter for smaller models.</p></div>
         <div class="rule"><code>1.0</code> stays <code>1.0</code><p>Numbers keep their kind and shortest round-trip text. Integers above 2^53 do not get mangled.</p></div>
       </div>
-    </div>
-  </section>
-
-  <section class="section" id="numbers">
-    <div class="container">
-      <div class="section-head" data-reveal>
-        <p class="eyebrow">Numbers</p>
-        <h2 class="h2">Tokens, as a share of compact JSON.</h2>
-        <p class="lead">
-          o200k_base tokens on the first 1 000 records of the benchmark datasets, from the report's own
-          tables. CSV ties LDF where CSV works at all; CSV cannot hold nested data and drops the
-          difference between missing and null.
-        </p>
-      </div>
-      <div class="table-wrap" data-reveal>
-        <table class="numbers">
-          <thead><tr><th>dataset</th><th>LDF</th><th>TOON</th><th>CSV</th></tr></thead>
-          <tbody>
-            {tokenRows.map(([name, ldf, toon, csv]) => (
-              <tr><td><code>{name}</code></td><td class="strong">{ldf}</td><td>{toon}</td><td>{csv}</td></tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div class="stats" data-reveal>
-        <div class="stat"><span class="stat-n">294 / 297</span><span class="stat-l">Claude Opus 5.5 on held-out data, LDF and JSON alike, with LDF at 57 to 77 percent of JSON's input tokens. <a href="/docs/results/stage-c/">Stage C</a></span></div>
-        <div class="stat"><span class="stat-n">53 / 53</span><span class="stat-l">GPT-6.1 Sol on LDF at 50 records, zero-shot: the prompt names the format and shows the data, nothing more.</span></div>
-        <div class="stat"><span class="stat-n">0.56×</span><span class="stat-l">JSON tool output in real agent sessions (headless Claude Code, Haiku 5.5 and Opus 5.5), in provider-reported tokens, no answer lost. <a href={`${repo}/tree/main/reports/2026-10-20-hook/ab-opus`}>A/B runs</a></span></div>
-      </div>
-      <div class="chart-wrap" data-reveal>
-        <h3 class="chart-title">Same questions, JSON against LDF</h3>
-        <EvidenceChart dark />
-      </div>
-      <p class="note" data-reveal>Below the frontier tier no format is reliably better than another, and the reports say so. A model without enough evidence gets JSON. Read the <a href="/docs/methodology/">methodology</a> before quoting any number.</p>
-    </div>
-  </section>
-
-  <section class="section" id="agents">
-    <div class="container">
-      <div class="section-head" data-reveal>
-        <p class="eyebrow">Where it plugs in</p>
-        <h2 class="h2">Nobody has to adopt a format. <span class="soft">Put it between the data and the model.</span></h2>
-        <p class="lead">
-          LDF is plain text in a prompt: no SDK, no model support needed. <code>ldf-mcp</code> puts it
-          where data enters the context, and the tools and scripts on the other side keep seeing JSON.
-          Only the model's copy changes, and only when it comes out shorter.
-        </p>
-      </div>
-      <div class="agent-samples" data-reveal>
-        <div class="sample">
-          <div class="sample-bar"><span>Any MCP client</span><span class="dim">wrap a server, or serve ClickHouse and data files</span></div>
-          <pre><code>{mcp}</code></pre>
-        </div>
-        <div class="sample">
-          <div class="sample-bar"><span>Any pipeline or model API</span><span class="dim">json, jsonl, csv, tsv, parquet in; LDF out</span></div>
-          <pre><code>{install}</code></pre>
-        </div>
-        <div class="sample">
-          <div class="sample-bar"><span>Rust</span><span class="dim">the ldf crate</span></div>
-          <pre><code>{lib}</code></pre>
-        </div>
-        <div class="sample">
-          <div class="sample-bar"><span>Claude Code shell output</span><span class="dim">optional hook, reversible</span></div>
-          <pre><code>{hook}</code></pre>
-        </div>
-      </div>
-      <div class="mcp-points" data-reveal>
-        <div><strong>Per model.</strong> Give it the model id and it checks the measured evidence. No evidence, no conversion.</div>
-        <div><strong>Primer once.</strong> The model gets a short description of the format the first time, then the data.</div>
-        <div><strong>Only what helps.</strong> Small results, errors, partial output and anything not a complete dataset pass through untouched.</div>
-        <div><strong>Tested clients.</strong> Claude Code, Codex CLI and OpenCode, with what each one does and does not pass through <a href="/docs/agents/">in the guide</a>.</div>
+      <div class="cta" data-reveal>
+        <a class="btn btn-light" href="/docs/format/">The format in five minutes <span class="arrow">→</span></a>
+        <a class="btn btn-ghost" href="/docs/spec/">Specification</a>
       </div>
     </div>
   </section>
@@ -198,13 +247,17 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
         <p class="eyebrow">Status</p>
         <h2 class="h2">Spec v0.2, ldf-mcp 0.5. <span class="soft">Evidence attached.</span></h2>
         <p class="lead">
-          The format has been v0.2 since hoisted arrays; the releases after it changed the tools, not the
-          format. One Rust workspace, published on crates.io: the codec, the per-model selector, <code>ldf-mcp</code>,
-          ten baseline formats implemented faithfully (TOON passes its official
+          One Rust workspace, published on crates.io: the codec, the per-model selector,
+          <code>ldf-mcp</code>, ten baseline formats implemented faithfully (TOON passes its official
           conformance suite), and the benchmark and evaluation harnesses. Every dependency pinned.
+          ClickHouse and data files are supported directly; other databases through the proxy.
+        </p>
+        <p class="consult">
+          Putting a model on top of your own database? Caio Ricciuti, who builds LDF, helps teams wire
+          it up and measure it on their data: <a href="mailto:me@caioricciuti.com">me@caioricciuti.com</a>.
         </p>
         <div class="cta">
-          <a class="btn btn-light" href="/docs/format/">The format in five minutes <span class="arrow">→</span></a>
+          <a class="btn btn-light" href="/docs/">Read the docs <span class="arrow">→</span></a>
           <a class="btn btn-ghost" href="/docs/roadmap/">What comes next</a>
         </div>
       </div>
@@ -427,11 +480,6 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
     border-radius: var(--radius);
     background: var(--bg-1);
   }
-  .chart-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
   .mcp-points {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -441,6 +489,43 @@ const hook = `ldf-mcp install claude-code --hooks --apply`;
     font-size: 0.93rem;
   }
   .mcp-points a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+  }
+  .fit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .fit-col {
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-1);
+  }
+  .fit-col h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .fit-col ul {
+    margin: 0.8rem 0 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.6rem;
+    color: var(--text-2);
+    font-size: 0.93rem;
+  }
+  .dim-col h3 {
+    color: var(--text-2);
+  }
+  .consult {
+    margin: 1.5rem 0 0;
+    color: var(--text-2);
+  }
+  .consult a {
     color: var(--text);
     text-decoration: underline;
     text-decoration-color: var(--line-2);

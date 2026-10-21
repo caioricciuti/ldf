@@ -1,0 +1,8 @@
+@records name:s,type:s,default_type:s,default_expression:s,comment:s,codec_expression:s,ttl_expression:s
+order_id,Nullable(String),"","","","",""
+customer,"Tuple(\n    address Tuple(\n        city Nullable(String),\n        country Nullable(String),\n        zip Nullable(String)),\n    id Nullable(Int64),\n    name Nullable(String))","","","","",""
+items,"Array(Tuple(\n    price Nullable(Float64),\n    qty Nullable(Int64),\n    sku Nullable(String)))","","","","",""
+total,Nullable(Float64),"","","","",""
+status,Nullable(String),"","","","",""
+shipped,Nullable(Bool),"","","","",""
+note,Nullable(String),"","","","",""
