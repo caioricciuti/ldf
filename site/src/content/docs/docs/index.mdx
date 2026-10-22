@@ -3,6 +3,13 @@ title: Overview
 description: What LDF is, what it is for, and where to look next.
 ---
 
+:::note[Research project, no longer developed]
+LDF saves tokens, but minifying, capping big results and checking which
+copy your client reads get nearly all of it, and the format was proven safe
+only for a few models and data shapes. The write-up:
+[I spent $70 proving my LLM data format isn't worth using](/docs/writing/not-worth-it/).
+:::
+
 LDF, the Language Data Format, is a lossless, line-oriented text encoding of
 JSON records. It exists for one reader: a language model. A dataset becomes
 one typed header and one line per record, with child tables for nested
