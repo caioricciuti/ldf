@@ -80,7 +80,7 @@ JSON: no model has been graded on a frame yet.
 
 On the twelve medium fixtures through MotherDuck's server
 (`reports/2026-10-21-columnar`), minifying alone removes 31 to 59 percent of
-the tokens on most tables; the frame removes a further 1 to 7 percent on
+the tokens on most tables; the frame removes a further 0.1 to 7 percent on
 flat tables and 13 to 28 percent where the rows have structs, lists or
 mixed types. NULL-heavy results stay JSON, because the sparse-key rule
 writes their NULLs as `"key":null` pairs.
