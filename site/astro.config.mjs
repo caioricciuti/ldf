@@ -89,6 +89,12 @@ export default defineConfig({
           ],
         },
         {
+          label: "Writing",
+          items: [
+            { label: "What actually saves tokens (2026-10-22)", slug: "docs/writing/what-saves-tokens" },
+          ],
+        },
+        {
           label: "Project",
           items: [
             { label: "Roadmap", slug: "docs/roadmap" },
