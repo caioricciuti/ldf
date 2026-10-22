@@ -13,6 +13,7 @@ export default defineConfig({
   redirects: {
     "/spec": "/docs/spec/",
     "/mcp": "/docs/mcp/",
+    "/docs/writing/what-saves-tokens": "/docs/writing/not-worth-it/",
   },
   integrations: [
     starlight({
@@ -91,7 +92,7 @@ export default defineConfig({
         {
           label: "Writing",
           items: [
-            { label: "What actually saves tokens (2026-10-22)", slug: "docs/writing/what-saves-tokens" },
+            { label: "Why LDF isn't worth using (2026-10-22)", slug: "docs/writing/not-worth-it" },
           ],
         },
         {
