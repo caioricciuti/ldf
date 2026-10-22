@@ -9,8 +9,8 @@ files) and cuts what tool results cost in the model's context without
 changing what they mean. Most of the saving needs no new format:
 
 - **Minify.** Database MCP servers often send pretty-printed JSON. Removing
-  the whitespace alone takes 30 to 60 percent off most results (5 percent
-  on long text), for every model.
+  the whitespace alone takes 31 to 59 percent off most results (13 percent on
+  high-cardinality strings, 5 on long text), for every model.
 - **Keep one copy in sync.** FastMCP servers send each result twice, as
   text and as `structuredContent`, and Claude Code shows the model the
   second copy. The proxy rewrites both, so its savings reach the model.
@@ -23,8 +23,8 @@ changing what they mean. Most of the saving needs no new format:
   against JSON; everywhere else the model gets JSON.
 
 Where it does not help much: flat SQL results that are already columnar
-(`columns` plus row arrays, or CSV). There LDF saves 1 to 7 percent over
-minified JSON. If you control the server, ask your database for a compact
+(`columns` plus row arrays, or CSV). There LDF saves 0.1 to 7 percent over
+minified JSON (one table came out 4 tokens larger). If you control the server, ask your database for a compact
 output format and you get most of that for free.
 
 ## The format
