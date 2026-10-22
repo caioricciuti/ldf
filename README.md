@@ -4,6 +4,13 @@
 [![license](https://img.shields.io/badge/license-MIT%20or%20Apache--2.0-blue)](#license)
 [![docs](https://img.shields.io/badge/docs-ldflabs.org-f2b56b)](https://ldflabs.org)
 
+> **Research project, no longer developed.** LDF saves tokens, but in
+> practice minifying, capping big results and checking which copy your
+> client reads get you nearly all of it, and the format was proven safe
+> only for a few models and data shapes. The write-up:
+> [I spent $70 proving my LLM data format isn't worth using](https://ldflabs.org/docs/writing/not-worth-it/).
+> The crates and binaries stay published as they are.
+
 `ldf-mcp` sits between an agent and its data (MCP servers, shell output,
 files) and cuts what tool results cost in the model's context without
 changing what they mean. Most of the saving needs no new format:
